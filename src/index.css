@@ -1,0 +1,27 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Print Styles for Pasaporte de Apoyo Educativo */
+@media print {
+  header, footer, nav, button, .no-print {
+    display: none !important;
+  }
+  
+  body, main {
+    background-color: white !important;
+    color: black !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  article, .border {
+    border-color: #cbd5e1 !important;
+    box-shadow: none !important;
+  }
+}

@@ -1,0 +1,275 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ * Madrid Apoyo Especializado v1.7 - Results List Container
+ * Resultados agrupados por fuerza de evidencia A1/A2, B1/B2 y C (§37.1)
+ * Manejo estricto de incertidumbre y cero resultados sin relajar en silencio (§38).
+ */
+
+import React, { useState } from 'react';
+import { EvaluatedCentreResult, SearchQueryState } from '../../types/specialized';
+import { SpecializedCentreCard } from './SpecializedCentreCard';
+import { 
+  AlertCircle, 
+  RotateCcw, 
+  MapPin, 
+  List, 
+  Layers, 
+  ShieldAlert, 
+  HelpCircle,
+  ChevronDown,
+  ChevronUp,
+  Sparkles
+} from 'lucide-react';
+
+interface ResultsListProps {
+  results: EvaluatedCentreResult[];
+  incompatibleResults: EvaluatedCentreResult[];
+  query: SearchQueryState;
+  onWhyAppears: (item: EvaluatedCentreResult) => void;
+  onPrepareContact: (item: EvaluatedCentreResult) => void;
+  onReportError: (item: EvaluatedCentreResult) => void;
+  comparedIds: string[];
+  onToggleCompare: (centreId: string) => void;
+  onResetFilters: () => void;
+  easyReadMode: boolean;
+}
+
+export const SpecializedResultsList: React.FC<ResultsListProps> = ({
+  results,
+  incompatibleResults,
+  query,
+  onWhyAppears,
+  onPrepareContact,
+  onReportError,
+  comparedIds,
+  onToggleCompare,
+  onResetFilters,
+  easyReadMode
+}) => {
+  const [showIncompatibles, setShowIncompatibles] = useState(false);
+  const [groupByTier, setGroupByTier] = useState(true);
+
+  // Agrupación por nivel de evidencia (§37.1, §77)
+  const groupA = results.filter(r => r.evidence_level === 'A1' || r.evidence_level === 'A2');
+  const groupB = results.filter(r => r.evidence_level === 'B1' || r.evidence_level === 'B2');
+  const groupC = results.filter(r => r.evidence_level === 'C');
+
+  // Si no hay resultados (§38: Diseño para incertidumbre y ausencia de resultados)
+  if (results.length === 0) {
+    return (
+      <div className="bg-white rounded-xl border border-stone-200 p-8 shadow-xs text-center max-w-xl mx-auto my-8 space-y-4">
+        <div className="w-12 h-12 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto text-amber-700">
+          <AlertCircle className="w-6 h-6" />
+        </div>
+        <h3 className="text-base font-bold text-stone-900">
+          No consta especialización en las fuentes consultadas
+        </h3>
+        <p className="text-xs text-stone-600 leading-relaxed max-w-md mx-auto">
+          Ningún centro autorizado de la Comunidad de Madrid cumple simultáneamente todos los criterios seleccionados con los filtros actuales.
+        </p>
+
+        {/* Alternativas estructuradas (§38) */}
+        <div className="p-4 bg-stone-50 rounded-xl border border-stone-200 text-left text-xs space-y-2 text-stone-700">
+          <div className="font-bold text-stone-800">Alternativas recomendadas:</div>
+          <ul className="list-disc list-inside space-y-1 text-stone-600 pl-1">
+            {query.radius_km < 50 && (
+              <li>Ampliar el radio geográfico de búsqueda (actualmente en {query.radius_km} km).</li>
+            )}
+            {query.support_combination_mode === 'all_supports_same_centre' && (
+              <li>Cambiar el modo de combinación a «Cualquier apoyo (OR)» para permitir servicios coordinados en distintas sedes.</li>
+            )}
+            <li>Retirar el filtro de titularidad para incluir centros privados autorizados o de la red pública.</li>
+          </ul>
+        </div>
+
+        <button
+          onClick={onResetFilters}
+          className="px-4 py-2 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-stone-800 transition-colors inline-flex items-center gap-1.5"
+        >
+          <RotateCcw className="w-3.5 h-3.5" />
+          <span>Restablecer criterios de búsqueda</span>
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Barra de cabecera de la lista */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-200 pb-3">
+        <div className="flex items-center gap-2">
+          <h2 className="text-base font-bold text-stone-900">
+            Resultados de la búsqueda
+          </h2>
+          <span className="text-xs font-mono font-semibold text-stone-600 bg-stone-100 px-2 py-0.5 rounded">
+            {results.length} {results.length === 1 ? 'recurso' : 'recursos'}
+          </span>
+        </div>
+
+        {/* Toggle para agrupar por fuerza de evidencia o lista continua */}
+        <div className="flex items-center gap-3 text-xs">
+          <label className="flex items-center gap-1.5 cursor-pointer text-stone-600">
+            <input
+              type="checkbox"
+              checked={groupByTier}
+              onChange={() => setGroupByTier(prev => !prev)}
+              className="rounded border-stone-300 accent-stone-900"
+            />
+            <span>Agrupar por fuerza de evidencia (§37.1)</span>
+          </label>
+        </div>
+      </div>
+
+      {groupByTier ? (
+        <div className="space-y-8">
+          {/* Grupo A: Especialización publicada (A1 y A2) */}
+          {groupA.length > 0 && (
+            <section className="space-y-3">
+              <div className="flex items-center justify-between border-b border-emerald-100 pb-2">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-600" />
+                  <h3 className="text-sm font-bold text-stone-900">
+                    Especialización Publicada ({groupA.length})
+                  </h3>
+                </div>
+                <span className="text-[11px] text-stone-500 font-mono">
+                  Niveles A1 y A2 · Mención literal en fuente oficial
+                </span>
+              </div>
+
+              <div className="space-y-4">
+                {groupA.map((item) => (
+                  <SpecializedCentreCard
+                    key={item.centre.centre_id}
+                    item={item}
+                    onWhyAppears={onWhyAppears}
+                    onPrepareContact={onPrepareContact}
+                    onReportError={onReportError}
+                    isCompared={comparedIds.includes(item.centre.centre_id)}
+                    onToggleCompare={onToggleCompare}
+                    easyReadMode={easyReadMode}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Grupo B: Servicios relacionados (B1 y B2) */}
+          {groupB.length > 0 && (
+            <section className="space-y-3">
+              <div className="flex items-center justify-between border-b border-sky-100 pb-2">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-sky-600" />
+                  <h3 className="text-sm font-bold text-stone-900">
+                    Servicios Relacionados ({groupB.length})
+                  </h3>
+                </div>
+                <span className="text-[11px] text-stone-500 font-mono">
+                  Niveles B1 y B2 · Especialización no confirmada
+                </span>
+              </div>
+
+              <div className="space-y-4">
+                {groupB.map((item) => (
+                  <SpecializedCentreCard
+                    key={item.centre.centre_id}
+                    item={item}
+                    onWhyAppears={onWhyAppears}
+                    onPrepareContact={onPrepareContact}
+                    onReportError={onReportError}
+                    isCompared={comparedIds.includes(item.centre.centre_id)}
+                    onToggleCompare={onToggleCompare}
+                    easyReadMode={easyReadMode}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Grupo C: Orientación potencial */}
+          {groupC.length > 0 && (
+            <section className="space-y-3">
+              <div className="flex items-center justify-between border-b border-stone-200 pb-2">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-stone-400" />
+                  <h3 className="text-sm font-bold text-stone-900">
+                    Orientación General ({groupC.length})
+                  </h3>
+                </div>
+                <span className="text-[11px] text-stone-500 font-mono">
+                  Nivel C · Sector genérico compatible
+                </span>
+              </div>
+
+              <div className="space-y-4">
+                {groupC.map((item) => (
+                  <SpecializedCentreCard
+                    key={item.centre.centre_id}
+                    item={item}
+                    onWhyAppears={onWhyAppears}
+                    onPrepareContact={onPrepareContact}
+                    onReportError={onReportError}
+                    isCompared={comparedIds.includes(item.centre.centre_id)}
+                    onToggleCompare={onToggleCompare}
+                    easyReadMode={easyReadMode}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+      ) : (
+        /* Lista continua en orden lexicográfico estricto (§41) */
+        <div className="space-y-4">
+          {results.map((item) => (
+            <SpecializedCentreCard
+              key={item.centre.centre_id}
+              item={item}
+              onWhyAppears={onWhyAppears}
+              onPrepareContact={onPrepareContact}
+              onReportError={onReportError}
+              isCompared={comparedIds.includes(item.centre.centre_id)}
+              onToggleCompare={onToggleCompare}
+              easyReadMode={easyReadMode}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* 4. Sección de Centros Incompatibles Excluidos de la Lista Principal (§78) */}
+      {incompatibleResults.length > 0 && (
+        <div className="pt-6 border-t border-stone-200">
+          <button
+            type="button"
+            onClick={() => setShowIncompatibles(prev => !prev)}
+            className="text-xs font-bold text-stone-600 hover:text-stone-900 flex items-center justify-between w-full p-3 rounded-lg bg-stone-100 border border-stone-200"
+          >
+            <span>
+              Recursos excluidos por incompatibilidad de criterios ({incompatibleResults.length})
+            </span>
+            {showIncompatibles ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+
+          {showIncompatibles && (
+            <div className="space-y-3 mt-3">
+              {incompatibleResults.map((item) => (
+                <div key={item.centre.centre_id} className="opacity-75">
+                  <SpecializedCentreCard
+                    item={item}
+                    onWhyAppears={onWhyAppears}
+                    onPrepareContact={onPrepareContact}
+                    onReportError={onReportError}
+                    isCompared={comparedIds.includes(item.centre.centre_id)}
+                    onToggleCompare={onToggleCompare}
+                    easyReadMode={easyReadMode}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};

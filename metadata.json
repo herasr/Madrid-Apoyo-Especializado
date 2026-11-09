@@ -1,0 +1,6 @@
+{
+  "name": "Madrid Educa Apoyo",
+  "description": "Madrid Educa Apoyo v2.8 Integrado: Buscador educativo con evidencia oficial, filtros acumulativos y proximidad territorial geodésica. Localiza centros con atención preferente (TEA, auditiva, motora), Educación Especial, discapacidad visual y altas capacidades.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

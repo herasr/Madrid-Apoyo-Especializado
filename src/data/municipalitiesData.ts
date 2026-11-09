@@ -1,0 +1,143 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ * Catálogo de municipios y centroides oficiales de la Comunidad de Madrid
+ * Centroide de referencia general: Puerta del Sol (Madrid Km 0: 40.4168, -3.7038)
+ */
+
+export interface MunicipalityItem {
+  code: string;
+  ine_code: string;
+  name: string;
+  search_name: string;
+  lat: number;
+  lon: number;
+  surface_km2: number;
+  dat: string;
+}
+
+export const MADRID_CENTRO_COORDS: [number, number] = [40.4168, -3.7038];
+
+export const MADRID_MUNICIPALITIES: MunicipalityItem[] = [
+  { code: "0796", ine_code: "28079", name: "Madrid", search_name: "Madrid", lat: 40.4168, lon: -3.7038, surface_km2: 605.77, dat: "Madrid-Capital" },
+  { code: "0053", ine_code: "28005", name: "Alcalá de Henares", search_name: "Alcala de Henares", lat: 40.4819, lon: -3.3635, surface_km2: 87.72, dat: "Madrid-Este" },
+  { code: "0066", ine_code: "28006", name: "Alcobendas", search_name: "Alcobendas", lat: 40.5475, lon: -3.6420, surface_km2: 44.98, dat: "Madrid-Norte" },
+  { code: "0072", ine_code: "28007", name: "Alcorcón", search_name: "Alcorcon", lat: 40.3458, lon: -3.8249, surface_km2: 33.73, dat: "Madrid-Sur" },
+  { code: "0088", ine_code: "28008", name: "Aldea del Fresno", search_name: "Aldea del Fresno", lat: 40.3236, lon: -4.2036, surface_km2: 51.78, dat: "Madrid-Sur" },
+  { code: "0091", ine_code: "28009", name: "Algete", search_name: "Algete", lat: 40.5969, lon: -3.4997, surface_km2: 37.88, dat: "Madrid-Norte" },
+  { code: "0105", ine_code: "28010", name: "Alpedrete", search_name: "Alpedrete", lat: 40.6833, lon: -4.0167, surface_km2: 24.64, dat: "Madrid-Oeste" },
+  { code: "0127", ine_code: "28012", name: "Aranjuez", search_name: "Aranjuez", lat: 40.0333, lon: -3.6000, surface_km2: 201.11, dat: "Madrid-Sur" },
+  { code: "0133", ine_code: "28013", name: "Arganda del Rey", search_name: "Arganda del Rey", lat: 40.3000, lon: -3.4500, surface_km2: 79.65, dat: "Madrid-Este" },
+  { code: "0148", ine_code: "28014", name: "Arroyomolinos", search_name: "Arroyomolinos", lat: 40.2667, lon: -3.9167, surface_km2: 20.66, dat: "Madrid-Sur" },
+  { code: "0048", ine_code: "28004", name: "Álamo, El", search_name: "El Alamo Alamo, El", lat: 40.2322, lon: -3.9889, surface_km2: 22.25, dat: "Madrid-Sur" },
+  { code: "0164", ine_code: "28016", name: "Boadilla del Monte", search_name: "Boadilla del Monte", lat: 40.4069, lon: -3.8753, surface_km2: 47.24, dat: "Madrid-Oeste" },
+  { code: "0170", ine_code: "28017", name: "Brunete", search_name: "Brunete", lat: 40.4061, lon: -3.9986, surface_km2: 48.94, dat: "Madrid-Oeste" },
+  { code: "0458", ine_code: "28045", name: "Colmenar Viejo", search_name: "Colmenar Viejo", lat: 40.6586, lon: -3.7667, surface_km2: 182.56, dat: "Madrid-Norte" },
+  { code: "0477", ine_code: "28047", name: "Collado Villalba", search_name: "Collado Villalba Villalba", lat: 40.6333, lon: -4.0000, surface_km2: 26.52, dat: "Madrid-Oeste" },
+  { code: "0496", ine_code: "28049", name: "Coslada", search_name: "Coslada", lat: 40.4244, lon: -3.5658, surface_km2: 12.01, dat: "Madrid-Este" },
+  { code: "0584", ine_code: "28058", name: "Fuenlabrada", search_name: "Fuenlabrada", lat: 40.2842, lon: -3.7942, surface_km2: 39.41, dat: "Madrid-Sur" },
+  { code: "0601", ine_code: "28060", name: "Galapagar", search_name: "Galapagar", lat: 40.5800, lon: -4.0033, surface_km2: 64.99, dat: "Madrid-Oeste" },
+  { code: "0652", ine_code: "28065", name: "Getafe", search_name: "Getafe", lat: 40.3082, lon: -3.7327, surface_km2: 78.38, dat: "Madrid-Sur" },
+  { code: "0671", ine_code: "28067", name: "Guadarrama", search_name: "Guadarrama", lat: 40.6725, lon: -4.0894, surface_km2: 56.98, dat: "Madrid-Oeste" },
+  { code: "0745", ine_code: "28074", name: "Leganés", search_name: "Leganes", lat: 40.3280, lon: -3.7635, surface_km2: 43.05, dat: "Madrid-Sur" },
+  { code: "0800", ine_code: "28080", name: "Majadahonda", search_name: "Majadahonda", lat: 40.4725, lon: -3.8722, surface_km2: 38.47, dat: "Madrid-Oeste" },
+  { code: "0847", ine_code: "28084", name: "Mejorada del Campo", search_name: "Mejorada del Campo", lat: 40.3972, lon: -3.4867, surface_km2: 17.21, dat: "Madrid-Este" },
+  { code: "0921", ine_code: "28092", name: "Móstoles", search_name: "Mostoles", lat: 40.3228, lon: -3.8649, surface_km2: 45.36, dat: "Madrid-Sur" },
+  { code: "0968", ine_code: "28096", name: "Navalcarnero", search_name: "Navalcarnero", lat: 40.2886, lon: -4.0139, surface_km2: 100.22, dat: "Madrid-Sur" },
+  { code: "1065", ine_code: "28106", name: "Parla", search_name: "Parla", lat: 40.2372, lon: -3.7742, surface_km2: 24.51, dat: "Madrid-Sur" },
+  { code: "1138", ine_code: "28113", name: "Pinto", search_name: "Pinto", lat: 40.2417, lon: -3.6997, surface_km2: 62.04, dat: "Madrid-Sur" },
+  { code: "1156", ine_code: "28115", name: "Pozuelo de Alarcón", search_name: "Pozuelo de Alarcon", lat: 40.4346, lon: -3.8142, surface_km2: 43.20, dat: "Madrid-Oeste" },
+  { code: "1231", ine_code: "28123", name: "Rivas-Vaciamadrid", search_name: "Rivas Vaciamadrid Rivas", lat: 40.3541, lon: -3.5358, surface_km2: 67.38, dat: "Madrid-Este" },
+  { code: "1279", ine_code: "28127", name: "Rozas de Madrid, Las", search_name: "Las Rozas Las Rozas de Madrid Rozas", lat: 40.4925, lon: -3.8736, surface_km2: 58.83, dat: "Madrid-Oeste" },
+  { code: "1314", ine_code: "28131", name: "San Fernando de Henares", search_name: "San Fernando de Henares", lat: 40.4258, lon: -3.5333, surface_km2: 39.86, dat: "Madrid-Este" },
+  { code: "1336", ine_code: "28133", name: "San Lorenzo de El Escorial", search_name: "San Lorenzo de El Escorial El Escorial", lat: 40.5917, lon: -4.1481, surface_km2: 56.40, dat: "Madrid-Oeste" },
+  { code: "1341", ine_code: "28134", name: "San Sebastián de los Reyes", search_name: "San Sebastian de los Reyes Sanse", lat: 40.5472, lon: -3.6263, surface_km2: 58.66, dat: "Madrid-Norte" },
+  { code: "1482", ine_code: "28148", name: "Torrejón de Ardoz", search_name: "Torrejon de Ardoz", lat: 40.4578, lon: -3.4795, surface_km2: 32.62, dat: "Madrid-Este" },
+  { code: "1495", ine_code: "28149", name: "Torrelodones", search_name: "Torrelodones", lat: 40.5764, lon: -3.9306, surface_km2: 21.95, dat: "Madrid-Oeste" },
+  { code: "1549", ine_code: "28154", name: "Tres Cantos", search_name: "Tres Cantos", lat: 40.6075, lon: -3.7125, surface_km2: 37.93, dat: "Madrid-Norte" },
+  { code: "1611", ine_code: "28161", name: "Valdemoro", search_name: "Valdemoro", lat: 40.1908, lon: -3.6769, surface_km2: 64.17, dat: "Madrid-Sur" },
+  { code: "1772", ine_code: "28177", name: "Villaviciosa de Odón", search_name: "Villaviciosa de Odon", lat: 40.3583, lon: -3.9000, surface_km2: 68.05, dat: "Madrid-Sur" },
+  { code: "1808", ine_code: "28180", name: "Villanueva de la Cañada", search_name: "Villanueva de la Canada", lat: 40.4478, lon: -4.0044, surface_km2: 34.92, dat: "Madrid-Oeste" }
+];
+
+export function findMunicipalityByName(name: string | null | undefined): MunicipalityItem | null {
+  if (!name) return null;
+  const clean = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+  return MADRID_MUNICIPALITIES.find(m => {
+    const mName = m.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const mSearch = m.search_name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    return mName === clean || mSearch.includes(clean) || clean.includes(mName);
+  }) || null;
+}
+
+export interface OriginReference {
+  coordinates: [number, number];
+  name: string;
+  mode: 'browser' | 'municipality' | 'default';
+  isCustom: boolean;
+}
+
+export function resolveSearchOrigin(
+  userEphemeralLocation: [number, number] | null,
+  municipalityName: string | null,
+  locationMode: 'browser' | 'municipality' | 'all'
+): OriginReference {
+  if (locationMode === 'browser' && userEphemeralLocation) {
+    return {
+      coordinates: userEphemeralLocation,
+      name: 'Tu ubicación actual (GPS)',
+      mode: 'browser',
+      isCustom: true
+    };
+  }
+
+  if (municipalityName) {
+    const muni = findMunicipalityByName(municipalityName);
+    if (muni) {
+      return {
+        coordinates: [muni.lat, muni.lon],
+        name: muni.name,
+        mode: 'municipality',
+        isCustom: true
+      };
+    }
+  }
+
+  // Si tiene ubicación efímera almacenada aunque locationMode sea 'all' o no especificado
+  if (userEphemeralLocation) {
+    return {
+      coordinates: userEphemeralLocation,
+      name: 'Tu ubicación actual (GPS)',
+      mode: 'browser',
+      isCustom: true
+    };
+  }
+
+  // Origen por defecto: Km 0 Puerta del Sol (Madrid Centro)
+  return {
+    coordinates: MADRID_CENTRO_COORDS,
+    name: 'Madrid Centro (Km 0)',
+    mode: 'default',
+    isCustom: false
+  };
+}
+
+/**
+ * Cálculo de distancia Haversine en kilómetros entre dos coordenadas [lat, lon]
+ */
+export function calculateHaversineDistanceKm(coord1: [number, number], coord2: [number, number]): number {
+  const [lat1, lon1] = coord1;
+  const [lat2, lon2] = coord2;
+  const R = 6371; // Radio medio de la Tierra en km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round(R * c * 10) / 10;
+}
+
