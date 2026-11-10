@@ -16,7 +16,8 @@ import {
   AlertCircle, 
   Phone, 
   ExternalLink,
-  Plus
+  Plus,
+  Printer
 } from 'lucide-react';
 
 interface ComparatorViewProps {
@@ -205,11 +206,21 @@ export const SpecializedComparatorView: React.FC<ComparatorViewProps> = ({
 
         <div className="flex items-center gap-3">
           <button
+            onClick={() => window.print()}
+            className="px-3.5 py-1.5 bg-white border border-stone-300 text-stone-800 rounded-lg text-xs font-semibold hover:bg-stone-50 transition-colors inline-flex items-center gap-1.5 shadow-xs"
+            title="Imprimir o guardar como informe PDF profesional para familias u organismos"
+          >
+            <Printer className="w-3.5 h-3.5 text-stone-600" />
+            <span>Imprimir / Exportar Informe (PDF)</span>
+          </button>
+
+          <button
             onClick={onClearCompare}
             className="text-xs text-stone-500 hover:text-stone-900 transition-colors"
           >
             Limpiar comparación
           </button>
+
           <button
             onClick={onGoToSearch}
             className="px-3.5 py-1.5 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-stone-800 transition-colors"

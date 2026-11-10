@@ -19,7 +19,11 @@ import {
   HelpCircle,
   ChevronDown,
   ChevronUp,
-  Sparkles
+  Sparkles,
+  Share2,
+  Download,
+  FileSpreadsheet,
+  Check
 } from 'lucide-react';
 
 interface ResultsListProps {
@@ -49,6 +53,72 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
 }) => {
   const [showIncompatibles, setShowIncompatibles] = useState(false);
   const [groupByTier, setGroupByTier] = useState(true);
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  // Copiar enlace reproducibilidad de la búsqueda completa
+  const handleCopyShareLink = () => {
+    if (typeof window !== 'undefined') {
+      navigator.clipboard.writeText(window.location.href);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2500);
+    }
+  };
+
+  // Descarga CSV de resultados con trazabilidad y procedencia de atributos
+  const handleExportCSV = () => {
+    const headers = [
+      'ID Centro',
+      'Nombre Oficial',
+      'Municipio',
+      'Distrito',
+      'Nivel Evidencia',
+      'Adecuación',
+      'Distancia (km)',
+      'Titularidad',
+      'Tipo Centro',
+      'Subtipo',
+      'Apoyos Confirmados',
+      'Trazabilidad Registral'
+    ];
+
+    const rows = results.map(r => [
+      `"${r.centre.centre_id}"`,
+      `"${r.centre.official_name.replace(/"/g, '""')}"`,
+      `"${r.centre.municipality}"`,
+      `"${r.centre.district || ''}"`,
+      `"${r.evidence_level}"`,
+      `"${r.suitability}"`,
+      `"${r.distance_km !== null ? r.distance_km.toFixed(1) : 'Sin coords'}"`,
+      `"${r.centre.public_private_status}"`,
+      `"${r.centre.centre_type}"`,
+      `"${r.centre.subtype || ''}"`,
+      `"${r.centre.supports.join('; ')}"`,
+      `"${r.centre.provenance_records.map(p => `${p.attribute_name}:${p.source_dataset}`).join('; ')}"`
+    ]);
+
+    const csvStr = '\uFEFF' + [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+    const blob = new Blob([csvStr], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `madrid_apoyo_especializado_resultados_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Descarga JSON estructurado con datos completos
+  const handleExportJSON = () => {
+    const jsonStr = JSON.stringify(results, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `madrid_apoyo_especializado_resultados_${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   // Agrupación por nivel de evidencia (§37.1, §77)
   const groupA = results.filter(r => r.evidence_level === 'A1' || r.evidence_level === 'A2');
@@ -96,6 +166,26 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* Aviso institucional de transparencia del dataset */}
+      <div className="bg-stone-100/90 border border-stone-200 rounded-xl p-3 text-xs text-stone-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-stone-700 shrink-0" />
+          <span>
+            <strong className="text-stone-900 font-semibold">Trazabilidad Registral DATAMAD 2026:</strong> Muestra canónica auditada con referencias registrales al RECESS y red social de la CAM.
+          </span>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={handleCopyShareLink}
+            className="px-2.5 py-1 bg-white border border-stone-300 hover:bg-stone-50 text-stone-800 rounded-lg text-[11px] font-medium transition-colors flex items-center gap-1"
+            title="Copiar enlace URL con todos los criterios de esta búsqueda"
+          >
+            {copiedLink ? <Check className="w-3 h-3 text-emerald-600" /> : <Share2 className="w-3 h-3 text-stone-600" />}
+            <span>{copiedLink ? '¡Enlace copiado!' : 'Copiar búsqueda compartible'}</span>
+          </button>
+        </div>
+      </div>
+
       {/* Barra de cabecera de la lista */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-200 pb-3">
         <div className="flex items-center gap-2">
@@ -107,8 +197,28 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
           </span>
         </div>
 
-        {/* Toggle para agrupar por fuerza de evidencia o lista continua */}
-        <div className="flex items-center gap-3 text-xs">
+        {/* Acciones de exportación y agrupación */}
+        <div className="flex flex-wrap items-center gap-3 text-xs">
+          <button
+            onClick={handleExportCSV}
+            className="px-2.5 py-1 bg-white border border-stone-300 text-stone-700 hover:bg-stone-50 rounded-lg font-medium transition-colors flex items-center gap-1"
+            title="Exportar resultados en formato CSV con fuentes y procedencia"
+          >
+            <FileSpreadsheet className="w-3.5 h-3.5 text-stone-600" />
+            <span>Exportar CSV</span>
+          </button>
+
+          <button
+            onClick={handleExportJSON}
+            className="px-2.5 py-1 bg-white border border-stone-300 text-stone-700 hover:bg-stone-50 rounded-lg font-medium transition-colors flex items-center gap-1"
+            title="Exportar estructurado completo en JSON"
+          >
+            <Download className="w-3.5 h-3.5 text-stone-600" />
+            <span>Exportar JSON</span>
+          </button>
+
+          <div className="h-4 w-px bg-stone-200 hidden sm:block" />
+
           <label className="flex items-center gap-1.5 cursor-pointer text-stone-600">
             <input
               type="checkbox"

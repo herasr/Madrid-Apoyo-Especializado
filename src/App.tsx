@@ -64,7 +64,7 @@ export default function App() {
   // Estado accesible
   const [easyReadMode, setEasyReadMode] = useState<boolean>(false);
 
-  // Estado acumulativo de la búsqueda (§62.1)
+  // Estado acumulativo de la búsqueda con soporte completo de reproducción por URL (§62.1, §62.2)
   const [query, setQuery] = useState<SearchQueryState>(() => {
     if (typeof window !== 'undefined' && window.location.search) {
       const params = new URLSearchParams(window.location.search);
@@ -72,18 +72,31 @@ export default function App() {
       const municipality = params.get('municipality');
       const radius = params.get('radius');
       const supports = params.get('supports')?.split(',').filter(Boolean) || [];
+      const needs = params.get('needs')?.split(',').filter(Boolean) || [];
+      const stage = params.get('stage');
+      const net = params.get('net');
+      const comb = params.get('comb');
+      const access = params.get('access')?.split(',').filter(Boolean) || [];
+      const locMode = params.get('loc');
+
       return {
         ...DEFAULT_QUERY,
         profile: profile || null,
         municipality: municipality || null,
         radius_km: radius ? parseInt(radius, 10) : 25,
-        support_types: supports as any
+        support_types: supports as any,
+        functional_needs: needs as any,
+        life_stage: (stage as any) || null,
+        network_preference: (net as any) || 'all',
+        support_combination_mode: (comb as any) || 'any_support',
+        accessibility_needs: access,
+        location_mode: (locMode as any) || 'all'
       };
     }
     return DEFAULT_QUERY;
   });
 
-  // Sincronización con parámetros de URL sin exponer ubicación exacta ni datos de salud (§62.2, LOC-006)
+  // Sincronización transparente de todas las dimensiones en la URL sin almacenar salud ni datos personales (§62.2, LOC-006)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams();
@@ -91,12 +104,29 @@ export default function App() {
       if (query.municipality) params.set('municipality', query.municipality);
       if (query.radius_km !== 25) params.set('radius', query.radius_km.toString());
       if (query.support_types.length > 0) params.set('supports', query.support_types.join(','));
+      if (query.functional_needs.length > 0) params.set('needs', query.functional_needs.join(','));
+      if (query.life_stage) params.set('stage', query.life_stage);
+      if (query.network_preference !== 'all') params.set('net', query.network_preference);
+      if (query.support_combination_mode !== 'any_support') params.set('comb', query.support_combination_mode);
+      if (query.accessibility_needs.length > 0) params.set('access', query.accessibility_needs.join(','));
+      if (query.location_mode !== 'all') params.set('loc', query.location_mode);
       
       const newQs = params.toString();
       const newUrl = newQs ? `${window.location.pathname}?${newQs}` : window.location.pathname;
       window.history.replaceState({}, '', newUrl);
     }
-  }, [query.profile, query.municipality, query.radius_km, query.support_types]);
+  }, [
+    query.profile, 
+    query.municipality, 
+    query.radius_km, 
+    query.support_types,
+    query.functional_needs,
+    query.life_stage,
+    query.network_preference,
+    query.support_combination_mode,
+    query.accessibility_needs,
+    query.location_mode
+  ]);
 
   // Selección de centros para comparar (hasta 3 centros §15)
   const [comparedCentreIds, setComparedCentreIds] = useState<string[]>([]);
