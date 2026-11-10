@@ -12,6 +12,7 @@ import {
   BookOpen,
   AlertCircle
 } from 'lucide-react';
+import { PWAInstallButton } from '../pwa/PWAInstallButton';
 
 interface SpecializedHeaderProps {
   activeTab: string;
@@ -101,6 +102,7 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
             </button>
 
             {/* Búsquedas guardadas */}
+            <PWAInstallButton />
             <button
               onClick={openSavedSearches}
               title="Búsquedas guardadas"

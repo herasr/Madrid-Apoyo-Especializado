@@ -1,0 +1,10 @@
+{
+  "ingestion_id": "ING_1794309458199",
+  "timestamp": "2026-11-10T11:17:37.513Z",
+  "source_url": "https://www.comunidad.madrid/servicios/asuntos-sociales/registro-centros-servicios-sociales",
+  "sha256_hash": "e723cf1b0c70cc0edc8e3f4f6e894337c20ed3d8ee0b2d189758300f9e19b49d",
+  "file_size_bytes": 17328,
+  "extracted_records_count": 15,
+  "status": "SUCCESS",
+  "verification_notes": "Ingesta registral completada y verificada contra firma SHA-256."
+}

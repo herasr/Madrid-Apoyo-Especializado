@@ -27,20 +27,36 @@ interface WhyAppearsModalProps {
 }
 
 export const WhyAppearsModal: React.FC<WhyAppearsModalProps> = ({ item, onClose }) => {
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   if (!item) return null;
 
   const { centre, match_assessment, evidence_level, combination_status, combination_details, criterion_matrix } = item;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-3xl w-full border border-stone-200 shadow-xl overflow-hidden my-8 max-h-[90vh] flex flex-col">
+    <div 
+      className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="why-appears-modal-title"
+    >
+      <div 
+        className="bg-white rounded-2xl max-w-3xl w-full border border-stone-200 shadow-xl overflow-hidden my-8 max-h-[90vh] flex flex-col"
+        tabIndex={-1}
+      >
         {/* Cabecera del modal */}
         <div className="px-6 py-4 border-b border-stone-200 flex items-start justify-between gap-4 bg-stone-50">
           <div>
             <div className="text-xs uppercase tracking-wider font-mono font-bold text-stone-500">
               Auditoría y Procedencia de Datos Oficiales · {centre.centre_id}
             </div>
-            <h2 className="text-lg font-bold text-stone-900 mt-0.5">
+            <h2 id="why-appears-modal-title" className="text-lg font-bold text-stone-900 mt-0.5">
               ¿Por qué aparece este centro?
             </h2>
             <div className="text-xs text-stone-600 mt-1">
@@ -49,7 +65,8 @@ export const WhyAppearsModal: React.FC<WhyAppearsModalProps> = ({ item, onClose 
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-stone-200/50 transition-colors"
+            aria-label="Cerrar modal"
+            className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-stone-200/50 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>

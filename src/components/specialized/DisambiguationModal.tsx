@@ -21,6 +21,15 @@ export const DisambiguationModal: React.FC<DisambiguationModalProps> = ({
   onClose,
   setQuery
 }) => {
+  React.useEffect(() => {
+    if (!term) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [term, onClose]);
+
   if (!term) return null;
 
   const data = DISAMBIGUATION_TERMS[term];
@@ -50,14 +59,22 @@ export const DisambiguationModal: React.FC<DisambiguationModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-xl w-full border border-stone-200 shadow-xl overflow-hidden my-8">
+    <div 
+      className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="disambiguation-modal-title"
+    >
+      <div 
+        className="bg-white rounded-2xl max-w-xl w-full border border-stone-200 shadow-xl overflow-hidden my-8"
+        tabIndex={-1}
+      >
         {/* Cabecera */}
         <div className="px-6 py-4 border-b border-stone-200 flex items-start justify-between gap-4 bg-stone-50">
           <div className="flex items-center gap-2">
             <ShieldAlert className="w-5 h-5 text-amber-700 shrink-0" />
             <div>
-              <h2 className="text-base font-bold text-stone-900">
+              <h2 id="disambiguation-modal-title" className="text-base font-bold text-stone-900">
                 {data.title}
               </h2>
               <div className="text-[11px] text-stone-500">

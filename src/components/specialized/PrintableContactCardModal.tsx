@@ -27,6 +27,14 @@ interface PrintableContactCardProps {
 }
 
 export const PrintableContactCardModal: React.FC<PrintableContactCardProps> = ({ item, onClose }) => {
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   if (!item) return null;
 
   const { centre, evidence_level, match_assessment } = item;
@@ -37,27 +45,36 @@ export const PrintableContactCardModal: React.FC<PrintableContactCardProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-2xl w-full border border-stone-200 shadow-xl overflow-hidden my-8 max-h-[90vh] flex flex-col">
+    <div 
+      className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="contact-card-modal-title"
+    >
+      <div 
+        className="bg-white rounded-2xl max-w-2xl w-full border border-stone-200 shadow-xl overflow-hidden my-8 max-h-[90vh] flex flex-col"
+        tabIndex={-1}
+      >
         {/* Cabecera modal con botón Imprimir */}
         <div className="px-6 py-4 border-b border-stone-200 flex items-center justify-between bg-stone-50 no-print">
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-stone-700" />
-            <h2 className="text-base font-bold text-stone-900">
+            <h2 id="contact-card-modal-title" className="text-base font-bold text-stone-900">
               Ficha para Preparar el Contacto con el Centro
             </h2>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className="px-3.5 py-1.5 bg-stone-900 text-white rounded-lg hover:bg-stone-800 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+              className="px-3.5 py-1.5 bg-stone-900 text-white rounded-lg hover:bg-stone-800 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <Printer className="w-4 h-4" />
               <span>Imprimir / Guardar PDF</span>
             </button>
             <button
               onClick={onClose}
-              className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg transition-colors"
+              aria-label="Cerrar modal"
+              className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>

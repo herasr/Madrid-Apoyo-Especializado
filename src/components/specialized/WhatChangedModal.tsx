@@ -29,17 +29,34 @@ interface WhatChangedModalProps {
 }
 
 export const WhatChangedModal: React.FC<WhatChangedModalProps> = ({ isOpen, onClose }) => {
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-3xl w-full border border-stone-200 shadow-xl overflow-hidden my-8 max-h-[90vh] flex flex-col">
+    <div 
+      className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="what-changed-modal-title"
+    >
+      <div 
+        className="bg-white rounded-2xl max-w-3xl w-full border border-stone-200 shadow-xl overflow-hidden my-8 max-h-[90vh] flex flex-col"
+        tabIndex={-1}
+      >
         {/* Cabecera */}
         <div className="px-6 py-4 border-b border-stone-200 flex items-center justify-between bg-stone-50">
           <div className="flex items-center gap-2">
             <History className="w-5 h-5 text-stone-700" />
             <div>
-              <h2 className="text-base font-bold text-stone-900">
+              <h2 id="what-changed-modal-title" className="text-base font-bold text-stone-900">
                 ¿Qué ha cambiado entre versiones del registro oficial? (§84)
               </h2>
               <div className="text-[11px] text-stone-500 font-mono">
@@ -49,7 +66,8 @@ export const WhatChangedModal: React.FC<WhatChangedModalProps> = ({ isOpen, onCl
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg transition-colors"
+            aria-label="Cerrar modal"
+            className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
