@@ -32,7 +32,6 @@ interface ResultsListProps {
   query: SearchQueryState;
   onWhyAppears: (item: EvaluatedCentreResult) => void;
   onPrepareContact: (item: EvaluatedCentreResult) => void;
-  onReportError: (item: EvaluatedCentreResult) => void;
   comparedIds: string[];
   onToggleCompare: (centreId: string) => void;
   onResetFilters: () => void;
@@ -45,14 +44,12 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
   query,
   onWhyAppears,
   onPrepareContact,
-  onReportError,
   comparedIds,
   onToggleCompare,
   onResetFilters,
   easyReadMode
 }) => {
   const [showIncompatibles, setShowIncompatibles] = useState(false);
-  const [groupByTier, setGroupByTier] = useState(true);
   const [copiedLink, setCopiedLink] = useState(false);
 
   // Copiar enlace reproducibilidad de la búsqueda completa
@@ -120,7 +117,7 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
     document.body.removeChild(link);
   };
 
-  // Agrupación por nivel de evidencia (§37.1, §77)
+  // Agrupación permanente por nivel de evidencia (§37.1, §77)
   const groupA = results.filter(r => r.evidence_level === 'A1' || r.evidence_level === 'A2');
   const groupB = results.filter(r => r.evidence_level === 'B1' || r.evidence_level === 'B2');
   const groupC = results.filter(r => r.evidence_level === 'C');
@@ -147,7 +144,7 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
               <li>Ampliar el radio geográfico de búsqueda (actualmente en {query.radius_km} km).</li>
             )}
             {query.support_combination_mode === 'all_supports_same_centre' && (
-              <li>Cambiar el modo de combinación a «Cualquier apoyo (OR)» para permitir servicios coordinados en distintas sedes.</li>
+              <li>Cambiar el modo de combinación a «Cualquier apoyo» para permitir servicios coordinados en distintas sedes.</li>
             )}
             <li>Retirar el filtro de titularidad para incluir centros privados autorizados o de la red pública.</li>
           </ul>
@@ -166,27 +163,7 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Aviso institucional de transparencia del dataset */}
-      <div className="bg-stone-100/90 border border-stone-200 rounded-xl p-3 text-xs text-stone-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-stone-700 shrink-0" />
-          <span>
-            <strong className="text-stone-900 font-semibold">Trazabilidad Registral DATAMAD 2026:</strong> Muestra canónica auditada con referencias registrales al RECESS y red social de la CAM.
-          </span>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={handleCopyShareLink}
-            className="px-2.5 py-1 bg-white border border-stone-300 hover:bg-stone-50 text-stone-800 rounded-lg text-[11px] font-medium transition-colors flex items-center gap-1"
-            title="Copiar enlace URL con todos los criterios de esta búsqueda"
-          >
-            {copiedLink ? <Check className="w-3 h-3 text-emerald-600" /> : <Share2 className="w-3 h-3 text-stone-600" />}
-            <span>{copiedLink ? '¡Enlace copiado!' : 'Copiar búsqueda compartible'}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Barra de cabecera de la lista */}
+      {/* Barra de cabecera de la lista con exportaciones y compartir */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-200 pb-3">
         <div className="flex items-center gap-2">
           <h2 className="text-base font-bold text-stone-900">
@@ -197,15 +174,24 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
           </span>
         </div>
 
-        {/* Acciones de exportación y agrupación */}
-        <div className="flex flex-wrap items-center gap-3 text-xs">
+        {/* Acciones de exportación y enlace compartible */}
+        <div className="flex flex-wrap items-center gap-2.5 text-xs">
+          <button
+            onClick={handleCopyShareLink}
+            className="px-2.5 py-1 bg-white border border-stone-300 hover:bg-stone-50 text-stone-800 rounded-lg text-[11px] font-medium transition-colors flex items-center gap-1"
+            title="Copiar enlace URL con todos los criterios de esta búsqueda"
+          >
+            {copiedLink ? <Check className="w-3 h-3 text-emerald-600" /> : <Share2 className="w-3 h-3 text-stone-600" />}
+            <span>{copiedLink ? '¡Enlace copiado!' : 'Compartir búsqueda'}</span>
+          </button>
+
           <button
             onClick={handleExportCSV}
             className="px-2.5 py-1 bg-white border border-stone-300 text-stone-700 hover:bg-stone-50 rounded-lg font-medium transition-colors flex items-center gap-1"
             title="Exportar resultados en formato CSV con fuentes y procedencia"
           >
             <FileSpreadsheet className="w-3.5 h-3.5 text-stone-600" />
-            <span>Exportar CSV</span>
+            <span>CSV</span>
           </button>
 
           <button
@@ -214,138 +200,112 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
             title="Exportar estructurado completo en JSON"
           >
             <Download className="w-3.5 h-3.5 text-stone-600" />
-            <span>Exportar JSON</span>
+            <span>JSON</span>
           </button>
-
-          <div className="h-4 w-px bg-stone-200 hidden sm:block" />
-
-          <label className="flex items-center gap-1.5 cursor-pointer text-stone-600">
-            <input
-              type="checkbox"
-              checked={groupByTier}
-              onChange={() => setGroupByTier(prev => !prev)}
-              className="rounded border-stone-300 accent-stone-900"
-            />
-            <span>Agrupar por fuerza de evidencia (§37.1)</span>
-          </label>
         </div>
       </div>
 
-      {groupByTier ? (
-        <div className="space-y-8">
-          {/* Grupo A: Especialización publicada (A1 y A2) */}
-          {groupA.length > 0 && (
-            <section className="space-y-3">
-              <div className="flex items-center justify-between border-b border-emerald-100 pb-2">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-600" />
-                  <h3 className="text-sm font-bold text-stone-900">
-                    Especialización Publicada ({groupA.length})
-                  </h3>
-                </div>
-                <span className="text-[11px] text-stone-500 font-mono">
-                  Niveles A1 y A2 · Mención literal en fuente oficial
-                </span>
+      <div className="space-y-8">
+        {/* Grupo A: Especialización publicada (A1 y A2) */}
+        {groupA.length > 0 && (
+          <section className="space-y-3">
+            <div className="flex items-center justify-between border-b border-emerald-100 pb-2">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-600" />
+                <h3 className="text-sm font-bold text-stone-900">
+                  Especialización Publicada ({groupA.length})
+                </h3>
               </div>
+              <span className="text-[11px] text-stone-500">
+                Mención en registro oficial
+              </span>
+            </div>
 
-              <div className="space-y-4">
-                {groupA.map((item) => (
-                  <SpecializedCentreCard
-                    key={item.centre.centre_id}
-                    item={item}
-                    onWhyAppears={onWhyAppears}
-                    onPrepareContact={onPrepareContact}
-                    onReportError={onReportError}
-                    isCompared={comparedIds.includes(item.centre.centre_id)}
-                    onToggleCompare={onToggleCompare}
-                    easyReadMode={easyReadMode}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
+            <div className="space-y-4">
+              {groupA.map((item) => (
+                <SpecializedCentreCard
+                  key={item.centre.centre_id}
+                  item={item}
+                  onWhyAppears={onWhyAppears}
+                  onPrepareContact={onPrepareContact}
+                  isCompared={comparedIds.includes(item.centre.centre_id)}
+                  onToggleCompare={onToggleCompare}
+                  easyReadMode={easyReadMode}
+                />
+              ))}
+            </div>
+          </section>
+        )}
 
-          {/* Grupo B: Servicios relacionados (B1 y B2) */}
-          {groupB.length > 0 && (
-            <section className="space-y-3">
-              <div className="flex items-center justify-between border-b border-sky-100 pb-2">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-sky-600" />
-                  <h3 className="text-sm font-bold text-stone-900">
-                    Servicios Relacionados ({groupB.length})
-                  </h3>
-                </div>
-                <span className="text-[11px] text-stone-500 font-mono">
-                  Niveles B1 y B2 · Especialización no confirmada
-                </span>
+        {/* Grupo B: Servicios relacionados (B1 y B2) */}
+        {groupB.length > 0 && (
+          <section className="space-y-3">
+            <div className="flex items-center justify-between border-b border-sky-100 pb-2">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-sky-600" />
+                <h3 className="text-sm font-bold text-stone-900">
+                  Servicios Relacionados ({groupB.length})
+                </h3>
               </div>
+              <span className="text-[11px] text-stone-500">
+                Recursos del sector relacionado
+              </span>
+            </div>
 
-              <div className="space-y-4">
-                {groupB.map((item) => (
-                  <SpecializedCentreCard
-                    key={item.centre.centre_id}
-                    item={item}
-                    onWhyAppears={onWhyAppears}
-                    onPrepareContact={onPrepareContact}
-                    onReportError={onReportError}
-                    isCompared={comparedIds.includes(item.centre.centre_id)}
-                    onToggleCompare={onToggleCompare}
-                    easyReadMode={easyReadMode}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
+            <div className="space-y-4">
+              {groupB.map((item) => (
+                <SpecializedCentreCard
+                  key={item.centre.centre_id}
+                  item={item}
+                  onWhyAppears={onWhyAppears}
+                  onPrepareContact={onPrepareContact}
+                  isCompared={comparedIds.includes(item.centre.centre_id)}
+                  onToggleCompare={onToggleCompare}
+                  easyReadMode={easyReadMode}
+                />
+              ))}
+            </div>
+          </section>
+        )}
 
-          {/* Grupo C: Orientación potencial */}
-          {groupC.length > 0 && (
-            <section className="space-y-3">
-              <div className="flex items-center justify-between border-b border-stone-200 pb-2">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-stone-400" />
-                  <h3 className="text-sm font-bold text-stone-900">
-                    Orientación General ({groupC.length})
-                  </h3>
-                </div>
-                <span className="text-[11px] text-stone-500 font-mono">
-                  Nivel C · Sector genérico compatible
-                </span>
+        {/* Grupo C: Orientación potencial */}
+        {groupC.length > 0 && (
+          <section className="space-y-3">
+            <div className="flex items-center justify-between border-b border-stone-200 pb-2">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-stone-400" />
+                <h3 className="text-sm font-bold text-stone-900">
+                  Orientación General ({groupC.length})
+                </h3>
               </div>
+              <span className="text-[11px] text-stone-500">
+                Sector asistencial compatible
+              </span>
+            </div>
 
-              <div className="space-y-4">
-                {groupC.map((item) => (
-                  <SpecializedCentreCard
-                    key={item.centre.centre_id}
-                    item={item}
-                    onWhyAppears={onWhyAppears}
-                    onPrepareContact={onPrepareContact}
-                    onReportError={onReportError}
-                    isCompared={comparedIds.includes(item.centre.centre_id)}
-                    onToggleCompare={onToggleCompare}
-                    easyReadMode={easyReadMode}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
-        </div>
-      ) : (
-        /* Lista continua en orden lexicográfico estricto (§41) */
-        <div className="space-y-4">
-          {results.map((item) => (
-            <SpecializedCentreCard
-              key={item.centre.centre_id}
-              item={item}
-              onWhyAppears={onWhyAppears}
-              onPrepareContact={onPrepareContact}
-              onReportError={onReportError}
-              isCompared={comparedIds.includes(item.centre.centre_id)}
-              onToggleCompare={onToggleCompare}
-              easyReadMode={easyReadMode}
-            />
-          ))}
-        </div>
-      )}
+            <div className="space-y-4">
+              {groupC.map((item) => (
+                <SpecializedCentreCard
+                  key={item.centre.centre_id}
+                  item={item}
+                  onWhyAppears={onWhyAppears}
+                  onPrepareContact={onPrepareContact}
+                  isCompared={comparedIds.includes(item.centre.centre_id)}
+                  onToggleCompare={onToggleCompare}
+                  easyReadMode={easyReadMode}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+
+      {/* Nota de trazabilidad registral discreta */}
+      <div className="pt-4 pb-2 border-t border-stone-200 text-center">
+        <span className="text-[11px] text-stone-400 font-mono">
+          DATAMAD 2026 · Registros RECESS / Red Social CAM
+        </span>
+      </div>
 
       {/* 4. Sección de Centros Incompatibles Excluidos de la Lista Principal (§78) */}
       {incompatibleResults.length > 0 && (
@@ -369,7 +329,6 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
                     item={item}
                     onWhyAppears={onWhyAppears}
                     onPrepareContact={onPrepareContact}
-                    onReportError={onReportError}
                     isCompared={comparedIds.includes(item.centre.centre_id)}
                     onToggleCompare={onToggleCompare}
                     easyReadMode={easyReadMode}

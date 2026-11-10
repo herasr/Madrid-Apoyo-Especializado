@@ -138,21 +138,9 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
     }
   };
 
-  // Geolocalización efímera del navegador (§67) - conmutación automática bidireccional
+  // Geolocalización efímera del navegador (§67) - con requisito de asignación de municipio alternativa para desactivar
   const requestBrowserLocation = () => {
-    // Si ya está activo en modo ubicación propia, un segundo clic hace toggle hacia toda la Comunidad
-    if (query.location_mode === 'browser') {
-      setGeoStatus('idle');
-      setQuery(prev => ({
-        ...prev,
-        user_ephemeral_location: null,
-        municipality: null,
-        location_mode: 'all'
-      }));
-      return;
-    }
-
-    // Al pulsar "Usar mi ubicación", conmutamos de inmediato liberando el municipio anterior
+    // Si ya está activo, informamos o reactivamos GPS; la única forma de cambiar es mediante el desplegable de municipios
     setGeoStatus('requesting');
     setQuery(prev => ({
       ...prev,
@@ -172,7 +160,6 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
     }
 
     const timer = setTimeout(() => {
-      // Fallback suave en caso de retardo o bloqueo por iframe sandbox
       setGeoStatus('granted');
       setQuery(prev => ({
         ...prev,
@@ -195,8 +182,6 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
       },
       () => {
         clearTimeout(timer);
-        // Si el navegador deniega el acceso por política de iframe o denegación,
-        // activa la posición en Madrid de forma transparente para no romper la experiencia
         setGeoStatus('granted');
         setQuery(prev => ({
           ...prev,
@@ -212,16 +197,18 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
   const handleSelectMunicipality = (muniName: string) => {
     setGeoStatus('idle');
     if (!muniName) {
+      // Si selecciona la opción vacía, vuelve a Madrid Centro por defecto
       setQuery(prev => ({
         ...prev,
         municipality: null,
-        user_ephemeral_location: null,
+        user_ephemeral_location: [40.4168, -3.7038],
         location_mode: 'all'
       }));
       return;
     }
     const selected = municipalities.find(m => m.name === muniName);
     if (!selected) return;
+    // Seleccionar un municipio desactiva obligatoriamente el GPS y asigna el nuevo origen municipal
     setQuery(prev => ({
       ...prev,
       municipality: selected.name,
@@ -278,7 +265,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
         </form>
 
         <div className="flex items-center gap-2 mt-2 text-xs text-stone-500">
-          <span className="font-medium text-stone-700">Términos frecuentes con desambiguación:</span>
+          <span className="font-medium text-stone-700">Sugerencias:</span>
           <button
             type="button"
             onClick={() => onOpenDisambiguation('neurodivergent')}
@@ -294,18 +281,16 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
           >
             psicomotriz
           </button>
-          <span>·</span>
-          <span>Búsqueda por necesidad funcional sin exigir nombre administrativo</span>
         </div>
       </div>
 
       <div className="h-px bg-stone-100" />
 
-      {/* 2. Dimensión 1: Perfiles oficiales verificados (§3.1, §88.2) */}
+      {/* 2. Dimensión 1: Perfiles oficiales verificados */}
       <div>
         <div className="flex items-center justify-between mb-2.5">
           <label className="text-xs font-bold uppercase tracking-wider text-stone-700">
-            1. Perfil o Condición Especializada (Evidencia oficial publicada)
+            Perfil o condición
           </label>
           {query.profile && (
             <button
@@ -336,17 +321,14 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                 }`}
               >
                 <div className="text-xs font-bold">{prof.preferred_label}</div>
-                <div className={`text-[11px] mt-1 line-clamp-1 ${isSelected ? 'text-stone-300' : 'text-stone-500'}`}>
-                  {prof.explicit_terms.slice(0, 2).join(' · ')}
-                </div>
               </button>
             );
           })}
         </div>
 
-        {/* Perfiles en reserva / experimentales (§25.2, §88.2) */}
+        {/* Otros perfiles */}
         <div className="mt-2.5 flex items-center gap-2 flex-wrap">
-          <span className="text-[11px] text-stone-500 font-medium">Perfiles en reserva experimental:</span>
+          <span className="text-[11px] text-stone-500 font-medium">Otros perfiles:</span>
           {Object.values(EXPERIMENTAL_PROFILES).map((prof) => {
             const isSelected = query.profile === prof.id;
             return (
@@ -359,8 +341,8 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                 }))}
                 className={`text-xs px-2.5 py-1 rounded-md border transition-colors ${
                   isSelected 
-                    ? 'bg-amber-900 text-amber-50 border-amber-900' 
-                    : 'bg-amber-50 border-amber-200 text-amber-900 hover:bg-amber-100'
+                    ? 'bg-stone-900 text-white border-stone-900' 
+                    : 'bg-stone-50 border-stone-200 text-stone-700 hover:bg-stone-100'
                 }`}
               >
                 {prof.preferred_label}
@@ -372,14 +354,14 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
 
       <div className="h-px bg-stone-100" />
 
-      {/* 3. Dimensión 2: Tipos de Apoyo y Novedad v1.7: Combinación en misma sede (§82) */}
+      {/* Dimensión 2: Tipos de Apoyo */}
       <div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5">
           <label className="text-xs font-bold uppercase tracking-wider text-stone-700">
-            2. Tipos de apoyo requeridos (Multiselección)
+            Tipos de apoyo
           </label>
 
-          {/* Selector de modo de combinación v1.7 (§82.1) */}
+          {/* Selector de modo de combinación */}
           <div className="inline-flex p-0.5 bg-stone-100 rounded-lg border border-stone-200 text-xs">
             <button
               type="button"
@@ -390,7 +372,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                   : 'text-stone-600 hover:text-stone-900'
               }`}
             >
-              Cualquier apoyo (OR)
+              Cualquier apoyo
             </button>
             <button
               type="button"
@@ -403,7 +385,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
               }`}
             >
               <Building2 className="w-3 h-3" />
-              <span>Todos en la misma sede (AND)</span>
+              <span>Todos en la misma sede</span>
             </button>
           </div>
         </div>
@@ -423,9 +405,6 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                 }`}
               >
                 <span className="text-xs leading-snug">{st.label}</span>
-                <span className="text-[10px] text-stone-500 mt-1">
-                  {isChecked ? '✓ Seleccionado' : '+ Añadir'}
-                </span>
               </button>
             );
           })}
@@ -435,7 +414,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
           <div className="mt-2 text-xs bg-stone-50 border border-stone-200 rounded-lg p-2.5 text-stone-700 flex items-center gap-2">
             <Info className="w-4 h-4 text-stone-500 shrink-0" />
             <span>
-              <strong>Filtro de sede unificada activo:</strong> Se verificarán los apoyos vinculados al mismo código de centro (<code className="font-mono text-stone-900">centre_id</code>), no meramente al mismo grupo empresarial.
+              <strong>Sede unificada activa:</strong> Se comprobarán los apoyos en el mismo centro físico.
             </span>
           </div>
         )}
@@ -443,12 +422,12 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
 
       <div className="h-px bg-stone-100" />
 
-      {/* 4. Dimensiones 3 y 4: Etapa Vital, Preferencia de Red y Localización (§67) */}
+      {/* Dimensiones: Etapa Vital, Preferencia de Red y Localización */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Etapa Vital */}
         <div>
           <label className="text-xs font-bold uppercase tracking-wider text-stone-700 block mb-2">
-            3. Etapa vital (Filtro bloqueante)
+            Etapa vital
           </label>
           <div className="grid grid-cols-2 gap-1.5">
             {Object.entries(LIFE_STAGES).map(([key, item]) => {
@@ -480,13 +459,13 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
         {/* Titularidad y Red */}
         <div>
           <label className="text-xs font-bold uppercase tracking-wider text-stone-700 block mb-2">
-            4. Titularidad y red
+            Red y titularidad
           </label>
           <div className="space-y-1.5 text-xs">
             {[
-              { id: 'all', label: 'Todas las titularidades oficiales' },
-              { id: 'public_network', label: 'Red Pública y Concertada CAM' },
-              { id: 'private_authorised', label: 'Centros privados autorizados' }
+              { id: 'all', label: 'Todas las titularidades' },
+              { id: 'public_network', label: 'Red Pública y Concertada' },
+              { id: 'private_authorised', label: 'Privados autorizados' }
             ].map(opt => (
               <label 
                 key={opt.id}
@@ -509,29 +488,12 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
           </div>
         </div>
 
-        {/* Localización territorial y radio (§67) */}
+        {/* Localización territorial y radio */}
         <div>
           <div className="flex items-center justify-between mb-2">
             <label className="text-xs font-bold uppercase tracking-wider text-stone-700">
-              5. Localización y radio (§67)
+              Ubicación y radio
             </label>
-            {(query.municipality || query.location_mode === 'browser') && (
-              <button
-                type="button"
-                onClick={() => {
-                  setGeoStatus('idle');
-                  setQuery(prev => ({
-                    ...prev,
-                    user_ephemeral_location: null,
-                    municipality: null,
-                    location_mode: 'all'
-                  }));
-                }}
-                className="text-[11px] text-stone-500 hover:text-stone-900"
-              >
-                Quitar origen
-              </button>
-            )}
           </div>
 
           <div className="space-y-2">
@@ -551,7 +513,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                 {geoStatus === 'requesting'
                   ? 'Obteniendo posición...'
                   : query.location_mode === 'browser'
-                  ? '✓ Usando tu ubicación actual (clic para desactivar)'
+                  ? '✓ Usando tu ubicación actual (GPS)'
                   : 'Usar mi ubicación'}
               </span>
             </button>
@@ -563,7 +525,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                 onChange={(e) => handleSelectMunicipality(e.target.value)}
                 className="w-full text-xs py-2 px-2.5 rounded-lg border border-stone-300 bg-white text-stone-800 focus:outline-none focus:border-stone-900"
               >
-                <option value="">Seleccionar municipio de la Comunidad de Madrid...</option>
+                <option value="">Seleccionar municipio para cambiar de origen...</option>
                 {municipalities.map((m) => (
                   <option key={m.code} value={m.name}>
                     {m.name}

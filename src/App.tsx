@@ -27,7 +27,6 @@ import { PrintableContactCardModal } from './components/specialized/PrintableCon
 import { SavedSearchesModal } from './components/specialized/SavedSearchesModal';
 import { WhatChangedModal } from './components/specialized/WhatChangedModal';
 import { DisambiguationModal } from './components/specialized/DisambiguationModal';
-import { CitizenCorrectionModal } from './components/specialized/CitizenCorrectionModal';
 import { EasyReadGlossaryModal } from './components/specialized/EasyReadGlossaryModal';
 import { TaxonomyGovernanceView } from './components/specialized/TaxonomyGovernanceView';
 import { SpecializedTestsRunnerView } from './components/specialized/SpecializedTestsRunnerView';
@@ -135,7 +134,6 @@ export default function App() {
   // Modales
   const [whyAppearsItem, setWhyAppearsItem] = useState<EvaluatedCentreResult | null>(null);
   const [printableContactItem, setPrintableContactItem] = useState<EvaluatedCentreResult | null>(null);
-  const [reportErrorItem, setReportErrorItem] = useState<EvaluatedCentreResult | null>(null);
   const [isSavedSearchesOpen, setIsSavedSearchesOpen] = useState(false);
   const [isWhatChangedOpen, setIsWhatChangedOpen] = useState(false);
   const [isDisambiguationOpen, setIsDisambiguationOpen] = useState<'neurodivergent' | 'psychomotor' | null>(null);
@@ -195,22 +193,18 @@ export default function App() {
         openGlossary={() => setIsGlossaryOpen(true)}
       />
 
-      {/* 2. Banner institucional de rigor metodológico y no diagnóstico */}
-      <section className="bg-stone-900 text-stone-100 py-3.5 px-4 text-xs border-b border-stone-800">
+      {/* Sub-header de rigor registral */}
+      <div className="bg-stone-100/70 text-stone-600 py-2 px-4 text-xs border-b border-stone-200">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-stone-200">DATAMAD 2026:</span>
-            <span className="text-stone-300">
-              Buscador transversal por necesidad funcional en registros oficiales de la Comunidad de Madrid.
-            </span>
+            <span className="font-semibold text-stone-900">DATAMAD 2026:</span>
+            <span>Buscador oficial de recursos autorizados de la Comunidad de Madrid.</span>
           </div>
-          <div className="flex items-center gap-4 text-stone-400 text-[11px]">
-            <span>Orientación verificable · No diagnóstico ni recomendación médica</span>
-            <span>·</span>
-            <span className="font-mono text-stone-300">Taxonomía v1.7.0</span>
+          <div className="flex items-center gap-3 text-stone-500 text-[11px]">
+            <span>Orientación verificable (sin finalidad diagnóstica)</span>
           </div>
         </div>
-      </section>
+      </div>
 
       {/* 3. Contenedor principal de vistas */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
@@ -244,7 +238,6 @@ export default function App() {
               query={query}
               onWhyAppears={(item) => setWhyAppearsItem(item)}
               onPrepareContact={(item) => setPrintableContactItem(item)}
-              onReportError={(item) => setReportErrorItem(item)}
               comparedIds={comparedCentreIds}
               onToggleCompare={toggleCompare}
               onResetFilters={resetAllFilters}
@@ -342,16 +335,6 @@ export default function App() {
         <PrintableContactCardModal
           item={printableContactItem}
           onClose={() => setPrintableContactItem(null)}
-        />
-      )}
-
-      {reportErrorItem && (
-        <CitizenCorrectionModal
-          item={reportErrorItem}
-          onClose={() => setReportErrorItem(null)}
-          onSuccess={(corr) => {
-            // Guardar en log local
-          }}
         />
       )}
 
