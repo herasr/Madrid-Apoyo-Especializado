@@ -35,7 +35,9 @@ export type SupportTypeId =
   | 'occupational_therapy' 
   | 'speech_therapy' 
   | 'residential_care' 
-  | 'employment_support';
+  | 'employment_support'
+  | 'psychological_support'
+  | 'respiratory_physiotherapy';
 
 export type FunctionalNeedId = 
   | 'communication' 

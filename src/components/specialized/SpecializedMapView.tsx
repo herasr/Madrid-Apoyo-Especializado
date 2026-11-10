@@ -221,9 +221,13 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
       });
 
       marker.bindTooltip(`
-        <div style="font-size: 11px; padding: 2px;">
-          <strong>${item.centre.official_name}</strong><br/>
-          <span style="color: #64748b;">${item.distance_label} · Nivel ${item.evidence_level}</span>
+        <div style="font-size: 11px; padding: 4px; line-height: 1.4;">
+          <strong style="display: block; font-size: 12px; margin-bottom: 2px;">${item.centre.official_name}</strong>
+          <div style="color: #44403c; font-weight: 600;">
+            ${item.centre.public_private_status === 'red_publica' ? 'Red Pública' : 
+              item.centre.public_private_status === 'concertado' ? 'Centro Concertado' : 'Privado Autorizado'}
+          </div>
+          <div style="color: #78716c;">${item.distance_label} desde origen</div>
         </div>
       `, { direction: 'top', offset: [0, -25] });
 
@@ -293,6 +297,17 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
     }, 100);
   }, [displayedCentres, selectedCentreId]);
 
+  // Ajustar la vista automáticamente SOLO cuando cambian los resultados de centros
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
+        handleFitAll();
+      }
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [displayedCentres]);
+
   const handleFitAll = () => {
     if (!mapInstanceRef.current) return;
     if (displayedCentres.length === 0) {
@@ -318,6 +333,8 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
     if (!mapInstanceRef.current || !item.centre.coordinates) return;
     mapInstanceRef.current.setView(item.centre.coordinates, 14, { animate: true });
   };
+
+
 
   return (
     <div className="bg-white rounded-xl border border-stone-200 overflow-hidden shadow-xs mb-8">

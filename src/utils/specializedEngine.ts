@@ -23,9 +23,39 @@ import {
   EXPERIMENTAL_PROFILES, 
   PENDING_PROFILES, 
   SUPPORT_TYPES, 
+  FUNCTIONAL_NEEDS,
   LIFE_STAGES 
 } from '../data/specializedTaxonomy';
 import { resolveSearchOrigin, OriginReference, calculateHaversineDistanceKm } from '../data/municipalitiesData';
+
+export const ACCESSIBILITY_MAP: Record<string, { label: string; keywords: string[] }> = {
+  wheelchair_access: {
+    label: 'Acceso silla de ruedas',
+    keywords: [
+      'silla', 'rueda', 'cota cero', 'rampa', 'elevador', 'nivel de calle', 
+      'pie llano', 'planta baja', 'accesibilidad total', 'accesibilidad universal', 
+      'pmr', 'adaptad', 'movilidad reducida'
+    ]
+  },
+  magnetic_loops: {
+    label: 'Bucles magnéticos',
+    keywords: ['bucle', 'magnétic', 'auditiv', 'bucle magnético']
+  },
+  braille_signage: {
+    label: 'Señalética braille',
+    keywords: ['braille', 'señalización accesible', 'pictograma']
+  }
+};
+
+/**
+ * Comprueba si un centro declara una característica de accesibilidad física oficial
+ */
+export function centreHasAccessibilityFeature(centre: SpecializedCentre, needId: string): boolean {
+  const rule = ACCESSIBILITY_MAP[needId];
+  if (!rule) return false;
+  const featuresText = (centre.accessibility_features || []).join(' ').toLowerCase();
+  return rule.keywords.some(kw => featuresText.includes(kw));
+}
 
 /**
  * Calcula estimación realista de tiempo de traslado en transporte público (Metro, EMT, Cercanías)
@@ -346,6 +376,49 @@ export function evaluateCentre(
     });
   }
 
+  // 5b. Evaluación de Accesibilidad Física Oficial
+  let accessibilityCompatible = true;
+  if (query.accessibility_needs && query.accessibility_needs.length > 0) {
+    query.accessibility_needs.forEach(needId => {
+      const featRule = ACCESSIBILITY_MAP[needId];
+      const featLabel = featRule?.label || needId;
+      const isConfirmed = centreHasAccessibilityFeature(centre, needId);
+
+      criterion_matrix.push({
+        criterion_id: `accessibility.${needId}`,
+        criterion_label: `Accesibilidad: ${featLabel}`,
+        requested: true,
+        status: isConfirmed ? 'confirmed' : 'not_stated',
+        note: isConfirmed 
+          ? 'Requisito de accesibilidad física oficial confirmado en el centro.' 
+          : 'No consta este requisito de accesibilidad en los datos registrados del centro.'
+      });
+
+      if (!isConfirmed) {
+        accessibilityCompatible = false;
+        suitability_reasons.push(`El centro no acredita el requisito de accesibilidad: ${featLabel}.`);
+      }
+    });
+
+    if (accessibilityCompatible) {
+      because.push(`Cumple todos los requisitos de accesibilidad física solicitados (${query.accessibility_needs.map(n => ACCESSIBILITY_MAP[n]?.label || n).join(', ')}).`);
+    }
+  }
+
+  // 5c. Evaluación de Necesidades Funcionales Observables (§50.1)
+  if (query.functional_needs && query.functional_needs.length > 0) {
+    query.functional_needs.forEach(needId => {
+      const needLabel = FUNCTIONAL_NEEDS[needId]?.label || needId;
+      criterion_matrix.push({
+        criterion_id: `functional.${needId}`,
+        criterion_label: `Necesidad funcional: ${needLabel}`,
+        requested: true,
+        status: 'confirmed',
+        note: `Criterio observable activo considerado en el plan de apoyos.`
+      });
+    });
+  }
+
   // 6. Clasificación de Nivel de Evidencia (§27)
   let evidence_level: EvidenceLevel = 'C';
 
@@ -375,7 +448,7 @@ export function evaluateCentre(
   // 7. Adecuación a la búsqueda (§70)
   let suitability: SuitabilityStatus = 'complete';
 
-  if (!lifeStageCompatible || isForbiddenInference) {
+  if (!lifeStageCompatible || isForbiddenInference || !accessibilityCompatible) {
     suitability = 'incompatible';
   } else if (
     (query.support_combination_mode === 'all_supports_same_centre' && !requestedSupportsConfirmedInThisCentre && query.support_types.length > 1) ||

@@ -27,6 +27,8 @@ export interface TaxonomyProfileDefinition {
   excluded_terms: string[];
   related_services: string[];
   allowed_life_stages: LifeStage[];
+  typical_supports?: SupportTypeId[];
+  typical_needs?: FunctionalNeedId[];
   forbidden_inferences: string[];
   access_routes: AccessRouteType[];
   evidence_thresholds: {
@@ -94,6 +96,8 @@ export const CORE_PROFILES: Record<CoreProfileId, TaxonomyProfileDefinition> = {
     excluded_terms: ['discapacidad intelectual', 'salud mental genérica'],
     related_services: ['atención temprana', 'logopedia', 'terapia ocupacional', 'apoyo social', 'habilidades sociales'],
     allowed_life_stages: ['early_childhood', 'minor', 'adult', 'older_adult'],
+    typical_supports: ['speech_therapy', 'occupational_therapy', 'day_care', 'employment_support', 'psychological_support'],
+    typical_needs: ['communication', 'social_skills', 'sensory_regulation', 'daily_autonomy', 'work_preparation', 'family_respite'],
     forbidden_inferences: [
       'TEA no se infiere desde discapacidad intelectual.',
       'TEA no se infiere desde neurodivergencia sin desambiguar.',
@@ -119,6 +123,8 @@ export const CORE_PROFILES: Record<CoreProfileId, TaxonomyProfileDefinition> = {
     excluded_terms: ['neurología ambulatoria general', 'fisioterapia osteopática'],
     related_services: ['neurología', 'rehabilitación neurológica', 'fisioterapia', 'terapia ocupacional', 'logopedia', 'neuropsicología'],
     allowed_life_stages: ['early_childhood', 'minor', 'adult', 'older_adult'],
+    typical_supports: ['rehabilitation', 'speech_therapy', 'occupational_therapy', 'day_care', 'psychological_support', 'respiratory_physiotherapy'],
+    typical_needs: ['mobility', 'communication', 'swallowing', 'fine_gross_motor', 'cognition_memory', 'daily_autonomy', 'family_respite'],
     forbidden_inferences: [
       'Neurología genérica no demuestra especialización en daño cerebral adquirido (máximo B2).',
       'Fisioterapia general no demuestra rehabilitación neurológica intensiva.',
@@ -144,6 +150,8 @@ export const CORE_PROFILES: Record<CoreProfileId, TaxonomyProfileDefinition> = {
     excluded_terms: ['discapacidad física genérica sin especificar', 'geriatría general'],
     related_services: ['rehabilitación', 'fisioterapia especializada', 'logopedia y deglución', 'terapia ocupacional', 'atención diurna', 'residencia'],
     allowed_life_stages: ['early_childhood', 'minor', 'adult', 'older_adult'],
+    typical_supports: ['rehabilitation', 'speech_therapy', 'occupational_therapy', 'day_care', 'residential_care'],
+    typical_needs: ['mobility', 'fine_gross_motor', 'swallowing', 'communication', 'daily_autonomy', 'family_respite'],
     forbidden_inferences: [
       'Centro para discapacidad física no demuestra parálisis cerebral ni patologías afines (máximo C).',
       'Fisioterapia general sin neurorrehabilitación no eleva a nivel A.'
@@ -168,6 +176,8 @@ export const CORE_PROFILES: Record<CoreProfileId, TaxonomyProfileDefinition> = {
     excluded_terms: ['electromedicina', 'urgencias hospitalarias generales'],
     related_services: ['neurología', 'fisioterapia motora', 'terapia ocupacional', 'rehabilitación neurológica', 'atención diurna'],
     allowed_life_stages: ['adult', 'older_adult'],
+    typical_supports: ['rehabilitation', 'occupational_therapy', 'day_care', 'psychological_support', 'speech_therapy'],
+    typical_needs: ['mobility', 'fine_gross_motor', 'cognition_memory', 'daily_autonomy', 'swallowing', 'family_respite'],
     forbidden_inferences: [
       'Neurología general no demuestra especialización en esclerosis múltiple ni enfermedades degenerativas.',
       'Fisioterapia deportiva no demuestra mantenimiento funcional neurológico.'
@@ -198,6 +208,8 @@ export const EXPERIMENTAL_PROFILES: Record<ExperimentalProfileId, TaxonomyProfil
     excluded_terms: ['discapacidad física sin lesión medular'],
     related_services: ['rehabilitación médica', 'fisioterapia intensiva', 'terapia ocupacional', 'adaptación del entorno'],
     allowed_life_stages: ['minor', 'adult', 'older_adult'],
+    typical_supports: ['rehabilitation', 'occupational_therapy', 'respiratory_physiotherapy', 'residential_care'],
+    typical_needs: ['mobility', 'fine_gross_motor', 'daily_autonomy', 'family_respite'],
     forbidden_inferences: [
       'Discapacidad física general no demuestra atención a lesión medular (máximo C).',
       'Fisioterapia ambulatoria básica no garantiza transferencias ni manejo vesical.'
@@ -222,6 +234,8 @@ export const EXPERIMENTAL_PROFILES: Record<ExperimentalProfileId, TaxonomyProfil
     excluded_terms: ['gimnasia infantil'],
     related_services: ['fisioterapia pediátrica', 'terapia ocupacional infantil', 'estimulación temprana', 'logopedia infantil'],
     allowed_life_stages: ['early_childhood'],
+    typical_supports: ['rehabilitation', 'occupational_therapy', 'speech_therapy', 'psychological_support'],
+    typical_needs: ['mobility', 'fine_gross_motor', 'sensory_regulation', 'communication', 'family_respite'],
     forbidden_inferences: [
       'Atención temprana genérica no prueba psicomotricidad específica si la fuente no lo expresa literalmente.',
       'Fisioterapia u ocupacional genérica de adultos no aplican a la primera infancia.'
@@ -252,6 +266,8 @@ export const PENDING_PROFILES: Record<PendingProfileId, TaxonomyProfileDefinitio
     excluded_terms: [],
     related_services: ['apoyo psicopedagógico', 'entrenamiento neurocognitivo'],
     allowed_life_stages: ['early_childhood', 'minor', 'adult'],
+    typical_supports: ['psychological_support', 'occupational_therapy', 'employment_support'],
+    typical_needs: ['cognition_memory', 'social_skills', 'daily_autonomy', 'work_preparation', 'family_respite'],
     forbidden_inferences: ['TDAH no se confunde con TEA ni discapacidad intelectual.'],
     access_routes: ['direct', 'referral'],
     evidence_thresholds: { level_a_precision: 0.95, level_b_precision: 0.85, minimum_explicit_centres: 3 },
@@ -269,6 +285,8 @@ export const PENDING_PROFILES: Record<PendingProfileId, TaxonomyProfileDefinitio
     excluded_terms: [],
     related_services: ['fisioterapia respiratoria', 'comunicación aumentativa', 'terapia ocupacional'],
     allowed_life_stages: ['adult', 'older_adult'],
+    typical_supports: ['respiratory_physiotherapy', 'speech_therapy', 'occupational_therapy', 'rehabilitation', 'psychological_support'],
+    typical_needs: ['swallowing', 'communication', 'mobility', 'fine_gross_motor', 'daily_autonomy', 'family_respite'],
     forbidden_inferences: ['Requiere validación de centros con unidad multidisciplinar.'],
     access_routes: ['referral', 'dependency_pia'],
     evidence_thresholds: { level_a_precision: 0.95, level_b_precision: 0.85, minimum_explicit_centres: 3 },
@@ -286,6 +304,8 @@ export const PENDING_PROFILES: Record<PendingProfileId, TaxonomyProfileDefinitio
     excluded_terms: [],
     related_services: ['fisioterapia neurológica', 'logopedia y voz', 'terapia ocupacional'],
     allowed_life_stages: ['adult', 'older_adult'],
+    typical_supports: ['rehabilitation', 'speech_therapy', 'occupational_therapy', 'day_care', 'psychological_support'],
+    typical_needs: ['mobility', 'fine_gross_motor', 'communication', 'swallowing', 'daily_autonomy', 'cognition_memory'],
     forbidden_inferences: ['No confundir con temblor esencial no catalogado.'],
     access_routes: ['direct', 'dependency_pia', 'referral'],
     evidence_thresholds: { level_a_precision: 0.95, level_b_precision: 0.85, minimum_explicit_centres: 3 },
@@ -303,6 +323,8 @@ export const PENDING_PROFILES: Record<PendingProfileId, TaxonomyProfileDefinitio
     excluded_terms: [],
     related_services: ['estimulación cognitiva', 'centro de día terapéutico', 'residencia especializada'],
     allowed_life_stages: ['older_adult', 'adult'],
+    typical_supports: ['day_care', 'residential_care', 'psychological_support', 'occupational_therapy'],
+    typical_needs: ['cognition_memory', 'daily_autonomy', 'family_respite', 'social_skills', 'mobility'],
     forbidden_inferences: ['No equiparar residencia ordinaria sin módulo de psicogeriatría.'],
     access_routes: ['dependency_pia', 'referral'],
     evidence_thresholds: { level_a_precision: 0.95, level_b_precision: 0.85, minimum_explicit_centres: 3 },
@@ -320,6 +342,8 @@ export const PENDING_PROFILES: Record<PendingProfileId, TaxonomyProfileDefinitio
     excluded_terms: [],
     related_services: ['atención multidisciplinar', 'rehabilitación integral'],
     allowed_life_stages: ['early_childhood', 'minor', 'adult'],
+    typical_supports: ['rehabilitation', 'speech_therapy', 'occupational_therapy', 'psychological_support'],
+    typical_needs: ['mobility', 'communication', 'swallowing', 'daily_autonomy', 'family_respite'],
     forbidden_inferences: ['Exige acreditación específica de CSUR o centro colaborador.'],
     access_routes: ['referral'],
     evidence_thresholds: { level_a_precision: 0.95, level_b_precision: 0.85, minimum_explicit_centres: 3 },
@@ -337,6 +361,8 @@ export const PENDING_PROFILES: Record<PendingProfileId, TaxonomyProfileDefinitio
     excluded_terms: [],
     related_services: ['logopedia auditivo-verbal', 'intérprete LSE', 'apoyo a la comunicación'],
     allowed_life_stages: ['early_childhood', 'minor', 'adult', 'older_adult'],
+    typical_supports: ['speech_therapy', 'employment_support', 'occupational_therapy'],
+    typical_needs: ['communication', 'social_skills', 'work_preparation', 'sensory_regulation'],
     forbidden_inferences: ['No confundir con centros educativos ordinarios sin recursos específicos.'],
     access_routes: ['direct', 'referral'],
     evidence_thresholds: { level_a_precision: 0.95, level_b_precision: 0.85, minimum_explicit_centres: 3 },
@@ -354,6 +380,8 @@ export const PENDING_PROFILES: Record<PendingProfileId, TaxonomyProfileDefinitio
     excluded_terms: [],
     related_services: ['rehabilitación visual', 'tiflotecnología', 'entrenamiento en movilidad'],
     allowed_life_stages: ['early_childhood', 'minor', 'adult', 'older_adult'],
+    typical_supports: ['occupational_therapy', 'employment_support', 'day_care'],
+    typical_needs: ['daily_autonomy', 'mobility', 'work_preparation', 'social_skills'],
     forbidden_inferences: ['Requiere convenio ONCE o servicio reconocido.'],
     access_routes: ['direct', 'referral'],
     evidence_thresholds: { level_a_precision: 0.95, level_b_precision: 0.85, minimum_explicit_centres: 3 },
@@ -408,6 +436,20 @@ export const SUPPORT_TYPES: Record<SupportTypeId, TaxonomySupportDefinition> = {
     official_terms: ['inserción laboral', 'empleo con apoyo', 'capacitación ocupacional'],
     typical_domain: 'social',
     description: 'Orientación, formación y adaptación de puestos de trabajo para favorecer la inclusión en el mercado laboral ordinario o protegido.'
+  },
+  psychological_support: {
+    id: 'psychological_support',
+    label: 'Apoyo psicológico y neuropsicología',
+    official_terms: ['neuropsicología', 'psicología clínica especializada', 'apoyo psicológico'],
+    typical_domain: 'both',
+    description: 'Evaluación e intervención neuropsicológica y apoyo emocional a personas y familias.'
+  },
+  respiratory_physiotherapy: {
+    id: 'respiratory_physiotherapy',
+    label: 'Fisioterapia respiratoria y deglutoria',
+    official_terms: ['fisioterapia respiratoria', 'manejo de secreciones', 'rehabilitación pulmonar'],
+    typical_domain: 'healthcare',
+    description: 'Técnicas de aclaramiento mucociliar, mantenimiento de volúmenes pulmonares y prevención de aspiraciones.'
   }
 };
 

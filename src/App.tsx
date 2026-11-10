@@ -15,7 +15,7 @@ import {
   CitizenCorrection 
 } from './types/specialized';
 import { SPECIALIZED_CENTRES } from './data/specializedCentresData';
-import { runSpecializedSearch } from './utils/specializedEngine';
+import { runSpecializedSearch, evaluateCentre } from './utils/specializedEngine';
 import { resolveSearchOrigin, OriginReference } from './data/municipalitiesData';
 import { SpecializedHeader } from './components/specialized/SpecializedHeader';
 import { SpecializedSearchFilters } from './components/specialized/SpecializedSearchFilters';
@@ -84,6 +84,7 @@ function validateAndParseUrlParams(): { query: SearchQueryState; errors: string[
   const validNets = ['all', 'public_network', 'private_authorised'];
   const validCombs = ['any_support', 'all_supports_same_centre'];
   const validLocs = ['all', 'municipality', 'browser'];
+  const validAccess = ['wheelchair_access', 'magnetic_loops', 'braille_signage'];
 
   let profile: ProfileId | null = null;
   if (rawProfile !== null && rawProfile !== '') {
@@ -176,7 +177,17 @@ function validateAndParseUrlParams(): { query: SearchQueryState; errors: string[
     }
   }
 
-  const accessibility_needs = rawAccess ? rawAccess.split(',').map(a => a.trim()).filter(Boolean) : [];
+  const accessibility_needs: string[] = [];
+  if (rawAccess) {
+    const items = rawAccess.split(',').map(a => a.trim()).filter(Boolean);
+    for (const item of items) {
+      if (validAccess.includes(item)) {
+        accessibility_needs.push(item);
+      } else {
+        errors.push(`Requisito de accesibilidad no reconocido: "${item}"`);
+      }
+    }
+  }
 
   return {
     query: {
@@ -294,10 +305,20 @@ export default function App() {
     return runSpecializedSearch(query, SPECIALIZED_CENTRES, resolvedOrigin.coordinates);
   }, [query, resolvedOrigin]);
 
-  // Centros en el comparador
+  // Centros en el comparador (mantiene los seleccionados independientemente de filtros de radio o estado)
   const comparedCentres = useMemo(() => {
-    return searchOutput.results.filter(r => comparedCentreIds.includes(r.centre.centre_id));
-  }, [searchOutput.results, comparedCentreIds]);
+    const allEvaluated = [...searchOutput.results, ...searchOutput.incompatible_results];
+    const matched = allEvaluated.filter(r => comparedCentreIds.includes(r.centre.centre_id));
+    if (matched.length === comparedCentreIds.length) return matched;
+
+    const missingIds = comparedCentreIds.filter(id => !matched.some(m => m.centre.centre_id === id));
+    const missingEvaluated = missingIds.map(id => {
+      const raw = SPECIALIZED_CENTRES.find(c => c.centre_id === id);
+      return raw ? evaluateCentre(raw, query, SPECIALIZED_CENTRES, resolvedOrigin.coordinates) : null;
+    }).filter(Boolean) as EvaluatedCentreResult[];
+
+    return [...matched, ...missingEvaluated];
+  }, [searchOutput.results, searchOutput.incompatible_results, comparedCentreIds, query, resolvedOrigin]);
 
   const toggleCompare = (id: string) => {
     setComparedCentreIds(prev => {
@@ -533,6 +554,7 @@ export default function App() {
           setQuery(prev => ({
             ...prev,
             ...filters,
+            accessibility_needs: filters.accessibility_needs || [],
             user_ephemeral_location: null,
             location_mode: filters.municipality ? 'municipality' : 'all'
           }));
