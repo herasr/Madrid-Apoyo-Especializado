@@ -439,9 +439,16 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
                           {item.centre.municipality}
                         </span>
                       </div>
-                      <span className="font-mono font-bold text-xs text-stone-900 shrink-0">
-                        {item.distance_label}
-                      </span>
+                      <div className="text-right shrink-0">
+                        <div className="font-mono font-bold text-xs text-stone-900">
+                          {item.distance_label}
+                        </div>
+                        {item.transit_time_label && (
+                          <div className="font-mono text-[10px] text-blue-800 font-medium">
+                            {item.transit_time_label}
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     <h5 className="font-bold text-xs text-stone-900 mt-1.5 line-clamp-1 leading-snug">

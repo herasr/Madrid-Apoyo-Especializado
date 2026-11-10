@@ -27,15 +27,12 @@ import {
 import { 
   MapPin, 
   Navigation, 
-  Layers, 
   X, 
   Search, 
   RotateCcw, 
-  AlertTriangle, 
   ChevronDown, 
   ChevronUp, 
   Info,
-  Check,
   Building2
 } from 'lucide-react';
 
@@ -68,7 +65,6 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
   const [freeTextQuery, setFreeTextQuery] = useState('');
   const [geoStatus, setGeoStatus] = useState<'idle' | 'requesting' | 'granted' | 'denied' | 'timeout'>('idle');
   const [showAdvancedNeeds, setShowAdvancedNeeds] = useState(false);
-  const [muniSearchText, setMuniSearchText] = useState('');
 
   // Carga del catálogo oficial de municipios de la Comunidad de Madrid
   useEffect(() => {
@@ -80,6 +76,11 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
         }
       })
       .catch(() => {});
+
+    // Solicitud/activación inicial de ubicación de referencia por defecto
+    if (query.location_mode === 'browser' && !query.municipality) {
+      requestBrowserLocation();
+    }
   }, []);
 
   // Intercepta términos ciudadanos ambiguos antes de ejecutar (§54)
@@ -368,7 +369,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
               onClick={() => setQuery(prev => ({ ...prev, support_combination_mode: 'any_support' }))}
               className={`px-2.5 py-1 font-medium rounded-md transition-colors ${
                 query.support_combination_mode === 'any_support'
-                  ? 'bg-white text-stone-900 shadow-xs'
+                  ? 'bg-stone-900 text-white shadow-xs'
                   : 'text-stone-600 hover:text-stone-900'
               }`}
             >
@@ -400,7 +401,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                 onClick={() => toggleSupport(st.id)}
                 className={`p-2.5 rounded-lg border text-left transition-colors cursor-pointer flex flex-col justify-between ${
                   isChecked
-                    ? 'border-stone-900 bg-stone-100 text-stone-900 font-semibold'
+                    ? 'border-stone-900 bg-stone-900 text-white font-semibold shadow-xs'
                     : 'border-stone-200 hover:bg-stone-50 text-stone-700'
                 }`}
               >

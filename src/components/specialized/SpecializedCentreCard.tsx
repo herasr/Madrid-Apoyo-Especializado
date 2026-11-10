@@ -8,14 +8,13 @@
 import React from 'react';
 import { EvaluatedCentreResult } from '../../types/specialized';
 import { 
-  Building2, 
   MapPin, 
   Phone, 
   ExternalLink, 
   Printer, 
-  ArrowRight
+  ArrowRight,
+  Bus
 } from 'lucide-react';
-import { LIFE_STAGES } from '../../data/specializedTaxonomy';
 
 interface CentreCardProps {
   item: EvaluatedCentreResult;
@@ -34,7 +33,7 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
   onToggleCompare,
   easyReadMode
 }) => {
-  const { centre, match_assessment, evidence_level, suitability, combination_status, distance_label } = item;
+  const { centre, evidence_level, suitability, distance_label, transit_time_label } = item;
 
   const evidenceLabels: Record<string, { label: string; dotClass: string }> = {
     A1: { label: 'Nivel A1 · Especialización publicada', dotClass: 'bg-emerald-600' },
@@ -80,6 +79,12 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
                   <MapPin className="w-3 h-3 text-stone-500" />
                   {distance_label}
                 </span>
+                {transit_time_label && (
+                  <span className="font-mono text-blue-900 font-semibold inline-flex items-center gap-1 bg-blue-50 border border-blue-200/60 px-1.5 py-0.5 rounded text-[11px]">
+                    <Bus className="w-3 h-3 text-blue-700" />
+                    {transit_time_label}
+                  </span>
+                )}
               </>
             )}
           </div>
@@ -116,6 +121,14 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
           {centre.access_route.next_step_action}
         </div>
       </div>
+
+      {/* Lectura fácil si está activado */}
+      {easyReadMode && (
+        <div className="p-2.5 bg-amber-50/80 border border-amber-200/90 rounded-lg text-xs text-amber-950 leading-relaxed">
+          <span className="font-bold">Lectura fácil: </span>
+          Centro con autorización oficial de la Comunidad de Madrid. Ofrece ayuda especializada y requiere derivación o trámite administrativo para plaza pública.
+        </div>
+      )}
 
       {/* 4. Bottom Actions & Contact */}
       <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-stone-100">

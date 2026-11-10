@@ -7,7 +7,7 @@
   }
 }
 
-/* Print Styles for Pasaporte de Apoyo Educativo */
+/* Estilos de Impresión - Ficha de Centro y Comparador */
 @media print {
   header, footer, nav, button, .no-print {
     display: none !important;

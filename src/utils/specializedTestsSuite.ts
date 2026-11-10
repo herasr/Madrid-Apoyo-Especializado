@@ -6,10 +6,13 @@
  * DATAMAD 2026 · Cero falsos positivos de especialización A · Orden lexicográfico estricto
  */
 
-import { SPECIALIZED_CENTRES } from '../data/specializedCentresData';
+import { REAL_CANONICAL_CENTRES } from '../data/specializedCentresData';
+import { BENCHMARK_TEST_CENTRES } from '../data/testCentresData';
 import { evaluateCentre, runSpecializedSearch } from './specializedEngine';
 import { SearchQueryState } from '../types/specialized';
 import { DISAMBIGUATION_TERMS, EDUCATION_BRIDGE_MAPPINGS } from '../data/specializedTaxonomy';
+
+const ALL_BENCHMARK_CENTRES = [...REAL_CANONICAL_CENTRES, ...BENCHMARK_TEST_CENTRES];
 
 export interface TestCaseResult {
   id: string;
@@ -46,13 +49,13 @@ export function runAllCanonicalTests(): {
   };
 
   // 1. TAX-001 & EV-001: TEA explícito en fuente + apoyo -> A1
-  const teaCenter = SPECIALIZED_CENTRES.find(c => c.centre_id === 'C-TEA-01')!;
+  const teaCenter = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'C-TEA-01')!;
   const qEv001: SearchQueryState = {
     ...defaultQuery,
     profile: 'autism',
     support_types: ['day_care']
   };
-  const resEv001 = evaluateCentre(teaCenter, qEv001, SPECIALIZED_CENTRES, null);
+  const resEv001 = evaluateCentre(teaCenter, qEv001, ALL_BENCHMARK_CENTRES, null);
   tests.push({
     id: 'TAX-001',
     category: 'EVIDENCIA',
@@ -69,8 +72,8 @@ export function runAllCanonicalTests(): {
     profile: 'autism',
     support_types: ['residential_care'] // Residencia en centro que solo tiene ambulatorio (ej. Sede Centro C-DUP-01A)
   };
-  const dupCenterA = SPECIALIZED_CENTRES.find(c => c.centre_id === 'C-DUP-01A')!;
-  const resEv002 = evaluateCentre(dupCenterA, qEv002, SPECIALIZED_CENTRES, null);
+  const dupCenterA = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'C-DUP-01A')!;
+  const resEv002 = evaluateCentre(dupCenterA, qEv002, ALL_BENCHMARK_CENTRES, null);
   tests.push({
     id: 'EV-002',
     category: 'EVIDENCIA',
@@ -82,12 +85,12 @@ export function runAllCanonicalTests(): {
   });
 
   // 3. NEG-001 & TAX-003: Neurología sin perfil explícito -> Máximo B2
-  const neuCenter = SPECIALIZED_CENTRES.find(c => c.centre_id === 'C-NEG-NEU')!;
+  const neuCenter = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'C-NEG-NEU')!;
   const qNeg001: SearchQueryState = {
     ...defaultQuery,
     profile: 'acquired_brain_injury'
   };
-  const resNeg001 = evaluateCentre(neuCenter, qNeg001, SPECIALIZED_CENTRES, null);
+  const resNeg001 = evaluateCentre(neuCenter, qNeg001, ALL_BENCHMARK_CENTRES, null);
   tests.push({
     id: 'NEG-001',
     category: 'REGLAS_NEGATIVAS',
@@ -99,13 +102,13 @@ export function runAllCanonicalTests(): {
   });
 
   // 4. NEG-002 & TAX-004: Fisioterapia genérica -> No inferir rehabilitación neurológica
-  const fisCenter = SPECIALIZED_CENTRES.find(c => c.centre_id === 'C-NEG-FIS')!;
+  const fisCenter = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'C-NEG-FIS')!;
   const qNeg002: SearchQueryState = {
     ...defaultQuery,
     profile: 'spinal_cord_injury',
     support_types: ['rehabilitation']
   };
-  const resNeg002 = evaluateCentre(fisCenter, qNeg002, SPECIALIZED_CENTRES, null);
+  const resNeg002 = evaluateCentre(fisCenter, qNeg002, ALL_BENCHMARK_CENTRES, null);
   tests.push({
     id: 'NEG-002',
     category: 'REGLAS_NEGATIVAS',
@@ -117,12 +120,12 @@ export function runAllCanonicalTests(): {
   });
 
   // 5. NEG-003 & TAX-002: Discapacidad intelectual sin TEA -> No inferir TEA
-  const diCenter = SPECIALIZED_CENTRES.find(c => c.centre_id === 'C-NEG-DI')!;
+  const diCenter = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'C-NEG-DI')!;
   const qNeg003: SearchQueryState = {
     ...defaultQuery,
     profile: 'autism'
   };
-  const resNeg003 = evaluateCentre(diCenter, qNeg003, SPECIALIZED_CENTRES, null);
+  const resNeg003 = evaluateCentre(diCenter, qNeg003, ALL_BENCHMARK_CENTRES, null);
   tests.push({
     id: 'NEG-003',
     category: 'REGLAS_NEGATIVAS',
@@ -147,14 +150,14 @@ export function runAllCanonicalTests(): {
   });
 
   // 7. COMB-001: Varios apoyos y "Todos en el mismo centro"
-  const beataCenter = SPECIALIZED_CENTRES.find(c => c.centre_id === 'C-DCA-01')!;
+  const beataCenter = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'C-DCA-01')!;
   const qComb001: SearchQueryState = {
     ...defaultQuery,
     profile: 'acquired_brain_injury',
     support_types: ['rehabilitation', 'speech_therapy', 'occupational_therapy'],
     support_combination_mode: 'all_supports_same_centre'
   };
-  const resComb001 = evaluateCentre(beataCenter, qComb001, SPECIALIZED_CENTRES, null);
+  const resComb001 = evaluateCentre(beataCenter, qComb001, ALL_BENCHMARK_CENTRES, null);
   tests.push({
     id: 'COMB-001',
     category: 'COMBINACION',
@@ -172,7 +175,7 @@ export function runAllCanonicalTests(): {
     support_types: ['occupational_therapy', 'day_care'],
     support_combination_mode: 'all_supports_same_centre'
   };
-  const resComb002 = evaluateCentre(dupCenterA, qComb002, SPECIALIZED_CENTRES, null);
+  const resComb002 = evaluateCentre(dupCenterA, qComb002, ALL_BENCHMARK_CENTRES, null);
   tests.push({
     id: 'COMB-002',
     category: 'COMBINACION',
@@ -184,7 +187,7 @@ export function runAllCanonicalTests(): {
   });
 
   // 9. ACC-001 & ACC-004: Vía documentada con derivación / PIA
-  const polibeaCenter = SPECIALIZED_CENTRES.find(c => c.centre_id === 'C-DCA-03')!;
+  const polibeaCenter = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'C-DCA-03')!;
   tests.push({
     id: 'ACC-004',
     category: 'ACCESO',
@@ -196,7 +199,7 @@ export function runAllCanonicalTests(): {
   });
 
   // 10. ACC-002 & ACC-005: Vía ausente en la fuente -> "Debe confirmarse"
-  const unkAccCenter = SPECIALIZED_CENTRES.find(c => c.centre_id === 'C-ACC-UNK')!;
+  const unkAccCenter = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'C-ACC-UNK')!;
   tests.push({
     id: 'ACC-002',
     category: 'ACCESO',
@@ -208,7 +211,7 @@ export function runAllCanonicalTests(): {
   });
 
   // 11. ACC-003: Centro privado autorizado no se etiqueta como Red Pública
-  const lescerCenter = SPECIALIZED_CENTRES.find(c => c.centre_id === 'C-DCA-02')!;
+  const lescerCenter = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'C-DCA-02')!;
   tests.push({
     id: 'ACC-003',
     category: 'ACCESO',
@@ -220,7 +223,7 @@ export function runAllCanonicalTests(): {
   });
 
   // 12. CAP-001 & NEG-004: Plazas autorizadas no se etiquetan como vacantes disponibles
-  const allNoVacancies = SPECIALIZED_CENTRES.every(c => c.availability.vacancies_known === false);
+  const allNoVacancies = ALL_BENCHMARK_CENTRES.every(c => c.availability.vacancies_known === false);
   tests.push({
     id: 'CAP-001',
     category: 'REGLAS_NEGATIVAS',
@@ -232,7 +235,7 @@ export function runAllCanonicalTests(): {
   });
 
   // 13. GEO-001 & GEO-002: Centro sin coordenadas aparece en lista pero no en radio
-  const noCoordCenter = SPECIALIZED_CENTRES.find(c => c.centre_id === 'C-GEO-NOCORD')!;
+  const noCoordCenter = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'C-GEO-NOCORD')!;
   const qGeo: SearchQueryState = {
     ...defaultQuery,
     profile: 'autism',
@@ -240,7 +243,7 @@ export function runAllCanonicalTests(): {
     radius_km: 10
   };
   const madridCenterCoord: [number, number] = [40.4168, -3.7038];
-  const searchGeo = runSpecializedSearch(qGeo, SPECIALIZED_CENTRES, madridCenterCoord);
+  const searchGeo = runSpecializedSearch(qGeo, ALL_BENCHMARK_CENTRES, madridCenterCoord);
   const foundInList = searchGeo.results.some(r => r.centre.centre_id === 'C-GEO-NOCORD');
   tests.push({
     id: 'GEO-001',
@@ -258,7 +261,7 @@ export function runAllCanonicalTests(): {
     profile: 'autism',
     radius_km: 50
   };
-  const searchSort = runSpecializedSearch(qSort, SPECIALIZED_CENTRES, madridCenterCoord);
+  const searchSort = runSpecializedSearch(qSort, ALL_BENCHMARK_CENTRES, madridCenterCoord);
   const firstResult = searchSort.results[0];
   const hasOnlyLevelAFirst = searchSort.results.slice(0, 2).every(r => r.evidence_level === 'A1' || r.evidence_level === 'A2');
   tests.push({
@@ -272,7 +275,7 @@ export function runAllCanonicalTests(): {
   });
 
   // 15. SRC-001: Contradicción de plazas entre Registro y Directorio -> Atributo nulo y aviso
-  const confCenter = SPECIALIZED_CENTRES.find(c => c.centre_id === 'C-SRC-CONF')!;
+  const confCenter = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'C-SRC-CONF')!;
   const hasConflictHandled = confCenter.conflict_record !== undefined && confCenter.availability.authorised_places === null;
   tests.push({
     id: 'SRC-001',
@@ -285,7 +288,7 @@ export function runAllCanonicalTests(): {
   });
 
   // 16. AVL-001: Disponibilidad comprobada hace más de 30 días -> "Confirmar con el centro"
-  const staleCenter = SPECIALIZED_CENTRES.find(c => c.centre_id === 'C-STALE-AVL')!;
+  const staleCenter = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'C-STALE-AVL')!;
   tests.push({
     id: 'AVL-001',
     category: 'EVIDENCIA',

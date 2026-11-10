@@ -12,18 +12,12 @@ import { SpecializedCentreCard } from './SpecializedCentreCard';
 import { 
   AlertCircle, 
   RotateCcw, 
-  MapPin, 
-  List, 
-  Layers, 
-  ShieldAlert, 
-  HelpCircle,
-  ChevronDown,
-  ChevronUp,
-  Sparkles,
-  Share2,
-  Download,
-  FileSpreadsheet,
-  Check
+  ChevronDown, 
+  ChevronUp, 
+  Share2, 
+  Download, 
+  FileSpreadsheet, 
+  Check 
 } from 'lucide-react';
 
 interface ResultsListProps {
@@ -300,12 +294,6 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
         )}
       </div>
 
-      {/* Nota de trazabilidad registral discreta */}
-      <div className="pt-4 pb-2 border-t border-stone-200 text-center">
-        <span className="text-[11px] text-stone-400 font-mono">
-          DATAMAD 2026 · Registros RECESS / Red Social CAM
-        </span>
-      </div>
 
       {/* 4. Sección de Centros Incompatibles Excluidos de la Lista Principal (§78) */}
       {incompatibleResults.length > 0 && (

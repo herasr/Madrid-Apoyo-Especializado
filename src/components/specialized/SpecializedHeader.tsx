@@ -7,11 +7,10 @@
 
 import React from 'react';
 import { 
-  Compass, 
-  MapPin, 
   Bookmark, 
   Eye, 
-  BookOpen
+  BookOpen,
+  AlertCircle
 } from 'lucide-react';
 
 interface SpecializedHeaderProps {
@@ -124,6 +123,17 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
             >
               <BookOpen className="w-4 h-4" />
             </button>
+
+            {/* Reportar discrepancia de datos / GitHub Issues */}
+            <a
+              href="https://github.com/madrid-apoyo/madrid-apoyo-especializado/issues/new"
+              target="_blank"
+              rel="noreferrer"
+              title="Reportar discrepancia o sugerir corrección registral"
+              className="p-2 text-stone-600 hover:text-stone-900 rounded-lg hover:bg-stone-100 transition-colors"
+            >
+              <AlertCircle className="w-4 h-4" />
+            </a>
           </div>
         </div>
 

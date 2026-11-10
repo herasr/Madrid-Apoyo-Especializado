@@ -258,6 +258,8 @@ export interface EvaluatedCentreResult {
   }[];
   distance_km: number | null;
   distance_label: string;
+  transit_time_minutes: number | null;
+  transit_time_label: string | null;
   is_in_radius: boolean;
   criterion_matrix: CriterionEvidence[];
   sort_rank: number; // Lexicographic sort score

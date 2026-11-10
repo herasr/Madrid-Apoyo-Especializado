@@ -28,6 +28,24 @@ import {
 import { resolveSearchOrigin, OriginReference, calculateHaversineDistanceKm } from '../data/municipalitiesData';
 
 /**
+ * Calcula estimación realista de tiempo de traslado en transporte público (Metro, EMT, Cercanías)
+ */
+export function calculatePublicTransitTime(distanceKm: number): { minutes: number; label: string } {
+  let minutes: number;
+  if (distanceKm <= 1.2) {
+    minutes = Math.round(5 + distanceKm * 8);
+  } else if (distanceKm <= 8) {
+    minutes = Math.round(10 + distanceKm * 2.6);
+  } else {
+    minutes = Math.round(14 + distanceKm * 2.2);
+  }
+  return {
+    minutes,
+    label: `~${minutes} min en transporte público`
+  };
+}
+
+/**
  * Normaliza cadenas de búsqueda
  */
 export function normalizeText(text: string): string {
@@ -142,11 +160,17 @@ export function evaluateCentre(
   // 1. Evaluación de Distancia y Radio
   let distance_km: number | null = null;
   let distance_label = 'Sin coordenadas registrales';
+  let transit_time_minutes: number | null = null;
+  let transit_time_label: string | null = null;
   let is_in_radius = true;
 
   if (centre.has_valid_coordinates && centre.coordinates) {
     distance_km = calculateHaversineDistanceKm(effectiveOrigin, centre.coordinates);
     distance_label = `${distance_km.toFixed(1)} km`;
+
+    const transit = calculatePublicTransitTime(distance_km);
+    transit_time_minutes = transit.minutes;
+    transit_time_label = transit.label;
 
     // Si el usuario eligió un origen específico (GPS o municipio), se aplica el radio estricto
     if (resolvedOrigin.isCustom) {
@@ -162,14 +186,16 @@ export function evaluateCentre(
 
     criterion_matrix.push({
       criterion_id: 'geo.proximity',
-      criterion_label: 'Proximidad geográfica',
+      criterion_label: 'Proximidad y transporte público',
       requested: true,
       status: 'calculated',
-      note: `Distancia calculada: ${distance_label} (referencia: ${resolvedOrigin.name}${resolvedOrigin.isCustom ? `, radio: ${query.radius_km} km` : ''})`
+      note: `Distancia: ${distance_label} · Transporte público: ${transit_time_label} (referencia: ${resolvedOrigin.name}${resolvedOrigin.isCustom ? `, radio: ${query.radius_km} km` : ''})`
     });
   } else {
     distance_km = null;
     distance_label = 'Sin coordenadas registrales';
+    transit_time_minutes = null;
+    transit_time_label = null;
     is_in_radius = true; // Section 63: Centros sin coordenadas permanecen en lista y no participan en cálculo de radio (GEO-001/002)
     criterion_matrix.push({
       criterion_id: 'geo.proximity',
@@ -332,8 +358,11 @@ export function evaluateCentre(
       evidence_level = 'A2';
     }
   } else if (hasRelatedServicesOnly && !isForbiddenInference) {
+    const isGeneralNeurologyOnly = query.profile === 'acquired_brain_injury' && 
+      centre.related_services.some(s => s.toLowerCase().includes('neurolog')) && 
+      !hasExplicitProfile;
     const relCount = centre.related_services.length;
-    if (relCount >= 2 && lifeStageCompatible) {
+    if (relCount >= 2 && lifeStageCompatible && !isGeneralNeurologyOnly) {
       evidence_level = 'B1';
     } else {
       evidence_level = 'B2';
@@ -409,6 +438,8 @@ export function evaluateCentre(
     combination_details: combinationResult.details,
     distance_km,
     distance_label,
+    transit_time_minutes,
+    transit_time_label,
     is_in_radius,
     criterion_matrix,
     sort_rank

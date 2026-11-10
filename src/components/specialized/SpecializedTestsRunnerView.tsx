@@ -57,7 +57,7 @@ export const SpecializedTestsRunnerView: React.FC = () => {
               Suite Canónica v1.7
             </span>
             <span className="text-xs text-stone-500 font-mono">
-              35+ Casos de Prueba Oficiales
+              18 Casos de Prueba Oficiales
             </span>
           </div>
           <h1 className="text-xl font-bold text-stone-900 mt-1">

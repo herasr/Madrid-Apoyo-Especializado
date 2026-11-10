@@ -90,6 +90,14 @@ export const PrintableContactCardModal: React.FC<PrintableContactCardProps> = ({
             <div>
               <span className="font-semibold text-stone-600 block">Dirección oficial:</span>
               <span className="font-medium">{centre.address}, {centre.postal_code} {centre.municipality}</span>
+              {item.distance_label && (
+                <div className="text-[11px] text-stone-600 mt-1">
+                  Distancia: <strong>{item.distance_label}</strong>
+                  {item.transit_time_label && (
+                    <span> · Transporte público: <strong>{item.transit_time_label}</strong></span>
+                  )}
+                </div>
+              )}
             </div>
             <div>
               <span className="font-semibold text-stone-600 block">Teléfono y web:</span>

@@ -81,8 +81,11 @@ export const SpecializedComparatorView: React.FC<ComparatorViewProps> = ({
             {item.suitability === 'incompatible' && 'Incompatible'}
             {item.suitability === 'unknown' && 'Sin datos suficientes'}
           </span>
-          <div className="text-[11px] font-mono font-medium text-stone-600 mt-0.5">
-            {item.distance_label}
+          <div className="text-[11px] font-mono font-medium text-stone-600 mt-0.5 space-y-0.5">
+            <div>{item.distance_label}</div>
+            {item.transit_time_label && (
+              <div className="text-blue-800 font-semibold">{item.transit_time_label}</div>
+            )}
           </div>
         </div>
       )
