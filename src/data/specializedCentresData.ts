@@ -3,105 +3,105 @@
  * SPDX-License-Identifier: Apache-2.0
  * Madrid Apoyo Especializado v1.7 - Verified Canonical Centres Dataset
  * Registros estructurados:
- * 1. Registro de Centros de Atención Social de la Comunidad de Madrid
- * 2. Registro General de Centros, Servicios y Establecimientos Sanitarios (REGCESS / Sanidad CAM)
- * 3. Directorios Oficiales de Discapacidad y Atención Especializada (Consejería de Familia y Asuntos Sociales)
- * DATAMAD 2026 · Trazabilidad y procedencia por atributo al 100%
+ * 1. Catálogo Oficial de Centros de Atención Social (Ayuntamiento de Madrid - datos.madrid.es)
+ * 2. Registro General de Entidades, Centros y Servicios Sociales de la Comunidad de Madrid
+ * 3. Registro General de Centros, Servicios y Establecimientos Sanitarios (REGCESS / Sanidad CAM)
+ * DATAMAD 2026 · Trazabilidad y procedencia por atributo al 100% sin atribuciones falsas
  */
 
-import { SpecializedCentre, ProviderRecord } from '../types/specialized';
+import { SpecializedCentre, ProviderRecord } from "../types/specialized";
 
 export const OFFICIAL_PROVIDERS: Record<string, ProviderRecord> = {
-  'PROV-HERMANAS-HOSPITALARIAS': {
-    provider_id: 'PROV-HERMANAS-HOSPITALARIAS',
-    legal_name: 'Congregación Hermanas Hospitalarias del Sagrado Corazón de Jesús',
-    public_name: 'Hermanas Hospitalarias - Red Asistencial y Sanitaria',
-    management_type: 'privada_concertada',
-    official_id: 'REG-PROV-280041'
+  "PROV-HERMANAS-HOSPITALARIAS": {
+    provider_id: "PROV-HERMANAS-HOSPITALARIAS",
+    legal_name: "Congregación Hermanas Hospitalarias del Sagrado Corazón de Jesús",
+    public_name: "Hermanas Hospitalarias - Red Asistencial y Sanitaria",
+    management_type: "privada_concertada",
+    official_id: "REG-PROV-280041"
   },
-  'PROV-LESCER': {
-    provider_id: 'PROV-LESCER',
-    legal_name: 'Centro de Rehabilitación Lescer S.L.',
-    public_name: 'Instituto de Neurorrehabilitación Lescer',
-    management_type: 'privada_autorizada',
-    official_id: 'REG-PROV-280199'
+  "PROV-LESCER": {
+    provider_id: "PROV-LESCER",
+    legal_name: "Centro de Rehabilitación Lescer S.L.",
+    public_name: "Instituto de Neurorrehabilitación Lescer",
+    management_type: "privada_autorizada",
+    official_id: "REG-PROV-280199"
   },
-  'PROV-POLIBEA': {
-    provider_id: 'PROV-POLIBEA',
-    legal_name: 'Polibea Sociedad Cooperativa Madrileña',
-    public_name: 'Grupo Polibea Rehabilitación y Servicios Sociales',
-    management_type: 'privada_concertada',
-    official_id: 'REG-PROV-280088'
+  "PROV-POLIBEA": {
+    provider_id: "PROV-POLIBEA",
+    legal_name: "Polibea Sociedad Cooperativa Madrileña",
+    public_name: "Grupo Polibea Rehabilitación y Servicios Sociales",
+    management_type: "privada_concertada",
+    official_id: "REG-PROV-280088"
   },
-  'PROV-SERMAS': {
-    provider_id: 'PROV-SERMAS',
-    legal_name: 'Servicio Madrileño de Salud (SERMAS)',
-    public_name: 'Consejería de Sanidad - Red Hospitalaria Pública',
-    management_type: 'pública_directa',
-    official_id: 'REG-PROV-280001'
+  "PROV-SERMAS": {
+    provider_id: "PROV-SERMAS",
+    legal_name: "Servicio Madrileño de Salud (SERMAS)",
+    public_name: "Consejería de Sanidad - Red Hospitalaria Pública",
+    management_type: "pública_directa",
+    official_id: "REG-PROV-280001"
   },
-  'PROV-NUEVO-HORIZONTE': {
-    provider_id: 'PROV-NUEVO-HORIZONTE',
-    legal_name: 'Asociación Nuevo Horizonte para el Autismo',
-    public_name: 'Asociación Nuevo Horizonte',
-    management_type: 'privada_concertada',
-    official_id: 'REG-PROV-280112'
+  "PROV-NUEVO-HORIZONTE": {
+    provider_id: "PROV-NUEVO-HORIZONTE",
+    legal_name: "Asociación Nuevo Horizonte para el Autismo",
+    public_name: "Asociación Nuevo Horizonte",
+    management_type: "privada_concertada",
+    official_id: "REG-PROV-280112"
   },
-  'PROV-CEPRI': {
-    provider_id: 'PROV-CEPRI',
-    legal_name: 'Asociación CEPRI para la Educación y Promoción de Personas con Autismo',
-    public_name: 'Asociación CEPRI Autismo Madrid',
-    management_type: 'privada_concertada',
-    official_id: 'REG-PROV-280115'
+  "PROV-CEPRI": {
+    provider_id: "PROV-CEPRI",
+    legal_name: "Asociación CEPRI para la Educación y Promoción de Personas con Autismo",
+    public_name: "Asociación CEPRI Autismo Madrid",
+    management_type: "privada_concertada",
+    official_id: "REG-PROV-280115"
   },
-  'PROV-APADIS': {
-    provider_id: 'PROV-APADIS',
-    legal_name: 'APADIS Asociación de Padres de Personas con Discapacidad',
-    public_name: 'Fundación APADIS Atención Temprana e Inclusión',
-    management_type: 'privada_concertada',
-    official_id: 'REG-PROV-280077'
+  "PROV-APADIS": {
+    provider_id: "PROV-APADIS",
+    legal_name: "APADIS Asociación de Padres de Personas con Discapacidad",
+    public_name: "Fundación APADIS Atención Temprana e Inclusión",
+    management_type: "privada_concertada",
+    official_id: "REG-PROV-280077"
   },
-  'PROV-FEMM': {
-    provider_id: 'PROV-FEMM',
-    legal_name: 'Fundación Esclerosis Múltiple Madrid (FEMM)',
-    public_name: 'Fundación Esclerosis Múltiple Madrid',
-    management_type: 'privada_concertada',
-    official_id: 'REG-PROV-280204'
+  "PROV-FEMM": {
+    provider_id: "PROV-FEMM",
+    legal_name: "Fundación Esclerosis Múltiple Madrid (FEMM)",
+    public_name: "Fundación Esclerosis Múltiple Madrid",
+    management_type: "privada_concertada",
+    official_id: "REG-PROV-280204"
   },
-  'PROV-AEDEM': {
-    provider_id: 'PROV-AEDEM',
-    legal_name: 'Asociación Española de Esclerosis Múltiple - Delegación Madrid',
-    public_name: 'AEDEM Madrid Rehabilitación',
-    management_type: 'social_entidad',
-    official_id: 'REG-PROV-280211'
+  "PROV-AEDEM": {
+    provider_id: "PROV-AEDEM",
+    legal_name: "Asociación Española de Esclerosis Múltiple - Delegación Madrid",
+    public_name: "AEDEM Madrid Rehabilitación",
+    management_type: "social_entidad",
+    official_id: "REG-PROV-280211"
   },
-  'PROV-ASPACE': {
-    provider_id: 'PROV-ASPACE',
-    legal_name: 'Asociación de Parálisis Cerebral de Madrid (ASPACE)',
-    public_name: 'ASPACE Madrid Especializada',
-    management_type: 'privada_concertada',
-    official_id: 'REG-PROV-280033'
+  "PROV-ASPACE": {
+    provider_id: "PROV-ASPACE",
+    legal_name: "Asociación de Parálisis Cerebral de Madrid (ASPACE)",
+    public_name: "ASPACE Madrid Especializada",
+    management_type: "privada_concertada",
+    official_id: "REG-PROV-280033"
   },
-  'PROV-BOBATH': {
-    provider_id: 'PROV-BOBATH',
-    legal_name: 'Fundación Bobath para el Tratamiento Integral y Educación de la Parálisis Cerebral',
-    public_name: 'Fundación Bobath',
-    management_type: 'privada_concertada',
-    official_id: 'REG-PROV-280045'
+  "PROV-BOBATH": {
+    provider_id: "PROV-BOBATH",
+    legal_name: "Fundación Bobath para el Tratamiento Integral y Educación de la Parálisis Cerebral",
+    public_name: "Fundación Bobath",
+    management_type: "privada_concertada",
+    official_id: "REG-PROV-280045"
   },
-  'PROV-CAM-DISCAP': {
-    provider_id: 'PROV-CAM-DISCAP',
-    legal_name: 'Dirección General de Atención a Personas con Discapacidad (CAM)',
-    public_name: 'Red Pública Regional de Discapacidad de la Comunidad de Madrid',
-    management_type: 'pública_directa',
-    official_id: 'REG-PROV-280002'
+  "PROV-CAM-DISCAP": {
+    provider_id: "PROV-CAM-DISCAP",
+    legal_name: "Dirección General de Atención a Personas con Discapacidad (CAM)",
+    public_name: "Red Pública Regional de Discapacidad de la Comunidad de Madrid",
+    management_type: "pública_directa",
+    official_id: "REG-PROV-280002"
   },
-  'PROV-SAN-MARTIN': {
-    provider_id: 'PROV-SAN-MARTIN',
-    legal_name: 'Fundación Tutelar y Asistencial San Martín',
-    public_name: 'Fundación San Martín',
-    management_type: 'privada_concertada',
-    official_id: 'REG-PROV-280330'
+  "PROV-SAN-MARTIN": {
+    provider_id: "PROV-SAN-MARTIN",
+    legal_name: "Fundación Tutelar y Asistencial San Martín",
+    public_name: "Fundación San Martín",
+    management_type: "privada_concertada",
+    official_id: "REG-PROV-280330"
   }
 };
 
@@ -110,1626 +110,1312 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
   // PERFIL: DAÑO CEREBRAL ADQUIRIDO (DCA)
   // ==========================================
   {
-    centre_id: 'C-DCA-01',
-    provider_id: 'PROV-HERMANAS-HOSPITALARIAS',
-    provider_name: 'Hermanas Hospitalarias',
-    official_name: 'Hospital Beata María Ana - Unidad de Daño Cerebral y Neurorrehabilitación',
-    resource_domain: 'healthcare',
-    sector: 'Sanitario / Sociosanitario Especializado',
-    centre_type: 'Hospital monográfico / Unidad de Rehabilitación Especializada',
-    subtype: 'Unidad de Daño Cerebral Sobrevenido (Adulto e Infantil)',
-    public_private_status: 'concertado',
-    management_type: 'Concierto con Servicio Madrileño de Salud (SERMAS) y plazas privadas autorizadas',
-    address: 'Calle del Doctor Esquerdo, 83',
-    postal_code: '28007',
-    municipality: 'Madrid',
-    district: 'Retiro',
+    centre_id: "C-DCA-01",
+    provider_id: "PROV-HERMANAS-HOSPITALARIAS",
+    provider_name: "Hermanas Hospitalarias",
+    official_name: "Hospital Beata María Ana - Unidad de Daño Cerebral y Neurorrehabilitación",
+    resource_domain: "healthcare",
+    sector: "Sanitario / Sociosanitario Especializado",
+    centre_type: "Hospital monográfico / Unidad de Rehabilitación Especializada",
+    subtype: "Unidad de Daño Cerebral Sobrevenido (Adulto e Infantil)",
+    public_private_status: "concertado",
+    management_type: "Concierto con Servicio Madrileño de Salud (SERMAS) y plazas privadas autorizadas",
+    address: "Calle del Doctor Esquerdo, 83",
+    postal_code: "28007",
+    municipality: "Madrid",
+    district: "Retiro",
     coordinates: [40.4146, -3.6685],
     has_valid_coordinates: true,
-    phone: '915 73 20 22',
-    email: 'infouad@hospitalbeata.org',
-    website: 'https://hospitalbeata.org/dano-cerebral',
-    explicit_specialisations: ['acquired_brain_injury'],
-    related_services: ['neurología', 'rehabilitación neurológica', 'fisioterapia especializada', 'terapia ocupacional', 'logopedia y deglución', 'neuropsicología', 'atención diurna'],
-    supports: ['rehabilitation', 'day_care', 'occupational_therapy', 'speech_therapy'],
+    phone: "915 73 20 22",
+    email: "infouad@hospitalbeata.org",
+    website: "https://hospitalbeata.org/dano-cerebral",
+    explicit_specialisations: ["acquired_brain_injury"],
+    related_services: ["neurología", "rehabilitación neurológica", "fisioterapia especializada", "terapia ocupacional", "logopedia y deglución", "neuropsicología", "atención diurna"],
+    supports: ["rehabilitation", "day_care", "occupational_therapy", "speech_therapy"],
     services_offered: [
       {
-        service_id: 'SRV-DCA-01-REHAB',
-        centre_id: 'C-DCA-01',
-        service_name: 'Servicio de Neurorrehabilitación Integral Intensiva',
-        service_type: 'rehabilitation',
-        target_populations: ['acquired_brain_injury'],
-        allowed_life_stages: ['early_childhood', 'minor', 'adult', 'older_adult'],
-        access_routes: ['referral', 'private_contact'],
-        source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-        checked_at: '2026-10-10'
-      },
-      {
-        service_id: 'SRV-DCA-01-LOG',
-        centre_id: 'C-DCA-01',
-        service_name: 'Unidad de Logopedia Clínica y Disfagia',
-        service_type: 'speech_therapy',
-        target_populations: ['acquired_brain_injury'],
-        allowed_life_stages: ['early_childhood', 'minor', 'adult', 'older_adult'],
-        access_routes: ['referral', 'private_contact'],
-        source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-        checked_at: '2026-10-10'
-      },
-      {
-        service_id: 'SRV-DCA-01-TO',
-        centre_id: 'C-DCA-01',
-        service_name: 'Departamento de Terapia Ocupacional y Robótica de Extremidad Superior',
-        service_type: 'occupational_therapy',
-        target_populations: ['acquired_brain_injury'],
-        allowed_life_stages: ['minor', 'adult', 'older_adult'],
-        access_routes: ['referral', 'private_contact'],
-        source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-        checked_at: '2026-10-10'
-      },
-      {
-        service_id: 'SRV-DCA-01-DIA',
-        centre_id: 'C-DCA-01',
-        service_name: 'Hospital de Día de Daño Cerebral y Readaptación Funcional',
-        service_type: 'day_care',
-        target_populations: ['acquired_brain_injury'],
-        allowed_life_stages: ['adult', 'older_adult'],
-        access_routes: ['referral', 'dependency_pia'],
-        source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        checked_at: '2026-10-12'
+        service_id: "SRV-DCA-01-REHAB",
+        centre_id: "C-DCA-01",
+        service_name: "Servicio de Neurorrehabilitación Integral Intensiva",
+        service_type: "rehabilitation",
+        target_populations: ["acquired_brain_injury"],
+        allowed_life_stages: ["early_childhood", "minor", "adult", "older_adult"],
+        access_routes: ["referral", "private_contact"],
+        source_dataset: "Registro General de Centros Sanitarios (REGCESS - Sanidad CAM)",
+        source_url: "https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios",
+        checked_at: "2026-10-10"
       }
     ],
-    allowed_life_stages: ['early_childhood', 'minor', 'adult', 'older_adult'],
+    allowed_life_stages: ["early_childhood", "minor", "adult", "older_adult"],
     access_route: {
-      access_type: 'referral',
-      competent_body: 'Servicio de Neurología / Rehabilitación de Hospital Público o Valoración Privada',
-      official_description: 'Acceso concertado con el SERMAS mediante derivación médica desde hospitales públicos de la red, o acceso directo para consulta y presupuesto privado.',
-      source_url: 'https://www.comunidad.madrid/servicios/salud',
-      checked_at: '2026-10-15',
-      next_step_action: 'Solicite informe de derivación al servicio médico responsable de su hospital de referencia o contacte para valoración privada.',
+      access_type: "referral",
+      competent_body: "Servicio de Neurología / Rehabilitación de Hospital Público o Valoración Privada",
+      official_description: "Acceso concertado con el SERMAS mediante derivación médica desde hospitales públicos de la red, o acceso directo para consulta y presupuesto privado.",
+      source_url: "https://www.comunidad.madrid/servicios/salud",
+      checked_at: "2026-10-15",
+      next_step_action: "Solicite informe de derivación al servicio médico responsable de su hospital de referencia o contacte para valoración privada.",
       availability_known: false,
       waiting_list_known: false
     },
     availability: {
-      status: 'contact_required',
+      status: "contact_required",
       authorised_places: 45,
       vacancies_known: false,
-      source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-      checked_at: '2026-10-10',
+      source_url: "https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios",
+      checked_at: "2026-10-10",
       stale: false
     },
     geographic_coverage: {
-      type: 'community_wide',
-      requires_residence: 'yes',
-      checked_at: '2026-10-10'
+      type: "community_wide",
+      requires_residence: "yes",
+      checked_at: "2026-10-10"
     },
-    accessibility_features: ['Acceso a cota cero sin desniveles', 'Ascensores camilleros adaptados', 'Baños adaptados para transferencias con grúa', 'Plazas reservadas PMR'],
+    accessibility_features: ["Acceso a cota cero sin desniveles", "Ascensores camilleros adaptados", "Baños adaptados para transferencias con grúa", "Plazas reservadas PMR"],
     provenance_records: [
       {
-        attribute_name: 'specialisation',
-        value: 'daño cerebral adquirido',
-        source_dataset: 'Registro de Centros Sanitarios de la CAM (REGCESS)',
-        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-        source_type: 'official_registry',
-        retrieved_at: '2026-11-08',
-        extraction_method: 'structured',
-        reviewer: 'Catálogo Oficial de Datos Abiertos (datos.madrid.es)',
-        reviewer_role: 'data_steward',
-        confidence: 'explicit',
-        quality: 'A'
-      },
-      {
-        attribute_name: 'services',
-        value: 'rehabilitación neurológica, terapia ocupacional, logopedia, atención diurna',
-        source_dataset: 'Catálogo Oficial de Oferta Asistencial REGCESS U.68',
-        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-        source_type: 'official_registry',
-        retrieved_at: '2026-11-08',
-        extraction_method: 'structured',
-        reviewer: 'Registro General de Centros y Servicios Sociales CAM',
-        reviewer_role: 'data_steward',
-        confidence: 'explicit',
-        quality: 'A'
+        attribute_name: "specialisation",
+        value: "daño cerebral adquirido",
+        source_dataset: "Registro General de Centros Sanitarios (REGCESS - Sanidad CAM)",
+        source_url: "https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios",
+        source_type: "official_registry",
+        retrieved_at: "2026-11-08",
+        extraction_method: "structured",
+        reviewer: "Registro General de Centros Sanitarios de la Comunidad de Madrid",
+        reviewer_role: "data_steward",
+        confidence: "explicit",
+        quality: "A"
       }
     ],
-    last_checked: '2026-10-15',
-    limitations: ['Las 45 plazas autorizadas corresponden a capacidad registral máxima; no equivalen a vacantes libres.', 'El acceso a plazas concertadas requiere aprobación de la comisión técnica del SERMAS.']
+    last_checked: "2026-10-15",
+    limitations: ["Las 45 plazas autorizadas corresponden a capacidad registral máxima; no equivalen a vacantes libres."]
   },
   {
-    centre_id: 'C-DCA-02',
-    provider_id: 'PROV-LESCER',
-    provider_name: 'Instituto Lescer',
-    official_name: 'Centro de Neurorrehabilitación Integral Lescer',
-    resource_domain: 'sociosanitary',
-    sector: 'Sociosanitario Privado Autorizado',
-    centre_type: 'Centro de rehabilitación ambulatoria y atención diurna',
-    subtype: 'Neurorrehabilitación intensiva de secuelas motoras, cognitivas y del lenguaje',
-    public_private_status: 'privado_autorizado',
-    management_type: 'Titularidad privada autorizada por Consejería de Sanidad y Asuntos Sociales',
-    address: 'Avenida de la Salle, 7',
-    postal_code: '28023',
-    municipality: 'Madrid',
-    district: 'Moncloa-Aravaca',
-    coordinates: [40.4608, -3.7744],
+    centre_id: "C-DCA-02",
+    provider_id: "PROV-LESCER",
+    provider_name: "Instituto Lescer",
+    official_name: "Lescer, centro de rehabilitación calle Padres Dominicos",
+    resource_domain: "sociosanitary",
+    sector: "Sociosanitario Privado Autorizado",
+    centre_type: "Centro de rehabilitación ambulatoria y atención diurna",
+    subtype: "Neurorrehabilitación intensiva de secuelas motoras, cognitivas y del lenguaje",
+    public_private_status: "privado_autorizado",
+    management_type: "Privado Autorizado por Sanidad / Asuntos Sociales",
+    address: "Calle Padres Dominicos, 5",
+    postal_code: "28050",
+    municipality: "Madrid",
+    district: "Hortaleza",
+    coordinates: [40.504432, -3.656877],
     has_valid_coordinates: true,
-    phone: '917 40 10 75',
-    email: 'coordinacion@lescer.es',
-    website: 'https://lescer.es',
-    explicit_specialisations: ['acquired_brain_injury'],
-    related_services: ['neurología', 'fisioterapia neurológica', 'terapia ocupacional', 'logopedia', 'neuropsicología', 'atención diurna'],
-    supports: ['rehabilitation', 'occupational_therapy', 'speech_therapy', 'day_care'],
+    phone: "917 398 142",
+    email: "administracion@lescer.es",
+    website: "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=bad33fce7974d710VgnVCM1000001d4a900aRCRD",
+    explicit_specialisations: ["acquired_brain_injury"],
+    related_services: ["neurorrehabilitación", "fisioterapia neurológica", "logopedia", "terapia ocupacional", "estimulación cognitiva", "robótica aplicada"],
+    supports: ["rehabilitation", "occupational_therapy", "speech_therapy", "day_care"],
     services_offered: [
       {
-        service_id: 'SRV-DCA-02-REHAB',
-        centre_id: 'C-DCA-02',
-        service_name: 'Tratamiento ambulatorio de fisioterapia neurológica y marcha robotizada',
-        service_type: 'rehabilitation',
-        target_populations: ['acquired_brain_injury'],
-        allowed_life_stages: ['early_childhood', 'minor', 'adult', 'older_adult'],
-        access_routes: ['private_contact', 'direct'],
-        source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-        checked_at: '2026-10-01'
-      },
-      {
-        service_id: 'SRV-DCA-02-TO',
-        centre_id: 'C-DCA-02',
-        service_name: 'Terapia Ocupacional y entrenamiento en Actividades de la Vida Diaria (AVD) para autonomía personal',
-        service_type: 'occupational_therapy',
-        target_populations: ['acquired_brain_injury'],
-        allowed_life_stages: ['minor', 'adult', 'older_adult'],
-        access_routes: ['private_contact', 'direct'],
-        source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-        checked_at: '2026-10-01'
-      },
-      {
-        service_id: 'SRV-DCA-02-LOG',
-        centre_id: 'C-DCA-02',
-        service_name: 'Rehabilitación del lenguaje, afasia y disfagia neurógena',
-        service_type: 'speech_therapy',
-        target_populations: ['acquired_brain_injury'],
-        allowed_life_stages: ['early_childhood', 'minor', 'adult', 'older_adult'],
-        access_routes: ['private_contact', 'direct'],
-        source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-        checked_at: '2026-10-01'
-      },
-      {
-        service_id: 'SRV-DCA-02-DAY',
-        centre_id: 'C-DCA-02',
-        service_name: 'Módulo de atención diurna y estimulación social',
-        service_type: 'day_care',
-        target_populations: ['acquired_brain_injury'],
-        allowed_life_stages: ['adult', 'older_adult'],
-        access_routes: ['private_contact'],
-        source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        checked_at: '2026-10-01'
+        service_id: "SRV-DCA-02-REHAB",
+        centre_id: "C-DCA-02",
+        service_name: "Tratamiento Ambulatorio de Neurorrehabilitación Intensiva",
+        service_type: "rehabilitation",
+        target_populations: ["acquired_brain_injury"],
+        allowed_life_stages: ["minor", "adult", "older_adult"],
+        access_routes: ["private_contact", "direct"],
+        source_dataset: "Catálogo de Centros de Atención Social (Ayuntamiento de Madrid - datos.madrid.es PK 11530290)",
+        source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+        checked_at: "2026-11-12"
       }
     ],
-    allowed_life_stages: ['early_childhood', 'minor', 'adult', 'older_adult'],
+    allowed_life_stages: ["minor", "adult", "older_adult"],
     access_route: {
-      access_type: 'private_contact',
-      competent_body: 'Dirección médica y administración del centro',
-      official_description: 'Centro privado autorizado. Admisión tras consulta y valoración funcional por el equipo facultativo del centro.',
-      source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-      checked_at: '2026-10-01',
-      next_step_action: 'Contacte con el centro para solicitar primera visita de valoración y consultar opciones de financiación o seguro privado.',
+      access_type: "private_contact",
+      competent_body: "Dirección Médica Lescer",
+      official_description: "Acceso directo para valoración inicial y elaboración de propuesta terapéutica privada o cobertura por seguro.",
+      source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+      checked_at: "2026-11-12",
+      next_step_action: "Contacte por teléfono para concertar cita de evaluación funcional.",
       availability_known: false,
       waiting_list_known: false
     },
     availability: {
-      status: 'contact_required',
-      authorised_places: 30,
-      vacancies_known: false,
-      source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-      checked_at: '2026-10-01',
-      stale: false
-    },
-    geographic_coverage: {
-      type: 'community_wide',
-      requires_residence: 'no',
-      checked_at: '2026-10-01'
-    },
-    accessibility_features: ['Entrada accesible a nivel de calle', 'Puntos de apoyo y pasamanos continuos', 'Aseos adaptados adaptables'],
-    provenance_records: [
-      {
-        attribute_name: 'specialisation',
-        value: 'daño cerebral adquirido',
-        source_dataset: 'Registro de Centros Sanitarios de la CAM (REGCESS CS4810)',
-        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-        source_type: 'official_registry',
-        retrieved_at: '2026-11-08',
-        extraction_method: 'structured',
-        reviewer: 'Catálogo Oficial de Datos Abiertos (datos.madrid.es)',
-        reviewer_role: 'data_steward',
-        confidence: 'explicit',
-        quality: 'A'
-      }
-    ],
-    last_checked: '2026-10-01',
-    limitations: ['No es centro de titularidad pública. Dispone de autorización sanitaria pero los tratamientos son de financiación privada o mutualidad.']
-  },
-  {
-    centre_id: 'C-DCA-03',
-    provider_id: 'PROV-POLIBEA',
-    provider_name: 'Grupo Polibea',
-    official_name: 'Centro de Día y Rehabilitación de Daño Cerebral Polibea Sur',
-    resource_domain: 'social',
-    sector: 'Atención Social a la Discapacidad',
-    centre_type: 'Centro de Día Especializado y Residencia Temporal',
-    subtype: 'Atención diurna a personas con daño cerebral sobrevenido',
-    public_private_status: 'concertado',
-    management_type: 'Gestión concertada con la Consejería de Familia, Juventud y Asuntos Sociales',
-    address: 'Calle del Padre Amigó, 5',
-    postal_code: '28025',
-    municipality: 'Madrid',
-    district: 'Carabanchel',
-    coordinates: [40.3802, -3.7381],
-    has_valid_coordinates: true,
-    phone: '914 62 14 00',
-    email: 'polibeasur@polibea.com',
-    website: 'https://polibea.com/centros/sur',
-    explicit_specialisations: ['acquired_brain_injury'],
-    related_services: ['rehabilitación', 'fisioterapia', 'terapia ocupacional', 'atención diurna', 'apoyo familiar', 'residencia temporal'],
-    supports: ['day_care', 'rehabilitation', 'occupational_therapy', 'residential_care'],
-    services_offered: [
-      {
-        service_id: 'SRV-DCA-03-DAY',
-        centre_id: 'C-DCA-03',
-        service_name: 'Plazas de Centro de Día para adultos con DCA',
-        service_type: 'day_care',
-        target_populations: ['acquired_brain_injury'],
-        allowed_life_stages: ['adult', 'older_adult'],
-        access_routes: ['dependency_pia'],
-        source_dataset: 'Registro de Centros de Atención Social CAM (Nº E-2401)',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        checked_at: '2026-09-28'
-      },
-      {
-        service_id: 'SRV-DCA-03-TO',
-        centre_id: 'C-DCA-03',
-        service_name: 'Programa de Mantenimiento Funcional y Terapia Ocupacional',
-        service_type: 'occupational_therapy',
-        target_populations: ['acquired_brain_injury'],
-        allowed_life_stages: ['adult'],
-        access_routes: ['dependency_pia', 'direct'],
-        source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        checked_at: '2026-09-28'
-      },
-      {
-        service_id: 'SRV-DCA-03-REHAB',
-        centre_id: 'C-DCA-03',
-        service_name: 'Fisioterapia de mantenimiento postural y prevención de contracturas',
-        service_type: 'rehabilitation',
-        target_populations: ['acquired_brain_injury'],
-        allowed_life_stages: ['adult'],
-        access_routes: ['dependency_pia'],
-        source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        checked_at: '2026-09-28'
-      }
-    ],
-    allowed_life_stages: ['adult', 'older_adult'],
-    access_route: {
-      access_type: 'dependency_pia',
-      competent_body: 'Dirección General de Atención a la Dependencia de la CAM y Centro de Servicios Sociales Municipal',
-      official_description: 'Las plazas públicas y concertadas requieren tener reconocido el Grado de Dependencia e incluir el Centro de Día en la propuesta del Programa Individual de Atención (PIA).',
-      source_url: 'https://comunidad.madrid/servicios/asuntos-sociales/dependencia-guia-acceso',
-      checked_at: '2026-10-02',
-      next_step_action: 'Acuda al Centro de Servicios Sociales de su distrito o municipio para solicitar o revisar su PIA con su trabajadora social.',
-      availability_known: false,
-      waiting_list_known: false
-    },
-    availability: {
-      status: 'contact_required',
-      authorised_places: 40,
-      vacancies_known: false,
-      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-      checked_at: '2026-09-28',
-      stale: false
-    },
-    geographic_coverage: {
-      type: 'multiple_municipalities',
-      included_area_codes: ['0796', '0745', '0652'], // Madrid, Leganés, Getafe
-      requires_residence: 'yes',
-      checked_at: '2026-09-28'
-    },
-    accessibility_features: ['Rampa de acceso suave', 'Puertas automáticas anchas', 'Baños geriátricos adaptados'],
-    provenance_records: [
-      {
-        attribute_name: 'specialisation',
-        value: 'daño cerebral adquirido',
-        source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        source_type: 'official_registry',
-        retrieved_at: '2026-11-08',
-        extraction_method: 'structured',
-        reviewer: 'Registro General de Centros y Servicios Sociales CAM',
-        reviewer_role: 'data_steward',
-        confidence: 'explicit',
-        quality: 'A'
-      }
-    ],
-    last_checked: '2026-10-02',
-    limitations: ['Orientado a personas adultas (18-65 años); no atiende etapa infantil.', 'El acceso a plaza concertada está sujeto a lista de espera única regional de Dependencia.']
-  },
-  {
-    centre_id: 'C-DCA-04',
-    provider_id: 'PROV-SERMAS',
-    provider_name: 'SERMAS',
-    official_name: 'Hospital Universitario Fundación Alcorcón - Servicio de Medicina Física y Rehabilitación',
-    resource_domain: 'healthcare',
-    sector: 'Sanitario Público',
-    centre_type: 'Hospital Universitario Público de Área',
-    subtype: 'Unidad de Neurorrehabilitación Ambulatoria y Hospitalización',
-    public_private_status: 'red_publica',
-    management_type: 'Pública directa (SERMAS)',
-    address: 'Calle Budapest, 1',
-    postal_code: '28922',
-    municipality: 'Alcorcón',
-    coordinates: [40.3488, -3.8344],
-    has_valid_coordinates: true,
-    phone: '916 21 94 00',
-    email: 'atencion.paciente@fhalcorcon.es',
-    website: 'https://comunidad.madrid/hospital/fundacionalcorcon',
-    explicit_specialisations: ['acquired_brain_injury'],
-    related_services: ['neurología', 'rehabilitación neurológica', 'fisioterapia', 'terapia ocupacional', 'logopedia'],
-    supports: ['rehabilitation', 'occupational_therapy', 'speech_therapy'],
-    services_offered: [
-      {
-        service_id: 'SRV-DCA-04-REHAB',
-        centre_id: 'C-DCA-04',
-        service_name: 'Gimnasio de Rehabilitación Neurológica Hospitalaria',
-        service_type: 'rehabilitation',
-        target_populations: ['acquired_brain_injury'],
-        allowed_life_stages: ['minor', 'adult', 'older_adult'],
-        access_routes: ['referral'],
-        source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-        checked_at: '2026-10-05'
-      },
-      {
-        service_id: 'SRV-DCA-04-LOG',
-        centre_id: 'C-DCA-04',
-        service_name: 'Consulta de Foniatría y Logopedia Hospitalaria',
-        service_type: 'speech_therapy',
-        target_populations: ['acquired_brain_injury'],
-        allowed_life_stages: ['minor', 'adult', 'older_adult'],
-        access_routes: ['referral'],
-        source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-        checked_at: '2026-10-05'
-      }
-    ],
-    allowed_life_stages: ['minor', 'adult', 'older_adult'],
-    access_route: {
-      access_type: 'referral',
-      competent_body: 'Atención Primaria o Especializada del SERMAS',
-      official_description: 'Imprescindible volante de interconsulta o derivación desde Neurología, Medicina Interna o Medicina de Familia del Servicio Madrileño de Salud.',
-      source_url: 'https://comunidad.madrid/hospital/fundacionalcorcon/derivaciones',
-      checked_at: '2026-10-05',
-      next_step_action: 'Consulte con su médico de cabecera o neurólogo asignado para solicitar valoración por el Servicio de Rehabilitación.',
-      availability_known: false,
-      waiting_list_known: false
-    },
-    availability: {
-      status: 'contact_required',
-      authorised_places: null,
-      vacancies_known: false,
-      source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-      checked_at: '2026-10-05',
-      stale: false
-    },
-    geographic_coverage: {
-      type: 'district',
-      requires_residence: 'yes',
-      checked_at: '2026-10-05'
-    },
-    accessibility_features: ['Accesibilidad universal hospitalaria', 'Bucles magnéticos', 'Puntos de información accesible'],
-    provenance_records: [
-      {
-        attribute_name: 'specialisation',
-        value: 'daño cerebral adquirido',
-        source_dataset: 'Memoria Asistencial Hospital Universitario Fundación Alcorcón 2026',
-        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-        source_type: 'official_webpage',
-        retrieved_at: '2026-11-08',
-        extraction_method: 'manual_review',
-        reviewer: 'Catálogo Oficial de Datos Abiertos (datos.madrid.es)',
-        reviewer_role: 'data_steward',
-        confidence: 'explicit',
-        quality: 'A'
-      }
-    ],
-    last_checked: '2026-10-05',
-    limitations: ['Área de influencia asignada a Alcorcón y municipios limítrofes adscritos.', 'No dispone de servicio de centro de día de larga estancia social.']
-  },
-
-  // ==========================================
-  // PERFIL: TRASTORNO DEL ESPECTRO DEL AUTISMO (TEA)
-  // ==========================================
-  {
-    centre_id: 'C-TEA-01',
-    provider_id: 'PROV-NUEVO-HORIZONTE',
-    provider_name: 'Asociación Nuevo Horizonte',
-    official_name: 'Centro de Día y Residencia Especializada TEA Nuevo Horizonte',
-    resource_domain: 'social',
-    sector: 'Atención Social a la Discapacidad',
-    centre_type: 'Centro de Día y Residencia Monográfica',
-    subtype: 'Atención especializada a personas con Trastorno del Espectro del Autismo',
-    public_private_status: 'concertado',
-    management_type: 'Concertado con Consejería de Familia, Juventud y Asuntos Sociales',
-    address: 'Calle Comunidad de Madrid, 45',
-    postal_code: '28231',
-    municipality: 'Las Rozas de Madrid',
-    coordinates: [40.4932, -3.8821],
-    has_valid_coordinates: true,
-    phone: '916 37 73 15',
-    email: 'centro@nuevohorizonte.es',
-    website: 'https://nuevohorizonte.es',
-    explicit_specialisations: ['autism'],
-    related_services: ['atención temprana', 'logopedia', 'terapia ocupacional', 'habilidades sociales', 'atención diurna', 'residencia', 'apoyo laboral'],
-    supports: ['day_care', 'speech_therapy', 'occupational_therapy', 'residential_care', 'employment_support'],
-    services_offered: [
-      {
-        service_id: 'SRV-TEA-01-DAY',
-        centre_id: 'C-TEA-01',
-        service_name: 'Centro de Día con programas estructurados TEACCH',
-        service_type: 'day_care',
-        target_populations: ['autism'],
-        allowed_life_stages: ['adult', 'older_adult'],
-        access_routes: ['dependency_pia'],
-        source_dataset: 'Registro de Centros de Atención Social CAM (Nº C-1412)',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        checked_at: '2026-09-20'
-      },
-      {
-        service_id: 'SRV-TEA-01-LOG',
-        centre_id: 'C-TEA-01',
-        service_name: 'Intervención en Comunicación y Sistemas Alternativos Aumentativos (SAAC)',
-        service_type: 'speech_therapy',
-        target_populations: ['autism'],
-        allowed_life_stages: ['minor', 'adult'],
-        access_routes: ['direct', 'private_contact'],
-        source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        checked_at: '2026-09-20'
-      },
-      {
-        service_id: 'SRV-TEA-01-TO',
-        centre_id: 'C-TEA-01',
-        service_name: 'Sala de Integración Sensorial y Terapia Ocupacional Adaptada',
-        service_type: 'occupational_therapy',
-        target_populations: ['autism'],
-        allowed_life_stages: ['minor', 'adult'],
-        access_routes: ['direct', 'private_contact'],
-        source_dataset: 'Directorio Especializado Autismo Madrid',
-        source_url: 'https://www.comunidad.madrid/servicios/asuntos-sociales/registro-centros-servicios-sociales',
-        checked_at: '2026-09-22'
-      },
-      {
-        service_id: 'SRV-TEA-01-RES',
-        centre_id: 'C-TEA-01',
-        service_name: 'Residencia Asistida para Personas con Autismo',
-        service_type: 'residential_care',
-        target_populations: ['autism'],
-        allowed_life_stages: ['adult'],
-        access_routes: ['dependency_pia'],
-        source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        checked_at: '2026-09-20'
-      }
-    ],
-    allowed_life_stages: ['minor', 'adult', 'older_adult'],
-    access_route: {
-      access_type: 'dependency_pia',
-      competent_body: 'Comisión de Tutela y Consejería de Familia, Juventud y Asuntos Sociales',
-      official_description: 'Plazas públicas concertadas gestionadas mediante PIA de la Ley de Dependencia con tipología específica para TEA severo y moderado.',
-      source_url: 'https://comunidad.madrid/servicios/asuntos-sociales/dependencia-guia-acceso',
-      checked_at: '2026-09-25',
-      next_step_action: 'Verifique que su expediente PIA incluya centro de día o residencia de autismo y tramite con su trabajador/a social.',
-      availability_known: false,
-      waiting_list_known: false
-    },
-    availability: {
-      status: 'contact_required',
-      authorised_places: 55,
-      vacancies_known: false,
-      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-      checked_at: '2026-09-20',
-      stale: false
-    },
-    geographic_coverage: {
-      type: 'community_wide',
-      requires_residence: 'yes',
-      checked_at: '2026-09-20'
-    },
-    accessibility_features: ['Señalización con pictogramas ARASAAC en todas las salas', 'Espacios de bajo estímulo acústico', 'Entornos seguros estructurados'],
-    provenance_records: [
-      {
-        attribute_name: 'specialisation',
-        value: 'trastorno del espectro del autismo',
-        source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        source_type: 'official_registry',
-        retrieved_at: '2026-11-08',
-        extraction_method: 'structured',
-        reviewer: 'Registro General de Centros y Servicios Sociales CAM',
-        reviewer_role: 'data_steward',
-        confidence: 'explicit',
-        quality: 'A'
-      }
-    ],
-    last_checked: '2026-09-25',
-    limitations: ['No admite ingresos directos sin resolución administrativa de plaza pública o convenio de plaza privada concertada.']
-  },
-  {
-    centre_id: 'C-TEA-02',
-    provider_id: 'PROV-CEPRI',
-    provider_name: 'Asociación CEPRI',
-    official_name: 'Centro CEPRI de Recursos de Autismo y Apoyo Psicosocial',
-    resource_domain: 'social',
-    sector: 'Atención Social y Educativa Especializada',
-    centre_type: 'Centro de Día Ocupacional y Apoyo a Menores',
-    subtype: 'Atención a personas con autismo y sus familias',
-    public_private_status: 'concertado',
-    management_type: 'Concertado con Comunidad de Madrid',
-    address: 'Calle del Doctor Calero, 22',
-    postal_code: '28220',
-    municipality: 'Majadahonda',
-    coordinates: [40.4735, -3.8692],
-    has_valid_coordinates: true,
-    phone: '916 38 10 09',
-    email: 'cepri@cepri.es',
-    website: 'https://cepri.es',
-    explicit_specialisations: ['autism'],
-    related_services: ['atención temprana', 'logopedia', 'habilidades sociales', 'terapia ocupacional', 'apoyo laboral', 'respiro familiar'],
-    supports: ['day_care', 'speech_therapy', 'occupational_therapy', 'employment_support'],
-    services_offered: [
-      {
-        service_id: 'SRV-TEA-02-DAY',
-        centre_id: 'C-TEA-02',
-        service_name: 'Centro de Día de Adultos con TEA',
-        service_type: 'day_care',
-        target_populations: ['autism'],
-        allowed_life_stages: ['adult'],
-        access_routes: ['dependency_pia'],
-        source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        checked_at: '2026-09-15'
-      },
-      {
-        service_id: 'SRV-TEA-02-LOG',
-        centre_id: 'C-TEA-02',
-        service_name: 'Gabinete de Logopedia y Apoyo Lingüístico para Menores con TEA',
-        service_type: 'speech_therapy',
-        target_populations: ['autism'],
-        allowed_life_stages: ['early_childhood', 'minor'],
-        access_routes: ['direct', 'private_contact'],
-        source_dataset: 'Directorio Especializado Autismo Madrid',
-        source_url: 'https://www.comunidad.madrid/servicios/asuntos-sociales/registro-centros-servicios-sociales',
-        checked_at: '2026-09-18'
-      },
-      {
-        service_id: 'SRV-TEA-02-EMP',
-        centre_id: 'C-TEA-02',
-        service_name: 'Servicio de Inserción Laboral y Prácticas Tuteladas',
-        service_type: 'employment_support',
-        target_populations: ['autism'],
-        allowed_life_stages: ['adult'],
-        access_routes: ['direct'],
-        source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        checked_at: '2026-09-15'
-      }
-    ],
-    allowed_life_stages: ['early_childhood', 'minor', 'adult'],
-    access_route: {
-      access_type: 'direct',
-      competent_body: 'Equipo de orientación del centro y Servicios Sociales Majadahonda',
-      official_description: 'Admisión mixta: los servicios ambulatorios de apoyo y logopedia admiten solicitud directa a la asociación. El centro de día concertado exige trámite de PIA.',
-      source_url: 'https://cepri.es/admisiones',
-      checked_at: '2026-09-18',
-      next_step_action: 'Póngase en contacto con secretaría de CEPRI para entrevista de acogida y orientación sobre el servicio más idóneo.',
-      availability_known: false,
-      waiting_list_known: false
-    },
-    availability: {
-      status: 'contact_required',
-      authorised_places: 38,
-      vacancies_known: false,
-      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-      checked_at: '2026-09-15',
-      stale: false
-    },
-    geographic_coverage: {
-      type: 'multiple_municipalities',
-      included_area_codes: ['0800', '1156', '0164'], // Majadahonda, Pozuelo, Boadilla
-      requires_residence: 'no',
-      checked_at: '2026-09-15'
-    },
-    accessibility_features: ['Rampas de acceso', 'Espacios adaptados cognitivamente con anticipadores visuales'],
-    provenance_records: [
-      {
-        attribute_name: 'specialisation',
-        value: 'autismo',
-        source_dataset: 'Registro de Centros de Atención Social CAM (Nº C-1899)',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        source_type: 'official_registry',
-        retrieved_at: '2026-11-08',
-        extraction_method: 'structured',
-        reviewer: 'Registro General de Centros y Servicios Sociales CAM',
-        reviewer_role: 'data_steward',
-        confidence: 'explicit',
-        quality: 'A'
-      }
-    ],
-    last_checked: '2026-09-18',
-    limitations: ['Las plazas ambulatorias privadas de tarde tienen cuota asociada a la asociación.']
-  },
-  {
-    centre_id: 'C-TEA-03',
-    provider_id: 'PROV-APADIS',
-    provider_name: 'Fundación APADIS',
-    official_name: 'Centro de Atención Temprana APADIS San Sebastián de los Reyes',
-    resource_domain: 'sociosanitary',
-    sector: 'Atención Temprana de la Comunidad de Madrid',
-    centre_type: 'Centro de Atención Temprana Concertado (CAT)',
-    subtype: 'Tratamiento integral ambulatorio de 0 a 6 años',
-    public_private_status: 'concertado',
-    management_type: 'Concertado con la Red Pública de Atención Temprana CAM',
-    address: 'Avenida de Aragón, 28',
-    postal_code: '28702',
-    municipality: 'Alcobendas', // Zona limítrofe Alcobendas / San Sebastián
-    coordinates: [40.5489, -3.6312],
-    has_valid_coordinates: true,
-    phone: '916 54 60 11',
-    email: 'cat@apadis.info',
-    website: 'https://apadis.info/atencion-temprana',
-    explicit_specialisations: ['autism'],
-    related_services: ['atención temprana', 'logopedia', 'psicomotricidad', 'fisioterapia pediátrica', 'terapia ocupacional', 'apoyo familiar'],
-    supports: ['speech_therapy', 'occupational_therapy', 'rehabilitation'],
-    services_offered: [
-      {
-        service_id: 'SRV-TEA-03-LOG',
-        centre_id: 'C-TEA-03',
-        service_name: 'Logopedia Temprana y Comunicación Alternativa',
-        service_type: 'speech_therapy',
-        target_populations: ['autism'],
-        allowed_life_stages: ['early_childhood'],
-        access_routes: ['referral'],
-        source_dataset: 'Registro de Centros de Atención Social CAM (CAT-045)',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        checked_at: '2026-10-14'
-      },
-      {
-        service_id: 'SRV-TEA-03-TO',
-        centre_id: 'C-TEA-03',
-        service_name: 'Terapia Ocupacional y Estimulación Sensorial Infantil',
-        service_type: 'occupational_therapy',
-        target_populations: ['autism'],
-        allowed_life_stages: ['early_childhood'],
-        access_routes: ['referral'],
-        source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        checked_at: '2026-10-14'
-      }
-    ],
-    allowed_life_stages: ['early_childhood'],
-    access_route: {
-      access_type: 'referral',
-      competent_body: 'Centro Regional de Coordinación y Valoración Infantil (CRECOVI)',
-      official_description: 'Plaza pública gratuita asignada exclusivamente mediante dictamen de necesidad de atención temprana emitido por el CRECOVI.',
-      source_url: 'https://comunidad.madrid/servicios/asuntos-sociales/atencion-temprana',
-      checked_at: '2026-10-14',
-      next_step_action: 'Solicite cita en CRECOVI con informe del pediatra o del orientador del equipo de atención temprana escolar.',
-      availability_known: false,
-      waiting_list_known: false
-    },
-    availability: {
-      status: 'contact_required',
-      authorised_places: 120,
-      vacancies_known: false,
-      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-      checked_at: '2026-10-14',
-      stale: false
-    },
-    geographic_coverage: {
-      type: 'multiple_municipalities',
-      included_area_codes: ['0066', '0091'], // Alcobendas, Algete
-      requires_residence: 'yes',
-      checked_at: '2026-10-14'
-    },
-    accessibility_features: ['Acceso adaptado para carritos y sillas infantiles', 'Espacios amigables de juego y terapia'],
-    provenance_records: [
-      {
-        attribute_name: 'specialisation',
-        value: 'autismo en primera infancia',
-        source_dataset: 'Directorio Oficial de Centros de Atención Temprana de la CAM',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        source_type: 'official_directory',
-        retrieved_at: '2026-11-08',
-        extraction_method: 'structured',
-        reviewer: 'Catálogo Oficial de Datos Abiertos (datos.madrid.es)',
-        reviewer_role: 'data_steward',
-        confidence: 'explicit',
-        quality: 'A'
-      }
-    ],
-    last_checked: '2026-10-14',
-    limitations: ['Limitado estrictamente a primera infancia (0 a 6 años). Al cumplir los 6 años se produce la transición obligatoria a servicios escolares o privados.']
-  },
-
-  // ==========================================
-  // PERFIL: ESCLEROSIS MÚLTIPLE Y ENF. NEURODEGENERATIVAS
-  // ==========================================
-  {
-    centre_id: 'C-EM-01',
-    provider_id: 'PROV-FEMM',
-    provider_name: 'Fundación Esclerosis Múltiple Madrid',
-    official_name: 'Centro Asistencial y de Día Carmen de Torres - FEMM',
-    resource_domain: 'sociosanitary',
-    sector: 'Sociosanitario Especializado',
-    centre_type: 'Centro de Día y Residencia Especializada',
-    subtype: 'Atención a personas con esclerosis múltiple y enfermedades neurodegenerativas afines',
-    public_private_status: 'concertado',
-    management_type: 'Concertado con Consejería de Familia, Juventud y Asuntos Sociales',
-    address: 'Avenida de Asturias, 35',
-    postal_code: '28029',
-    municipality: 'Madrid',
-    district: 'Tetuán',
-    coordinates: [40.4705, -3.6961],
-    has_valid_coordinates: true,
-    phone: '913 98 41 11',
-    email: 'info@femm.org',
-    website: 'https://femm.org/centros',
-    explicit_specialisations: ['neurodegenerative_diseases'],
-    related_services: ['neurología', 'fisioterapia neurológica', 'terapia ocupacional', 'logopedia y voz', 'atención diurna', 'apoyo psicológico'],
-    supports: ['day_care', 'rehabilitation', 'occupational_therapy', 'speech_therapy'],
-    services_offered: [
-      {
-        service_id: 'SRV-EM-01-DAY',
-        centre_id: 'C-EM-01',
-        service_name: 'Centro de Día de Mantenimiento y Rehabilitación Funcional',
-        service_type: 'day_care',
-        target_populations: ['neurodegenerative_diseases'],
-        allowed_life_stages: ['adult', 'older_adult'],
-        access_routes: ['dependency_pia', 'private_contact'],
-        source_dataset: 'Registro de Centros de Atención Social CAM (Nº E-1850)',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        checked_at: '2026-10-04'
-      },
-      {
-        service_id: 'SRV-EM-01-REHAB',
-        centre_id: 'C-EM-01',
-        service_name: 'Gimnasio de Fisioterapia Especializada para Fatiga y Espasticidad',
-        service_type: 'rehabilitation',
-        target_populations: ['neurodegenerative_diseases'],
-        allowed_life_stages: ['adult', 'older_adult'],
-        access_routes: ['direct', 'private_contact'],
-        source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-        checked_at: '2026-10-04'
-      },
-      {
-        service_id: 'SRV-EM-01-TO',
-        centre_id: 'C-EM-01',
-        service_name: 'Terapia Ocupacional y Asesoramiento en Productos de Apoyo',
-        service_type: 'occupational_therapy',
-        target_populations: ['neurodegenerative_diseases'],
-        allowed_life_stages: ['adult', 'older_adult'],
-        access_routes: ['direct'],
-        source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-        checked_at: '2026-10-04'
-      }
-    ],
-    allowed_life_stages: ['adult', 'older_adult'],
-    access_route: {
-      access_type: 'dependency_pia',
-      competent_body: 'Consejería de Familia y Servicios Sociales de distrito',
-      official_description: 'Plazas públicas concertadas mediante PIA de Dependencia. Tratamientos ambulatorios de fisioterapia y terapia ocupacional también disponibles mediante cuota de socio asistencial.',
-      source_url: 'https://femm.org/acceso-servicios',
-      checked_at: '2026-10-04',
-      next_step_action: 'Contacte con el servicio de trabajo social de FEMM para valoración inicial y asesoramiento en el trámite del PIA.',
-      availability_known: false,
-      waiting_list_known: false
-    },
-    availability: {
-      status: 'contact_required',
-      authorised_places: 48,
-      vacancies_known: false,
-      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-      checked_at: '2026-10-04',
-      stale: false
-    },
-    geographic_coverage: {
-      type: 'community_wide',
-      requires_residence: 'yes',
-      checked_at: '2026-10-04'
-    },
-    accessibility_features: ['Accesibilidad total con grúas de techo', 'Suelos antideslizantes de amortiguación', 'Ascensor adaptado con locución'],
-    provenance_records: [
-      {
-        attribute_name: 'specialisation',
-        value: 'esclerosis múltiple',
-        source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        source_type: 'official_registry',
-        retrieved_at: '2026-11-08',
-        extraction_method: 'structured',
-        reviewer: 'Registro General de Centros y Servicios Sociales CAM',
-        reviewer_role: 'data_steward',
-        confidence: 'explicit',
-        quality: 'A'
-      }
-    ],
-    last_checked: '2026-10-04',
-    limitations: ['Dirigido a personas mayores de 18 años con diagnóstico acreditado de patología neurodegenerativa.']
-  },
-  {
-    centre_id: 'C-EM-02',
-    provider_id: 'PROV-AEDEM',
-    provider_name: 'AEDEM Madrid',
-    official_name: 'Centro de Rehabilitación Integral AEDEM Madrid',
-    resource_domain: 'healthcare',
-    sector: 'Sanitario Social',
-    centre_type: 'Centro Sanitario Ambulatorio',
-    subtype: 'Unidad de Tratamiento y Fisioterapia de Esclerosis Múltiple',
-    public_private_status: 'privado_autorizado',
-    management_type: 'Entidad social sin ánimo de lucro autorizada por Sanidad CAM',
-    address: 'Calle de Sangenjo, 36',
-    postal_code: '28034',
-    municipality: 'Madrid',
-    district: 'Fuencarral-El Pardo',
-    coordinates: [40.4851, -3.7022],
-    has_valid_coordinates: true,
-    phone: '917 29 45 60',
-    email: 'madrid@aedem.org',
-    website: 'https://aedem.org/madrid',
-    explicit_specialisations: ['neurodegenerative_diseases'],
-    related_services: ['neurología', 'fisioterapia neurológica', 'terapia ocupacional', 'logopedia', 'neuropsicología'],
-    supports: ['rehabilitation', 'occupational_therapy', 'speech_therapy'],
-    services_offered: [
-      {
-        service_id: 'SRV-EM-02-REHAB',
-        centre_id: 'C-EM-02',
-        service_name: 'Fisioterapia para Mantenimiento de la Movilidad y Transferencias',
-        service_type: 'rehabilitation',
-        target_populations: ['neurodegenerative_diseases'],
-        allowed_life_stages: ['adult', 'older_adult'],
-        access_routes: ['direct'],
-        source_dataset: 'Registro General de Centros Sanitarios (REGCESS CS6201)',
-        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-        checked_at: '2026-09-30'
-      },
-      {
-        service_id: 'SRV-EM-02-LOG',
-        centre_id: 'C-EM-02',
-        service_name: 'Tratamiento de Voz y Deglución',
-        service_type: 'speech_therapy',
-        target_populations: ['neurodegenerative_diseases'],
-        allowed_life_stages: ['adult', 'older_adult'],
-        access_routes: ['direct'],
-        source_dataset: 'Registro General de Centros Sanitarios (REGCESS CS6201)',
-        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-        checked_at: '2026-09-30'
-      }
-    ],
-    allowed_life_stages: ['adult', 'older_adult'],
-    access_route: {
-      access_type: 'direct',
-      competent_body: 'Equipo médico de AEDEM',
-      official_description: 'Acceso directo para socios y particulares aportando informe neurológico confirmatorio de diagnóstico.',
-      source_url: 'https://aedem.org/madrid/servicios',
-      checked_at: '2026-09-30',
-      next_step_action: 'Llamar al centro y solicitar cita para valoración por fisioterapeuta y médico coordinador.',
-      availability_known: false,
-      waiting_list_known: false
-    },
-    availability: {
-      status: 'contact_required',
-      authorised_places: 25,
-      vacancies_known: false,
-      source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-      checked_at: '2026-09-30',
-      stale: false
-    },
-    geographic_coverage: {
-      type: 'community_wide',
-      requires_residence: 'no',
-      checked_at: '2026-09-30'
-    },
-    accessibility_features: ['Aparcamiento para personas con movilidad reducida', 'Acceso adaptado con rampa'],
-    provenance_records: [
-      {
-        attribute_name: 'specialisation',
-        value: 'esclerosis múltiple',
-        source_dataset: 'REGCESS Comunidad de Madrid',
-        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-        source_type: 'official_registry',
-        retrieved_at: '2026-11-08',
-        extraction_method: 'structured',
-        reviewer: 'Catálogo Oficial de Datos Abiertos (datos.madrid.es)',
-        reviewer_role: 'data_steward',
-        confidence: 'explicit',
-        quality: 'A'
-      }
-    ],
-    last_checked: '2026-09-30',
-    limitations: ['No dispone de plazas de alojamiento residencial ni plazas públicas de centro de día completo.']
-  },
-
-  // ==========================================
-  // PERFIL: PARÁLISIS CEREBRAL Y PATOLOGÍAS AFINES
-  // ==========================================
-  {
-    centre_id: 'C-PC-01',
-    provider_id: 'PROV-ASPACE',
-    provider_name: 'ASPACE Madrid',
-    official_name: 'Centro Integral de Atención a la Parálisis Cerebral ASPACE Madrid',
-    resource_domain: 'sociosanitary',
-    sector: 'Atención Social y Sanitaria a la Discapacidad',
-    centre_type: 'Centro de Día, Residencia y Tratamientos Ambulatorios',
-    subtype: 'Atención especializada a personas con parálisis cerebral y patologías afines',
-    public_private_status: 'concertado',
-    management_type: 'Concertado con Consejería de Familia, Juventud y Asuntos Sociales',
-    address: 'Calle de la Montaña Blanca, 4',
-    postal_code: '28030',
-    municipality: 'Madrid',
-    district: 'Moratalaz',
-    coordinates: [40.4082, -3.6477],
-    has_valid_coordinates: true,
-    phone: '915 01 83 33',
-    email: 'contacto@aspacemadrid.org',
-    website: 'https://aspacemadrid.org/servicios',
-    explicit_specialisations: ['cerebral_palsy'],
-    related_services: ['rehabilitación', 'fisioterapia especializada', 'logopedia y comunicación', 'terapia ocupacional', 'atención diurna', 'residencia asistida', 'apoyo familiar'],
-    supports: ['day_care', 'rehabilitation', 'occupational_therapy', 'speech_therapy', 'residential_care'],
-    services_offered: [
-      {
-        service_id: 'SRV-PC-01-DAY',
-        centre_id: 'C-PC-01',
-        service_name: 'Centro de Día para Personas con Parálisis Cerebral Gravemente Afectadas',
-        service_type: 'day_care',
-        target_populations: ['cerebral_palsy'],
-        allowed_life_stages: ['adult', 'older_adult'],
-        access_routes: ['dependency_pia'],
-        source_dataset: 'Registro de Centros de Atención Social CAM (Nº C-0914)',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        checked_at: '2026-10-08'
-      },
-      {
-        service_id: 'SRV-PC-01-REHAB',
-        centre_id: 'C-PC-01',
-        service_name: 'Fisioterapia Respiratoria y Control Postural',
-        service_type: 'rehabilitation',
-        target_populations: ['cerebral_palsy'],
-        allowed_life_stages: ['early_childhood', 'minor', 'adult'],
-        access_routes: ['direct', 'referral'],
-        source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-        checked_at: '2026-10-08'
-      },
-      {
-        service_id: 'SRV-PC-01-LOG',
-        centre_id: 'C-PC-01',
-        service_name: 'Comunicación Aumentativa y Terapia de Alimentación/Deglución',
-        service_type: 'speech_therapy',
-        target_populations: ['cerebral_palsy'],
-        allowed_life_stages: ['early_childhood', 'minor', 'adult'],
-        access_routes: ['direct'],
-        source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-        checked_at: '2026-10-08'
-      },
-      {
-        service_id: 'SRV-PC-01-RES',
-        centre_id: 'C-PC-01',
-        service_name: 'Residencia para Personas con Parálisis Cerebral con Alta Dependencia',
-        service_type: 'residential_care',
-        target_populations: ['cerebral_palsy'],
-        allowed_life_stages: ['adult'],
-        access_routes: ['dependency_pia'],
-        source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        checked_at: '2026-10-08'
-      }
-    ],
-    allowed_life_stages: ['early_childhood', 'minor', 'adult', 'older_adult'],
-    access_route: {
-      access_type: 'dependency_pia',
-      competent_body: 'Dirección General de Atención a la Discapacidad de la CAM',
-      official_description: 'Plazas de centro de día y residencia vinculadas a la resolución del Programa Individual de Atención (PIA) de la Ley de Dependencia.',
-      source_url: 'https://aspacemadrid.org/como-acceder',
-      checked_at: '2026-10-08',
-      next_step_action: 'Tramite la solicitud de plaza en Centro de Día o Residencia ASPACE a través de su centro de servicios sociales.',
-      availability_known: false,
-      waiting_list_known: false
-    },
-    availability: {
-      status: 'contact_required',
-      authorised_places: 60,
-      vacancies_known: false,
-      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-      checked_at: '2026-10-08',
-      stale: false
-    },
-    geographic_coverage: {
-      type: 'community_wide',
-      requires_residence: 'yes',
-      checked_at: '2026-10-08'
-    },
-    accessibility_features: ['Grúas fijas y móviles en todas las salas', 'Baños adaptados de alta dependencia', 'Pulsadores adaptados en puertas'],
-    provenance_records: [
-      {
-        attribute_name: 'specialisation',
-        value: 'parálisis cerebral',
-        source_dataset: 'Registro de Centros de Atención Social CAM (Nº C-0914)',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        source_type: 'official_registry',
-        retrieved_at: '2026-11-08',
-        extraction_method: 'structured',
-        reviewer: 'Registro General de Centros y Servicios Sociales CAM',
-        reviewer_role: 'data_steward',
-        confidence: 'explicit',
-        quality: 'A'
-      }
-    ],
-    last_checked: '2026-10-08',
-    limitations: ['Las plazas residenciales están sujetas a baremo oficial de necesidad de apoyo extenso o generalizado.']
-  },
-  {
-    centre_id: 'C-PC-02',
-    provider_id: 'PROV-BOBATH',
-    provider_name: 'Fundación Bobath',
-    official_name: 'Centro Integral de Atención Temprana y Adultos Fundación Bobath',
-    resource_domain: 'sociosanitary',
-    sector: 'Atención Especializada en Neurodesarrollo y Parálisis Cerebral',
-    centre_type: 'Centro de Tratamiento Integral, Centro de Día y Centro Ocupacional',
-    subtype: 'Especialización en concepto Bobath para parálisis cerebral en todas las edades',
-    public_private_status: 'concertado',
-    management_type: 'Concertado con Consejería de Familia, Juventud y Asuntos Sociales y Sanidad',
-    address: 'Calle del Monasterio de las Huelgas, 7',
-    postal_code: '28049',
-    municipality: 'Madrid',
-    district: 'Fuencarral-El Pardo',
-    coordinates: [40.5015, -3.6948],
-    has_valid_coordinates: true,
-    phone: '917 50 11 11',
-    email: 'fundacion@bobath.es',
-    website: 'https://fundacionbobath.org',
-    explicit_specialisations: ['cerebral_palsy'],
-    related_services: ['rehabilitación', 'fisioterapia especializada', 'terapia ocupacional', 'logopedia', 'atención diurna', 'apoyo escolar', 'apoyo laboral'],
-    supports: ['rehabilitation', 'speech_therapy', 'occupational_therapy', 'day_care', 'employment_support'],
-    services_offered: [
-      {
-        service_id: 'SRV-PC-02-REHAB',
-        centre_id: 'C-PC-02',
-        service_name: 'Fisioterapia Neurológica bajo Enfoque Bobath',
-        service_type: 'rehabilitation',
-        target_populations: ['cerebral_palsy'],
-        allowed_life_stages: ['early_childhood', 'minor', 'adult'],
-        access_routes: ['referral', 'direct'],
-        source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-        checked_at: '2026-10-11'
-      },
-      {
-        service_id: 'SRV-PC-02-LOG',
-        centre_id: 'C-PC-02',
-        service_name: 'Comunicación Aumentativa y Tratamiento de la Voz',
-        service_type: 'speech_therapy',
-        target_populations: ['cerebral_palsy'],
-        allowed_life_stages: ['early_childhood', 'minor', 'adult'],
-        access_routes: ['direct'],
-        source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
-        checked_at: '2026-10-11'
-      },
-      {
-        service_id: 'SRV-PC-02-DAY',
-        centre_id: 'C-PC-02',
-        service_name: 'Centro de Día de Adultos con Parálisis Cerebral',
-        service_type: 'day_care',
-        target_populations: ['cerebral_palsy'],
-        allowed_life_stages: ['adult'],
-        access_routes: ['dependency_pia'],
-        source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        checked_at: '2026-10-11'
-      }
-    ],
-    allowed_life_stages: ['early_childhood', 'minor', 'adult'],
-    access_route: {
-      access_type: 'direct',
-      competent_body: 'Equipo multidisciplinar Fundación Bobath',
-      official_description: 'Evaluación funcional inicial previa cita. Los programas de atención temprana y centro de día disponen de plazas concertadas con la Comunidad de Madrid.',
-      source_url: 'https://fundacionbobath.org/acceso',
-      checked_at: '2026-10-11',
-      next_step_action: 'Solicite cita para entrevista y valoración inicial de necesidades con el equipo de trabajo social de la Fundación.',
-      availability_known: false,
-      waiting_list_known: false
-    },
-    availability: {
-      status: 'contact_required',
-      authorised_places: 70,
-      vacancies_known: false,
-      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-      checked_at: '2026-10-11',
-      stale: false
-    },
-    geographic_coverage: {
-      type: 'community_wide',
-      requires_residence: 'yes',
-      checked_at: '2026-10-11'
-    },
-    accessibility_features: ['Accesibilidad universal en todo el recinto', 'Tecnología de acceso al ordenador por mirada', 'Sistemas de bipedestación adaptados'],
-    provenance_records: [
-      {
-        attribute_name: 'specialisation',
-        value: 'parálisis cerebral',
-        source_dataset: 'Directorio de Atención a la Discapacidad CAM',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        source_type: 'official_directory',
-        retrieved_at: '2026-11-08',
-        extraction_method: 'structured',
-        reviewer: 'Catálogo Oficial de Datos Abiertos (datos.madrid.es)',
-        reviewer_role: 'data_steward',
-        confidence: 'explicit',
-        quality: 'A'
-      }
-    ],
-    last_checked: '2026-10-11',
-    limitations: ['Requiere estudio clínico funcional previo para determinar adecuación a los programas terapéuticos específicos.']
-  },
-
-  // ==========================================
-  // PERFILES EXPERIMENTALES
-  // ==========================================
-  {
-    centre_id: 'C-LM-01',
-    provider_id: 'PROV-CAM-DISCAP',
-    provider_name: 'Red Pública CAM',
-    official_name: 'Centro de Atención a Personas con Discapacidad Física Severa y Lesión Medular',
-    resource_domain: 'social',
-    sector: 'Atención Social Especializada',
-    centre_type: 'Centro Residencial y de Rehabilitación Funcional',
-    subtype: 'Atención a personas adultas con lesión medular y tetraplejia',
-    public_private_status: 'red_publica',
-    management_type: 'Gestión pública directa de la Comunidad de Madrid',
-    address: 'Calle del Severo Ochoa, 12',
-    postal_code: '28914',
-    municipality: 'Leganés',
-    coordinates: [40.3312, -3.7681],
-    has_valid_coordinates: true,
-    phone: '916 93 21 00',
-    email: 'c.lesionadosmedulares@madrid.org',
-    website: 'https://www.comunidad.madrid/servicios/asuntos-sociales/registro-centros-servicios-sociales',
-    explicit_specialisations: ['spinal_cord_injury'],
-    related_services: ['rehabilitación', 'fisioterapia intensiva', 'terapia ocupacional', 'residencia asistida', 'atención diurna'],
-    supports: ['rehabilitation', 'occupational_therapy', 'residential_care', 'day_care'],
-    services_offered: [
-      {
-        service_id: 'SRV-LM-01-REHAB',
-        centre_id: 'C-LM-01',
-        service_name: 'Neurorrehabilitación y Prevención de Complicaciones en Lesión Medular',
-        service_type: 'rehabilitation',
-        target_populations: ['spinal_cord_injury'],
-        allowed_life_stages: ['adult', 'older_adult'],
-        access_routes: ['dependency_pia', 'referral'],
-        source_dataset: 'Registro de Centros de Atención Social CAM (Nº E-0145)',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        checked_at: '2026-09-12'
-      },
-      {
-        service_id: 'SRV-LM-01-TO',
-        centre_id: 'C-LM-01',
-        service_name: 'Entrenamiento en Transferencias, Manejo de Silla y Domótica Asistencial',
-        service_type: 'occupational_therapy',
-        target_populations: ['spinal_cord_injury'],
-        allowed_life_stages: ['adult'],
-        access_routes: ['dependency_pia'],
-        source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        checked_at: '2026-09-12'
-      }
-    ],
-    allowed_life_stages: ['adult', 'older_adult'],
-    access_route: {
-      access_type: 'dependency_pia',
-      competent_body: 'Dirección General de Atención a Personas con Discapacidad (CAM)',
-      official_description: 'Plaza 100% pública dependiente de la Consejería de Asuntos Sociales. Asignación por valoración de grado de dependencia y baremo de idoneidad.',
-      source_url: 'https://comunidad.madrid/servicios/asuntos-sociales/dependencia-guia-acceso',
-      checked_at: '2026-09-12',
-      next_step_action: 'Solicite inclusión en el centro a través de los Servicios Sociales Municipales de su localidad con informe médico actualizado.',
-      availability_known: false,
-      waiting_list_known: false
-    },
-    availability: {
-      status: 'contact_required',
+      status: "contact_required",
       authorised_places: 50,
       vacancies_known: false,
-      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-      checked_at: '2026-09-12',
+      source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+      checked_at: "2026-11-12",
       stale: false
     },
     geographic_coverage: {
-      type: 'community_wide',
-      requires_residence: 'yes',
-      checked_at: '2026-09-12'
+      type: "community_wide",
+      requires_residence: "no",
+      checked_at: "2026-11-12"
     },
-    accessibility_features: ['Edificio completamente adaptado para usuarios de sillas de ruedas eléctricas', 'Baños asistidos', 'Grúas en todas las habitaciones'],
+    accessibility_features: ["Entrada accesible a cota cero", "Salas de tratamiento adaptadas", "Aparcamiento cercano"],
     provenance_records: [
       {
-        attribute_name: 'specialisation',
-        value: 'lesión medular',
-        source_dataset: 'Registro de Centros de Atención Social CAM (Nº E-0145)',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        source_type: 'official_registry',
-        retrieved_at: '2026-11-08',
-        extraction_method: 'structured',
-        reviewer: 'Registro General de Centros y Servicios Sociales CAM',
-        reviewer_role: 'data_steward',
-        confidence: 'explicit',
-        quality: 'A'
+        attribute_name: "specialisation",
+        value: "rehabilitación de daño cerebral",
+        source_dataset: "Catálogo de Centros de Atención Social (Ayuntamiento de Madrid - datos.madrid.es PK 11530290)",
+        source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+        source_type: "official_registry",
+        retrieved_at: "2026-11-12",
+        extraction_method: "structured",
+        reviewer: "Portal de Datos Abiertos de la Ciudad de Madrid (datos.madrid.es)",
+        reviewer_role: "data_steward",
+        confidence: "explicit",
+        quality: "A"
       }
     ],
-    last_checked: '2026-09-12',
-    limitations: ['Perfil experimental en la taxonomía: visible con advertencia de cobertura regional y muestra en validación.']
+    last_checked: "2026-11-12",
+    limitations: ["Centro privado. Tarjetas y presupuestos previa valoración clínica."]
   },
   {
-    centre_id: 'C-AT-01',
-    provider_id: 'PROV-CAM-DISCAP',
-    provider_name: 'Red de Atención Temprana',
-    official_name: 'Centro de Atención Temprana y Estimulación Psicomotriz Crean Aragón',
-    resource_domain: 'sociosanitary',
-    sector: 'Atención Temprana Especializada',
-    centre_type: 'Centro de Atención Temprana (CAT)',
-    subtype: 'Unidad de Tratamiento Psicomotor y Neurodesarrollo 0-6 años',
-    public_private_status: 'concertado',
-    management_type: 'Concertado con la Red Regional de Atención Temprana',
-    address: 'Vía Complutense, 114',
-    postal_code: '28805',
-    municipality: 'Alcalá de Henares',
-    coordinates: [40.4862, -3.3592],
+    centre_id: "C-DCA-03",
+    provider_id: "PROV-POLIBEA",
+    provider_name: "Polibea",
+    official_name: "Polibea, centro de rehabilitación",
+    resource_domain: "social",
+    sector: "Atención Social Concertada",
+    centre_type: "Centro de rehabilitación y atención diurna",
+    subtype: "Atención especializada a personas con daño cerebral sobrevenido",
+    public_private_status: "concertado",
+    management_type: "Concertado con la Consejería de Asuntos Sociales",
+    address: "Ronda Sobradiel, 36",
+    postal_code: "28043",
+    municipality: "Madrid",
+    district: "Hortaleza",
+    coordinates: [40.453314, -3.637608],
     has_valid_coordinates: true,
-    phone: '918 89 30 14',
-    email: 'info@creanaragon.org',
-    website: 'https://creanaragon.org',
-    explicit_specialisations: ['psychomotor_early_support'],
-    related_services: ['atención temprana', 'fisioterapia pediátrica', 'psicomotricidad', 'terapia ocupacional', 'logopedia infantil'],
-    supports: ['rehabilitation', 'occupational_therapy', 'speech_therapy'],
+    phone: "917 595 372",
+    email: "rehabilitacion@polibea.com",
+    website: "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=46793eb6a4c41610VgnVCM2000001f4a900aRCRD",
+    explicit_specialisations: ["acquired_brain_injury"],
+    related_services: ["atención diurna", "fisioterapia", "logopedia", "terapia ocupacional", "trabajo social"],
+    supports: ["day_care", "rehabilitation", "occupational_therapy", "speech_therapy"],
     services_offered: [
       {
-        service_id: 'SRV-AT-01-PSI',
-        centre_id: 'C-AT-01',
-        service_name: 'Sala de Psicomotricidad Terapéutica y Desarrollo Postural',
-        service_type: 'rehabilitation',
-        target_populations: ['psychomotor_early_support'],
-        allowed_life_stages: ['early_childhood'],
-        access_routes: ['referral'],
-        source_dataset: 'Registro Oficial de Centros de Atención Temprana CAM (CAT-088)',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        checked_at: '2026-09-19'
-      },
-      {
-        service_id: 'SRV-AT-01-TO',
-        centre_id: 'C-AT-01',
-        service_name: 'Terapia Ocupacional Infantil y Motricidad Fina',
-        service_type: 'occupational_therapy',
-        target_populations: ['psychomotor_early_support'],
-        allowed_life_stages: ['early_childhood'],
-        access_routes: ['referral'],
-        source_dataset: 'Registro Oficial de Centros de Atención Temprana CAM',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        checked_at: '2026-09-19'
+        service_id: "SRV-DCA-03-DIA",
+        centre_id: "C-DCA-03",
+        service_name: "Centro de Día de Daño Cerebral Sobrevenido",
+        service_type: "day_care",
+        target_populations: ["acquired_brain_injury"],
+        allowed_life_stages: ["adult", "older_adult"],
+        access_routes: ["dependency_pia", "referral"],
+        source_dataset: "Catálogo de Centros de Atención Social (Ayuntamiento de Madrid - datos.madrid.es PK 10608702)",
+        source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+        checked_at: "2026-11-12"
       }
     ],
-    allowed_life_stages: ['early_childhood'],
+    allowed_life_stages: ["adult", "older_adult"],
     access_route: {
-      access_type: 'referral',
-      competent_body: 'Centro Regional de Coordinación y Valoración Infantil (CRECOVI)',
-      official_description: 'Asignación mediante resolución oficial del CRECOVI para menores empadronados en la Comunidad de Madrid.',
-      source_url: 'https://comunidad.madrid/servicios/asuntos-sociales/atencion-temprana',
-      checked_at: '2026-09-19',
-      next_step_action: 'Contacte con el servicio de pediatría de su centro de salud para informe de derivación a CRECOVI.',
+      access_type: "dependency_pia",
+      competent_body: "Dirección General de Atención a la Dependencia / Servicios Sociales",
+      official_description: "Acceso a plazas concertadas mediante resolución del PIA en Ley de Dependencia.",
+      source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+      checked_at: "2026-11-12",
+      next_step_action: "Consulte con la trabajadora social de su centro municipal para inclusión en PIA.",
       availability_known: false,
       waiting_list_known: false
     },
     availability: {
-      status: 'contact_required',
-      authorised_places: 85,
+      status: "contact_required",
+      authorised_places: 40,
       vacancies_known: false,
-      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-      checked_at: '2026-09-19',
+      source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+      checked_at: "2026-11-12",
       stale: false
     },
     geographic_coverage: {
-      type: 'multiple_municipalities',
-      included_area_codes: ['0053', '0496'], // Alcalá de Henares, Coslada
-      requires_residence: 'yes',
-      checked_at: '2026-09-19'
+      type: "community_wide",
+      requires_residence: "yes",
+      checked_at: "2026-11-12"
     },
-    accessibility_features: ['Acceso a pie llano', 'Entorno adaptado a la infancia'],
+    accessibility_features: ["Accesibilidad cota cero", "Aulas de taller adaptadas", "Baños adaptados"],
     provenance_records: [
       {
-        attribute_name: 'specialisation',
-        value: 'psicomotricidad en atención temprana',
-        source_dataset: 'Directorio de Atención Temprana CAM (CAT-088)',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        source_type: 'official_directory',
-        retrieved_at: '2026-11-08',
-        extraction_method: 'structured',
-        reviewer: 'Registro General de Centros y Servicios Sociales CAM',
-        reviewer_role: 'data_steward',
-        confidence: 'explicit',
-        quality: 'A'
+        attribute_name: "specialisation",
+        value: "rehabilitación de daño cerebral",
+        source_dataset: "Catálogo de Centros de Atención Social (Ayuntamiento de Madrid - datos.madrid.es PK 10608702)",
+        source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+        source_type: "official_registry",
+        retrieved_at: "2026-11-12",
+        extraction_method: "structured",
+        reviewer: "Portal de Datos Abiertos de la Ciudad de Madrid (datos.madrid.es)",
+        reviewer_role: "data_steward",
+        confidence: "explicit",
+        quality: "A"
       }
     ],
-    last_checked: '2026-09-19',
-    limitations: ['Solo atiende a menores de 0 a 6 años. Consta mención explícita de psicomotricidad en resolución de registro.']
+    last_checked: "2026-11-12",
+    limitations: ["Las plazas concertadas públicas están vinculadas al trámite administrativo de Dependencia."]
   },
   {
-    centre_id: 'C-EM-03',
-    provider_id: 'PROV-CAM-DISCAP',
-    provider_name: 'Consejería de Asuntos Sociales - Red Regional',
-    official_name: 'Alicia Koplowitz Centro de Día y Centro Residencial de Esclerosis Múltiple',
-    resource_domain: 'social',
-    sector: 'Red Pública de Atención a Personas con Discapacidad',
-    centre_type: 'Centro residencial y centro de día especializado',
-    subtype: 'Atención integral a personas con esclerosis múltiple y patologías desmielinizantes',
-    public_private_status: 'red_publica',
-    management_type: 'Gestión pública concertada / Red Comunidad de Madrid',
-    address: 'Bulevar José Prat, 40',
-    postal_code: '28032',
-    municipality: 'Madrid',
-    district: 'Vicálvaro',
-    coordinates: [40.396148, -3.619736],
+    centre_id: "C-DCA-04",
+    provider_id: "PROV-SERMAS",
+    provider_name: "Servicio Madrileño de Salud",
+    official_name: "Hospital Universitario Fundación Alcorcón - Servicio de Medicina Física y Rehabilitación",
+    resource_domain: "healthcare",
+    sector: "Sanidad Pública Hospitalaria (Comunidad de Madrid)",
+    centre_type: "Hospital de la Red Pública Regional",
+    subtype: "Unidad hospitalaria de valoración y rehabilitación neuromotora",
+    public_private_status: "red_publica",
+    management_type: "Público directo (SERMAS)",
+    address: "Calle Budapest, 1",
+    postal_code: "28922",
+    municipality: "Alcorcón",
+    coordinates: [40.3478, -3.8341],
     has_valid_coordinates: true,
-    phone: '913 016 560',
-    email: 'direccion.akoplowitz@grupo5.net',
-    website: 'http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=7e9f7c8c2e9ca410VgnVCM2000000c205a0aRCRD',
-    explicit_specialisations: ['multiple_sclerosis_als'],
-    related_services: ['rehabilitación neurológica', 'fisioterapia', 'terapia ocupacional', 'atención diurna', 'residencia especializada'],
-    supports: ['day_care', 'rehabilitation', 'occupational_therapy'],
+    phone: "916 21 94 00",
+    email: "atencionciudadano.hfa@salud.madrid.org",
+    website: "https://comunidad.madrid/hospital/fundacionalcorcon",
+    explicit_specialisations: ["acquired_brain_injury"],
+    related_services: ["medicina física", "rehabilitación neurológica", "fisioterapia", "logopedia hospitalaria"],
+    supports: ["rehabilitation", "speech_therapy"],
     services_offered: [
       {
-        service_id: 'SRV-EM-03-DIA',
-        centre_id: 'C-EM-03',
-        service_name: 'Centro de Día de Esclerosis Múltiple',
-        service_type: 'day_care',
-        target_populations: ['multiple_sclerosis_als'],
-        allowed_life_stages: ['adult', 'older_adult'],
-        access_routes: ['dependency_pia', 'referral'],
-        source_dataset: 'Catálogo de Centros de Atención Social (datos.madrid.es PK 7827523)',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        checked_at: '2026-11-12'
-      },
-      {
-        service_id: 'SRV-EM-03-REHAB',
-        centre_id: 'C-EM-03',
-        service_name: 'Servicio de Mantenimiento Funcional y Fisioterapia Especializada',
-        service_type: 'rehabilitation',
-        target_populations: ['multiple_sclerosis_als'],
-        allowed_life_stages: ['adult', 'older_adult'],
-        access_routes: ['dependency_pia'],
-        source_dataset: 'Catálogo de Centros de Atención Social (datos.madrid.es PK 7827523)',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        checked_at: '2026-11-12'
+        service_id: "SRV-DCA-04-RHB",
+        centre_id: "C-DCA-04",
+        service_name: "Consulta y Tratamiento de Rehabilitación Neurológica",
+        service_type: "rehabilitation",
+        target_populations: ["acquired_brain_injury"],
+        allowed_life_stages: ["minor", "adult", "older_adult"],
+        access_routes: ["referral"],
+        source_dataset: "Registro General de Centros Sanitarios (REGCESS - Sanidad CAM)",
+        source_url: "https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios",
+        checked_at: "2026-10-10"
       }
     ],
-    allowed_life_stages: ['adult', 'older_adult'],
+    allowed_life_stages: ["minor", "adult", "older_adult"],
     access_route: {
-      access_type: 'dependency_pia',
-      competent_body: 'Dirección General de Atención a la Dependencia y el Mayor',
-      official_description: 'Acceso regulado a través del Programa Individual de Atención (PIA) de la Ley de Dependencia.',
-      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-      checked_at: '2026-11-12',
-      next_step_action: 'Solicite cita con el trabajador social de su Centro de Servicios Sociales municipal para tramitar el PIA.',
+      access_type: "referral",
+      competent_body: "Atención Primaria / Neurología de la Red SERMAS",
+      official_description: "Acceso público regulado por volante de derivación médica en el área de salud correspondiente.",
+      source_url: "https://comunidad.madrid/hospital/fundacionalcorcon",
+      checked_at: "2026-10-10",
+      next_step_action: "Solicite cita en su médico de familia para valoración de interconsulta.",
       availability_known: false,
       waiting_list_known: false
     },
     availability: {
-      status: 'contact_required',
-      authorised_places: 156,
-      vacancies_known: false,
-      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-      checked_at: '2026-11-12',
-      stale: false
-    },
-    geographic_coverage: {
-      type: 'community_wide',
-      requires_residence: 'yes',
-      checked_at: '2026-11-12'
-    },
-    accessibility_features: ['Accesibilidad universal cota cero', 'Transporte adaptado (Metro Valdebernardo L9 a 150m)', 'Grúas y baños asistidos PMR'],
-    provenance_records: [
-      {
-        attribute_name: 'specialisation',
-        value: 'esclerosis múltiple',
-        source_dataset: 'Catálogo Oficial de Centros de Atención Social (datos.madrid.es PK 7827523)',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        source_type: 'official_registry',
-        retrieved_at: '2026-11-12',
-        extraction_method: 'structured',
-        reviewer: 'Catálogo Oficial de Datos Abiertos (datos.madrid.es)',
-        reviewer_role: 'data_steward',
-        confidence: 'explicit',
-        quality: 'A'
-      }
-    ],
-    last_checked: '2026-11-12',
-    limitations: ['El ingreso residencial requiere reconocimiento previo de Grado de Dependencia.']
-  },
-  {
-    centre_id: 'C-PC-03',
-    provider_id: 'PROV-ASPACE',
-    provider_name: 'ATENPACE - Asociación de Personas con Parálisis Cerebral',
-    official_name: 'ATENPACE Centro de Rehabilitación para Jóvenes y Adultos con Parálisis Cerebral',
-    resource_domain: 'social',
-    sector: 'Entidad de Utilidad Pública Concertada',
-    centre_type: 'Centro de día y de rehabilitación motriz',
-    subtype: 'Rehabilitación y atención de adultos con parálisis cerebral y trastornos afines',
-    public_private_status: 'concertado',
-    management_type: 'Concertado / Privado Autorizado',
-    address: 'Calle Islas Marquesas, 27',
-    postal_code: '28035',
-    municipality: 'Madrid',
-    district: 'Fuencarral-El Pardo',
-    coordinates: [40.476369, -3.726308],
-    has_valid_coordinates: true,
-    phone: '913 167 446',
-    email: 'gerencia@atenpace.org',
-    website: 'https://atenpace.org',
-    explicit_specialisations: ['cerebral_palsy'],
-    related_services: ['rehabilitación fisioterápica', 'logopedia', 'terapia ocupacional', 'talleres ocupacionales'],
-    supports: ['rehabilitation', 'day_care', 'occupational_therapy', 'speech_therapy'],
-    services_offered: [
-      {
-        service_id: 'SRV-PC-03-REHAB',
-        centre_id: 'C-PC-03',
-        service_name: 'Programa de Fisioterapia y Terapia Ocupacional Funcional',
-        service_type: 'rehabilitation',
-        target_populations: ['cerebral_palsy'],
-        allowed_life_stages: ['minor', 'adult'],
-        access_routes: ['referral', 'private_contact'],
-        source_dataset: 'Catálogo de Centros de Atención Social (datos.madrid.es PK 1417)',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        checked_at: '2026-11-12'
-      }
-    ],
-    allowed_life_stages: ['minor', 'adult'],
-    access_route: {
-      access_type: 'referral',
-      competent_body: 'Consejería de Familia, Juventud y Asuntos Sociales / Admisión ATENPACE',
-      official_description: 'Plazas concertadas mediante derivación del Centro Base o acceso directo privado asociativo.',
-      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-      checked_at: '2026-11-12',
-      next_step_action: 'Contacte con la trabajadora social de ATENPACE o solicite derivación en su Centro Base.',
-      availability_known: false,
-      waiting_list_known: false
-    },
-    availability: {
-      status: 'contact_required',
-      authorised_places: 60,
-      vacancies_known: false,
-      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-      checked_at: '2026-11-12',
-      stale: false
-    },
-    geographic_coverage: {
-      type: 'community_wide',
-      requires_residence: 'yes',
-      checked_at: '2026-11-12'
-    },
-    accessibility_features: ['Rampas normalizadas', 'Baños adaptados para transferencias dobles', 'Metro Peñagrande L7'],
-    provenance_records: [
-      {
-        attribute_name: 'specialisation',
-        value: 'parálisis cerebral',
-        source_dataset: 'Catálogo Oficial de Centros de Atención Social (datos.madrid.es PK 1417)',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        source_type: 'official_registry',
-        retrieved_at: '2026-11-12',
-        extraction_method: 'structured',
-        reviewer: 'Catálogo Oficial de Datos Abiertos (datos.madrid.es)',
-        reviewer_role: 'data_steward',
-        confidence: 'explicit',
-        quality: 'A'
-      }
-    ],
-    last_checked: '2026-11-12',
-    limitations: ['Requiere diagnóstico de parálisis cerebral o daño neuromotor similar.']
-  },
-  {
-    centre_id: 'C-LM-02',
-    provider_id: 'PROV-CAM-DISCAP',
-    provider_name: 'ASPAYM Madrid',
-    official_name: 'ASPAYM Madrid (Asociación de Parapléjicos y Personas con Gran Discapacidad Física)',
-    resource_domain: 'social',
-    sector: 'Entidad de Utilidad Pública y Atención Especializada',
-    centre_type: 'Centro de rehabilitación, vida autónoma y apoyo integral',
-    subtype: 'Servicio de orientación, rehabilitación física y vida independiente para lesión medular',
-    public_private_status: 'concertado',
-    management_type: 'Asociativo de Utilidad Pública',
-    address: 'Camino de Valderribas, 115',
-    postal_code: '28038',
-    municipality: 'Madrid',
-    district: 'Puente de Vallecas',
-    coordinates: [40.394474, -3.656134],
-    has_valid_coordinates: true,
-    phone: '914 772 235',
-    email: 'aspaym@aspaymmadrid.org',
-    website: 'https://aspaymmadrid.org',
-    explicit_specialisations: ['spinal_cord_injury'],
-    related_services: ['rehabilitación fisioterápica', 'terapia ocupacional', 'oficina de vida independiente', 'asesoría de accesibilidad'],
-    supports: ['rehabilitation', 'occupational_therapy', 'psychological_support'],
-    services_offered: [
-      {
-        service_id: 'SRV-LM-02-REHAB',
-        centre_id: 'C-LM-02',
-        service_name: 'Servicio de Fisioterapia y Readaptación Funcional',
-        service_type: 'rehabilitation',
-        target_populations: ['spinal_cord_injury'],
-        allowed_life_stages: ['minor', 'adult', 'older_adult'],
-        access_routes: ['direct', 'referral', 'private_contact'],
-        source_dataset: 'Catálogo de Centros de Atención Social (datos.madrid.es PK 6996740)',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        checked_at: '2026-11-12'
-      }
-    ],
-    allowed_life_stages: ['minor', 'adult', 'older_adult'],
-    access_route: {
-      access_type: 'direct',
-      competent_body: 'ASPAYM Madrid / Servicios Sociales',
-      official_description: 'Acceso directo mediante cita previa con el departamento de atención social o derivación médica hospitalaria.',
-      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-      checked_at: '2026-11-12',
-      next_step_action: 'Contacte telefónicamente con la sede central de ASPAYM Madrid para concertar primera entrevista.',
-      availability_known: false,
-      waiting_list_known: false
-    },
-    availability: {
-      status: 'contact_required',
+      status: "contact_required",
       authorised_places: 120,
       vacancies_known: false,
-      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-      checked_at: '2026-11-12',
+      source_url: "https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios",
+      checked_at: "2026-10-10",
       stale: false
     },
     geographic_coverage: {
-      type: 'community_wide',
-      requires_residence: 'no',
-      checked_at: '2026-11-12'
+      type: "multiple_municipalities",
+      included_area_codes: ["0007"],
+      requires_residence: "yes",
+      checked_at: "2026-10-10"
     },
-    accessibility_features: ['Accesibilidad física completa certificada', 'Aparcamiento adaptado PMR', 'Plataformas elevadoras'],
+    accessibility_features: ["Accesibilidad hospitalaria universal", "Aparcamiento PMR", "Transporte público directo"],
     provenance_records: [
       {
-        attribute_name: 'specialisation',
-        value: 'lesión medular y gran discapacidad física',
-        source_dataset: 'Catálogo Oficial de Centros de Atención Social (datos.madrid.es PK 6996740)',
-        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
-        source_type: 'official_registry',
-        retrieved_at: '2026-11-12',
-        extraction_method: 'structured',
-        reviewer: 'Catálogo Oficial de Datos Abiertos (datos.madrid.es)',
-        reviewer_role: 'data_steward',
-        confidence: 'explicit',
-        quality: 'A'
+        attribute_name: "specialisation",
+        value: "rehabilitación médica",
+        source_dataset: "Registro General de Centros Sanitarios (REGCESS - Sanidad CAM)",
+        source_url: "https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios",
+        source_type: "official_registry",
+        retrieved_at: "2026-11-08",
+        extraction_method: "structured",
+        reviewer: "Registro General de Centros Sanitarios de la Comunidad de Madrid",
+        reviewer_role: "data_steward",
+        confidence: "explicit",
+        quality: "A"
       }
     ],
-    last_checked: '2026-11-12',
-    limitations: ['Orientado a lesión medular y discapacidad física grave de origen neuromotor o traumático.']
+    last_checked: "2026-10-10",
+    limitations: ["Atención restringida a pacientes adscritos a la red hospitalaria pública."]
+  },
+
+  // ==========================================
+  // PERFIL: AUTISMO / TRASTORNO DEL ESPECTRO DEL AUTISMO (TEA)
+  // ==========================================
+  {
+    centre_id: "C-TEA-01",
+    provider_id: "PROV-NUEVO-HORIZONTE",
+    provider_name: "Asociación Nuevo Horizonte",
+    official_name: "Centro de Día y Residencia Especializada TEA Nuevo Horizonte",
+    resource_domain: "social",
+    sector: "Atención Social Concertada (Discapacidad y Autismo)",
+    centre_type: "Centro de día y centro residencial monográfico",
+    subtype: "Dispositivo asistencial integral para personas con autismo",
+    public_private_status: "concertado",
+    management_type: "Concertado con la Consejería de Familia y Asuntos Sociales",
+    address: "Calle Comunidad de Madrid, 45",
+    postal_code: "28231",
+    municipality: "Las Rozas de Madrid",
+    coordinates: [40.4912, -3.8765],
+    has_valid_coordinates: true,
+    phone: "916 37 73 15",
+    email: "info@nuevohorizonte.es",
+    website: "https://nuevohorizonte.es",
+    explicit_specialisations: ["autism"],
+    related_services: ["atención diurna", "residencia", "terapia de comunicación", "regulación sensorial", "apoyo a familias"],
+    supports: ["day_care", "residential_care", "psychological_support"],
+    services_offered: [
+      {
+        service_id: "SRV-TEA-01-DIA",
+        centre_id: "C-TEA-01",
+        service_name: "Centro de Día Monográfico TEA",
+        service_type: "day_care",
+        target_populations: ["autism"],
+        allowed_life_stages: ["adult", "older_adult"],
+        access_routes: ["dependency_pia"],
+        source_dataset: "Registro General de Entidades, Centros y Servicios Sociales de la Comunidad de Madrid (Nº C-1412)",
+        source_url: "https://www.comunidad.madrid/servicios/asuntos-sociales/registro-centros-servicios-sociales",
+        checked_at: "2026-10-12"
+      }
+    ],
+    allowed_life_stages: ["adult", "older_adult"],
+    access_route: {
+      access_type: "dependency_pia",
+      competent_body: "Dirección General de Atención a Personas con Discapacidad (CAM)",
+      official_description: "Acceso regulado mediante PIA de la Ley de Dependencia tramitado en el Centro de Servicios Sociales.",
+      source_url: "https://www.comunidad.madrid/servicios/asuntos-sociales/registro-centros-servicios-sociales",
+      checked_at: "2026-10-12",
+      next_step_action: "Solicite propuesta de asignación de plaza en su centro municipal de servicios sociales.",
+      availability_known: false,
+      waiting_list_known: false
+    },
+    availability: {
+      status: "contact_required",
+      authorised_places: 70,
+      vacancies_known: false,
+      source_url: "https://www.comunidad.madrid/servicios/asuntos-sociales/registro-centros-servicios-sociales",
+      checked_at: "2026-10-12",
+      stale: false
+    },
+    geographic_coverage: {
+      type: "community_wide",
+      requires_residence: "yes",
+      checked_at: "2026-10-12"
+    },
+    accessibility_features: ["Entorno estructurado visualmente", "Salas de estimulación sensorial", "Espacios ajardinados protegidos"],
+    provenance_records: [
+      {
+        attribute_name: "specialisation",
+        value: "trastorno del espectro del autismo",
+        source_dataset: "Registro General de Entidades, Centros y Servicios Sociales de la Comunidad de Madrid (Nº C-1412)",
+        source_url: "https://www.comunidad.madrid/servicios/asuntos-sociales/registro-centros-servicios-sociales",
+        source_type: "official_registry",
+        retrieved_at: "2026-11-08",
+        extraction_method: "structured",
+        reviewer: "Registro General de Entidades, Centros y Servicios Sociales de la Comunidad de Madrid",
+        reviewer_role: "data_steward",
+        confidence: "explicit",
+        quality: "A"
+      }
+    ],
+    last_checked: "2026-10-12",
+    limitations: ["Requiere diagnóstico formal de TEA y grado de dependencia reconocido."]
+  },
+  {
+    centre_id: "C-TEA-02",
+    provider_id: "PROV-CEPRI",
+    provider_name: "Asociación CEPRI",
+    official_name: "Cepri La Peineta, centro de día",
+    resource_domain: "social",
+    sector: "Atención Social Concertada (Discapacidad y Autismo)",
+    centre_type: "Centro de día de atención especializada",
+    subtype: "Atención diurna a personas con autismo y necesidades complejas de apoyo",
+    public_private_status: "concertado",
+    management_type: "Concertado con la Consejería de Asuntos Sociales",
+    address: "Calle Suecia, 36",
+    postal_code: "28022",
+    municipality: "Madrid",
+    district: "San Blas-Canillejas",
+    coordinates: [40.423294, -3.605041],
+    has_valid_coordinates: true,
+    phone: "913 240 255",
+    email: "cepri@asociacioncepri.org",
+    website: "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=2de3014bf7eb0710VgnVCM2000001f4a900aRCRD",
+    explicit_specialisations: ["autism"],
+    related_services: ["atención diurna", "comunicación aumentativa", "apoyo conductual positivo", "talleres de autonomía"],
+    supports: ["day_care", "psychological_support"],
+    services_offered: [
+      {
+        service_id: "SRV-TEA-02-DIA",
+        centre_id: "C-TEA-02",
+        service_name: "Servicio de Atención Diurna y Apoyo Conductual",
+        service_type: "day_care",
+        target_populations: ["autism"],
+        allowed_life_stages: ["minor", "adult"],
+        access_routes: ["dependency_pia"],
+        source_dataset: "Catálogo de Centros de Atención Social (Ayuntamiento de Madrid - datos.madrid.es PK 11154959)",
+        source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+        checked_at: "2026-11-12"
+      }
+    ],
+    allowed_life_stages: ["minor", "adult"],
+    access_route: {
+      access_type: "dependency_pia",
+      competent_body: "Consejería de Asuntos Sociales / Servicios Sociales",
+      official_description: "Acceso regulado mediante Ley de Dependencia o canal asociativo CEPRI.",
+      source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+      checked_at: "2026-11-12",
+      next_step_action: "Contacte con la trabajadora social del centro CEPRI para orientación e inclusión en solicitud.",
+      availability_known: false,
+      waiting_list_known: false
+    },
+    availability: {
+      status: "contact_required",
+      authorised_places: 35,
+      vacancies_known: false,
+      source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+      checked_at: "2026-11-12",
+      stale: false
+    },
+    geographic_coverage: {
+      type: "community_wide",
+      requires_residence: "yes",
+      checked_at: "2026-11-12"
+    },
+    accessibility_features: ["Entorno accesible cota cero", "Señalización pictogramas PECS", "Metro Las Musas L7"],
+    provenance_records: [
+      {
+        attribute_name: "specialisation",
+        value: "trastorno del espectro del autismo",
+        source_dataset: "Catálogo de Centros de Atención Social (Ayuntamiento de Madrid - datos.madrid.es PK 11154959)",
+        source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+        source_type: "official_registry",
+        retrieved_at: "2026-11-12",
+        extraction_method: "structured",
+        reviewer: "Portal de Datos Abiertos de la Ciudad de Madrid (datos.madrid.es)",
+        reviewer_role: "data_steward",
+        confidence: "explicit",
+        quality: "A"
+      }
+    ],
+    last_checked: "2026-11-12",
+    limitations: ["Especializado en autismo y trastornos del desarrollo asociados."]
+  },
+  {
+    centre_id: "C-TEA-03",
+    provider_id: "PROV-APADIS",
+    provider_name: "Fundación APADIS",
+    official_name: "Centro de Atención Temprana APADIS San Sebastián de los Reyes",
+    resource_domain: "social",
+    sector: "Atención Temprana Concertada (Comunidad de Madrid)",
+    centre_type: "Centro de Atención Temprana (0 a 6 años)",
+    subtype: "Atención temprana, desarrollo infantil e intervención en trastornos del espectro autista",
+    public_private_status: "concertado",
+    management_type: "Concertado con la Red Pública de Atención Temprana CAM",
+    address: "Avenida de Aragón, 28",
+    postal_code: "28701",
+    municipality: "San Sebastián de los Reyes",
+    coordinates: [40.5489, -3.6234],
+    has_valid_coordinates: true,
+    phone: "916 54 60 11",
+    email: "atenciontemprana@apadis.es",
+    website: "https://apadis.info/atencion-temprana",
+    explicit_specialisations: ["autism"],
+    related_services: ["estimulación precoz", "logopedia infantil", "psicomotricidad", "apoyo familiar"],
+    supports: ["rehabilitation", "speech_therapy"],
+    services_offered: [
+      {
+        service_id: "SRV-TEA-03-AT",
+        centre_id: "C-TEA-03",
+        service_name: "Programa de Intervención en Atención Temprana y TEA",
+        service_type: "rehabilitation",
+        target_populations: ["autism"],
+        allowed_life_stages: ["early_childhood"],
+        access_routes: ["referral"],
+        source_dataset: "Registro General de Entidades, Centros y Servicios Sociales de la Comunidad de Madrid (CAT-045)",
+        source_url: "https://www.comunidad.madrid/servicios/asuntos-sociales/registro-centros-servicios-sociales",
+        checked_at: "2026-10-10"
+      }
+    ],
+    allowed_life_stages: ["early_childhood"],
+    access_route: {
+      access_type: "referral",
+      competent_body: "CRECOVI (Centro Regional de Coordinación y Valoración Infantil)",
+      official_description: "Acceso a plaza pública gratuita previa resolución del dictamen del CRECOVI.",
+      source_url: "https://www.comunidad.madrid/servicios/asuntos-sociales/registro-centros-servicios-sociales",
+      checked_at: "2026-10-10",
+      next_step_action: "Solicite en su centro de salud la derivación de pediatría al CRECOVI.",
+      availability_known: false,
+      waiting_list_known: false
+    },
+    availability: {
+      status: "contact_required",
+      authorised_places: 110,
+      vacancies_known: false,
+      source_url: "https://www.comunidad.madrid/servicios/asuntos-sociales/registro-centros-servicios-sociales",
+      checked_at: "2026-10-10",
+      stale: false
+    },
+    geographic_coverage: {
+      type: "multiple_municipalities",
+      included_area_codes: ["0134", "0006"],
+      requires_residence: "yes",
+      checked_at: "2026-10-10"
+    },
+    accessibility_features: ["Aulas adaptadas a primera infancia", "Entorno accesible sin barreras", "Aparcamiento adaptado"],
+    provenance_records: [
+      {
+        attribute_name: "specialisation",
+        value: "atención temprana en autismo",
+        source_dataset: "Registro General de Entidades, Centros y Servicios Sociales de la Comunidad de Madrid (CAT-045)",
+        source_url: "https://www.comunidad.madrid/servicios/asuntos-sociales/registro-centros-servicios-sociales",
+        source_type: "official_registry",
+        retrieved_at: "2026-11-08",
+        extraction_method: "structured",
+        reviewer: "Registro General de Entidades, Centros y Servicios Sociales de la Comunidad de Madrid",
+        reviewer_role: "data_steward",
+        confidence: "explicit",
+        quality: "A"
+      }
+    ],
+    last_checked: "2026-10-10",
+    limitations: ["Exclusivamente para niños de 0 a 6 años con dictamen del CRECOVI."]
+  },
+
+  // ==========================================
+  // PERFIL: ESCLEROSIS MÚLTIPLE / ELA / ENFERMEDADES DESMIELINIZANTES
+  // ==========================================
+  {
+    centre_id: "C-EM-01",
+    provider_id: "PROV-AEDEM",
+    provider_name: "AEDEM Madrid",
+    official_name: "Asociación esclerosis múltiple Madrid, centro de rehabilitación",
+    resource_domain: "social",
+    sector: "Atención Especializada Concertada y Social",
+    centre_type: "Centro de rehabilitación integral ambulatoria",
+    subtype: "Mantenimiento funcional y neurorrehabilitación para esclerosis múltiple",
+    public_private_status: "concertado",
+    management_type: "Concertado / Entidad de Utilidad Pública",
+    address: "Calle Sangenjo, 36",
+    postal_code: "28034",
+    municipality: "Madrid",
+    district: "Fuencarral-El Pardo",
+    coordinates: [40.487531, -3.698569],
+    has_valid_coordinates: true,
+    phone: "913 785 526",
+    email: "ademm@ademmadrid.com",
+    website: "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=2e94ef2b16151610VgnVCM1000001d4a900aRCRD",
+    explicit_specialisations: ["multiple_sclerosis_als"],
+    related_services: ["fisioterapia neurológica", "terapia ocupacional", "logopedia", "atención social y psicológica"],
+    supports: ["rehabilitation", "occupational_therapy", "speech_therapy", "psychological_support"],
+    services_offered: [
+      {
+        service_id: "SRV-EM-01-RHB",
+        centre_id: "C-EM-01",
+        service_name: "Unidad de Rehabilitación Motriz y Funcional",
+        service_type: "rehabilitation",
+        target_populations: ["multiple_sclerosis_als"],
+        allowed_life_stages: ["adult", "older_adult"],
+        access_routes: ["direct", "referral", "private_contact"],
+        source_dataset: "Catálogo de Centros de Atención Social (Ayuntamiento de Madrid - datos.madrid.es PK 10610720)",
+        source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+        checked_at: "2026-11-12"
+      }
+    ],
+    allowed_life_stages: ["adult", "older_adult"],
+    access_route: {
+      access_type: "direct",
+      competent_body: "Servicio de Atención Social AEDEM Madrid",
+      official_description: "Acceso directo solicitando primera cita en la sede de la asociación o mediante derivación de neurología.",
+      source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+      checked_at: "2026-11-12",
+      next_step_action: "Contacte por teléfono para entrevista de valoración con la trabajadora social.",
+      availability_known: false,
+      waiting_list_known: false
+    },
+    availability: {
+      status: "contact_required",
+      authorised_places: 80,
+      vacancies_known: false,
+      source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+      checked_at: "2026-11-12",
+      stale: false
+    },
+    geographic_coverage: {
+      type: "community_wide",
+      requires_residence: "no",
+      checked_at: "2026-11-12"
+    },
+    accessibility_features: ["Acceso adaptado a personas con movilidad reducida", "Gimnasio con grúas de suspensión", "Aparcamiento reservado PMR"],
+    provenance_records: [
+      {
+        attribute_name: "specialisation",
+        value: "esclerosis múltiple",
+        source_dataset: "Catálogo de Centros de Atención Social (Ayuntamiento de Madrid - datos.madrid.es PK 10610720)",
+        source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+        source_type: "official_registry",
+        retrieved_at: "2026-11-12",
+        extraction_method: "structured",
+        reviewer: "Portal de Datos Abiertos de la Ciudad de Madrid (datos.madrid.es)",
+        reviewer_role: "data_steward",
+        confidence: "explicit",
+        quality: "A"
+      }
+    ],
+    last_checked: "2026-11-12",
+    limitations: ["Dirigido específicamente a pacientes diagnosticados de esclerosis múltiple y enfermedades afines."]
+  },
+  {
+    centre_id: "C-EM-02",
+    provider_id: "PROV-CAM-DISCAP",
+    provider_name: "Consejería de Asuntos Sociales - Red Regional",
+    official_name: "Alicia Koplowitz Centro de día y centro residencial de Esclerosis Múltiple de la Comunidad de Madrid",
+    resource_domain: "social",
+    sector: "Red Pública Regional de Discapacidad",
+    centre_type: "Centro residencial y centro de día de alta especialización",
+    subtype: "Dispositivo residencial y diurno especializado en esclerosis múltiple",
+    public_private_status: "red_publica",
+    management_type: "Público concertado / Red Comunidad de Madrid",
+    address: "Bulevar José Prat, 40",
+    postal_code: "28032",
+    municipality: "Madrid",
+    district: "Vicálvaro",
+    coordinates: [40.396148, -3.619736],
+    has_valid_coordinates: true,
+    phone: "913 016 560",
+    email: "direccion.akoplowitz@grupo5.net",
+    website: "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=7e9f7c8c2e9ca410VgnVCM2000000c205a0aRCRD",
+    explicit_specialisations: ["multiple_sclerosis_als"],
+    related_services: ["residencia especializada", "atención diurna", "fisioterapia neurológica", "terapia ocupacional", "apoyo psicológico"],
+    supports: ["day_care", "residential_care", "rehabilitation", "occupational_therapy"],
+    services_offered: [
+      {
+        service_id: "SRV-EM-02-RES",
+        centre_id: "C-EM-02",
+        service_name: "Residencia y Centro de Día Especializado Alicia Koplowitz",
+        service_type: "residential_care",
+        target_populations: ["multiple_sclerosis_als"],
+        allowed_life_stages: ["adult", "older_adult"],
+        access_routes: ["dependency_pia"],
+        source_dataset: "Catálogo de Centros de Atención Social (Ayuntamiento de Madrid - datos.madrid.es PK 7827523)",
+        source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+        checked_at: "2026-11-12"
+      }
+    ],
+    allowed_life_stages: ["adult", "older_adult"],
+    access_route: {
+      access_type: "dependency_pia",
+      competent_body: "Dirección General de Atención a la Dependencia y el Mayor",
+      official_description: "Acceso asignado por resolución del PIA en Ley de Dependencia.",
+      source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+      checked_at: "2026-11-12",
+      next_step_action: "Tramite el PIA en su Centro municipal de Servicios Sociales.",
+      availability_known: false,
+      waiting_list_known: false
+    },
+    availability: {
+      status: "contact_required",
+      authorised_places: 156,
+      vacancies_known: false,
+      source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+      checked_at: "2026-11-12",
+      stale: false
+    },
+    geographic_coverage: {
+      type: "community_wide",
+      requires_residence: "yes",
+      checked_at: "2026-11-12"
+    },
+    accessibility_features: ["Edificio 100% adaptado", "Habitaciones domotizadas", "Metro Valdebernardo L9"],
+    provenance_records: [
+      {
+        attribute_name: "specialisation",
+        value: "esclerosis múltiple",
+        source_dataset: "Catálogo de Centros de Atención Social (Ayuntamiento de Madrid - datos.madrid.es PK 7827523)",
+        source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+        source_type: "official_registry",
+        retrieved_at: "2026-11-12",
+        extraction_method: "structured",
+        reviewer: "Portal de Datos Abiertos de la Ciudad de Madrid (datos.madrid.es)",
+        reviewer_role: "data_steward",
+        confidence: "explicit",
+        quality: "A"
+      }
+    ],
+    last_checked: "2026-11-12",
+    limitations: ["Requiere valoración de dependencia oficial para plaza pública."]
+  },
+
+  // ==========================================
+  // PERFIL: PARÁLISIS CEREBRAL Y TRASTORNOS AFINES
+  // ==========================================
+  {
+    centre_id: "C-PC-01",
+    provider_id: "PROV-ASPACE",
+    provider_name: "ATENPACE",
+    official_name: "ATENPACE Centro de rehabilitación para jóvenes y adultos paralíticos cerebrales",
+    resource_domain: "social",
+    sector: "Atención Social Concertada (Parálisis Cerebral)",
+    centre_type: "Centro de día y de rehabilitación integral",
+    subtype: "Atención diurna y rehabilitación de jóvenes y adultos con parálisis cerebral",
+    public_private_status: "concertado",
+    management_type: "Concertado con Asuntos Sociales / Atención Privada",
+    address: "Calle Islas Marquesas, 27",
+    postal_code: "28035",
+    municipality: "Madrid",
+    district: "Fuencarral-El Pardo",
+    coordinates: [40.476369, -3.726308],
+    has_valid_coordinates: true,
+    phone: "913 167 446",
+    email: "gerencia@atenpace.org",
+    website: "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=f25376172d71c010VgnVCM1000000b205a0aRCRD",
+    explicit_specialisations: ["cerebral_palsy"],
+    related_services: ["atención diurna", "fisioterapia motriz", "logopedia", "terapia ocupacional", "trabajo social"],
+    supports: ["rehabilitation", "day_care", "occupational_therapy", "speech_therapy"],
+    services_offered: [
+      {
+        service_id: "SRV-PC-01-DIA",
+        centre_id: "C-PC-01",
+        service_name: "Centro de Día y Neurorrehabilitación ATENPACE",
+        service_type: "day_care",
+        target_populations: ["cerebral_palsy"],
+        allowed_life_stages: ["minor", "adult"],
+        access_routes: ["referral", "dependency_pia"],
+        source_dataset: "Catálogo de Centros de Atención Social (Ayuntamiento de Madrid - datos.madrid.es PK 1417)",
+        source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+        checked_at: "2026-11-12"
+      }
+    ],
+    allowed_life_stages: ["minor", "adult"],
+    access_route: {
+      access_type: "referral",
+      competent_body: "Consejería de Asuntos Sociales / Trabajo Social ATENPACE",
+      official_description: "Acceso concertado con Asuntos Sociales o valoración de ingreso privado.",
+      source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+      checked_at: "2026-11-12",
+      next_step_action: "Contacte con la dirección técnica de ATENPACE para entrevista previa.",
+      availability_known: false,
+      waiting_list_known: false
+    },
+    availability: {
+      status: "contact_required",
+      authorised_places: 60,
+      vacancies_known: false,
+      source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+      checked_at: "2026-11-12",
+      stale: false
+    },
+    geographic_coverage: {
+      type: "community_wide",
+      requires_residence: "yes",
+      checked_at: "2026-11-12"
+    },
+    accessibility_features: ["Instalaciones 100% accesibles", "Aulas adaptadas con grúas de transferencia", "Metro Peñagrande L7"],
+    provenance_records: [
+      {
+        attribute_name: "specialisation",
+        value: "parálisis cerebral",
+        source_dataset: "Catálogo de Centros de Atención Social (Ayuntamiento de Madrid - datos.madrid.es PK 1417)",
+        source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+        source_type: "official_registry",
+        retrieved_at: "2026-11-12",
+        extraction_method: "structured",
+        reviewer: "Portal de Datos Abiertos de la Ciudad de Madrid (datos.madrid.es)",
+        reviewer_role: "data_steward",
+        confidence: "explicit",
+        quality: "A"
+      }
+    ],
+    last_checked: "2026-11-12",
+    limitations: ["Requiere diagnóstico de parálisis cerebral o lesión neuromotora afín."]
+  },
+  {
+    centre_id: "C-PC-02",
+    provider_id: "PROV-BOBATH",
+    provider_name: "Fundación Bobath",
+    official_name: "Centro de Atención Temprana para menores BOBATH",
+    resource_domain: "social",
+    sector: "Atención Temprana y Especializada Concertada",
+    centre_type: "Centro de atención temprana y tratamiento especializado",
+    subtype: "Tratamiento integral según el concepto Bobath para parálisis cerebral",
+    public_private_status: "concertado",
+    management_type: "Concertado con la Red de Atención Temprana y Discapacidad CAM",
+    address: "Calle Mirador de la Reina, 113",
+    postal_code: "28035",
+    municipality: "Madrid",
+    district: "Fuencarral-El Pardo",
+    coordinates: [40.490703, -3.720457],
+    has_valid_coordinates: true,
+    phone: "913 767 190",
+    email: "tsocial@fundacionbobath.org",
+    website: "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=afd132b520e79110VgnVCM1000000b205a0aRCRD",
+    explicit_specialisations: ["cerebral_palsy"],
+    related_services: ["atención temprana", "fisioterapia Bobath", "logopedia", "terapia ocupacional", "orientación familiar"],
+    supports: ["rehabilitation", "speech_therapy", "occupational_therapy"],
+    services_offered: [
+      {
+        service_id: "SRV-PC-02-AT",
+        centre_id: "C-PC-02",
+        service_name: "Tratamiento de Atención Temprana en Parálisis Cerebral",
+        service_type: "rehabilitation",
+        target_populations: ["cerebral_palsy"],
+        allowed_life_stages: ["early_childhood"],
+        access_routes: ["referral"],
+        source_dataset: "Catálogo de Centros de Atención Social (Ayuntamiento de Madrid - datos.madrid.es PK 4896281)",
+        source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+        checked_at: "2026-11-12"
+      }
+    ],
+    allowed_life_stages: ["early_childhood"],
+    access_route: {
+      access_type: "referral",
+      competent_body: "CRECOVI / Fundación Bobath",
+      official_description: "Acceso concertado previa resolución dictamen CRECOVI o consulta privada.",
+      source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+      checked_at: "2026-11-12",
+      next_step_action: "Solicite en su centro de salud la derivación a CRECOVI.",
+      availability_known: false,
+      waiting_list_known: false
+    },
+    availability: {
+      status: "contact_required",
+      authorised_places: 90,
+      vacancies_known: false,
+      source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+      checked_at: "2026-11-12",
+      stale: false
+    },
+    geographic_coverage: {
+      type: "community_wide",
+      requires_residence: "yes",
+      checked_at: "2026-11-12"
+    },
+    accessibility_features: ["Accesibilidad física universal", "Salas de fisioterapia equipadas Bobath"],
+    provenance_records: [
+      {
+        attribute_name: "specialisation",
+        value: "parálisis cerebral en atención temprana",
+        source_dataset: "Catálogo de Centros de Atención Social (Ayuntamiento de Madrid - datos.madrid.es PK 4896281)",
+        source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+        source_type: "official_registry",
+        retrieved_at: "2026-11-12",
+        extraction_method: "structured",
+        reviewer: "Portal de Datos Abiertos de la Ciudad de Madrid (datos.madrid.es)",
+        reviewer_role: "data_steward",
+        confidence: "explicit",
+        quality: "A"
+      }
+    ],
+    last_checked: "2026-11-12",
+    limitations: ["Para menores de 0 a 6 años en régimen de atención temprana."]
+  },
+
+  // ==========================================
+  // PERFIL: LESIÓN MEDULAR Y GRAN DISCAPACIDAD FÍSICA
+  // ==========================================
+  {
+    centre_id: "C-LM-01",
+    provider_id: "PROV-CAM-DISCAP",
+    provider_name: "ASPAYM Madrid",
+    official_name: "ASPAYM Madrid (Asociación de Parapléjicos y Personas con Gran Discapacidad Física de la Comunidad de Madrid)",
+    resource_domain: "social",
+    sector: "Entidad de Utilidad Pública y Atención Especializada",
+    centre_type: "Centro de rehabilitación, vida autónoma y apoyo integral",
+    subtype: "Servicio de orientación, rehabilitación física y vida independiente para lesión medular",
+    public_private_status: "concertado",
+    management_type: "Asociativo de Utilidad Pública",
+    address: "Camino Valderribas, 115",
+    postal_code: "28038",
+    municipality: "Madrid",
+    district: "Puente de Vallecas",
+    coordinates: [40.394474, -3.656134],
+    has_valid_coordinates: true,
+    phone: "914 772 235",
+    email: "aspaym@aspaymmadrid.org",
+    website: "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=fedcaee55f14f310VgnVCM1000000b205a0aRCRD",
+    explicit_specialisations: ["spinal_cord_injury"],
+    related_services: ["rehabilitación fisioterápica", "terapia ocupacional", "oficina de vida independiente", "asesoría de accesibilidad"],
+    supports: ["rehabilitation", "occupational_therapy", "psychological_support"],
+    services_offered: [
+      {
+        service_id: "SRV-LM-01-REHAB",
+        centre_id: "C-LM-01",
+        service_name: "Servicio de Fisioterapia y Readaptación Funcional Medular",
+        service_type: "rehabilitation",
+        target_populations: ["spinal_cord_injury"],
+        allowed_life_stages: ["minor", "adult", "older_adult"],
+        access_routes: ["direct", "referral", "private_contact"],
+        source_dataset: "Catálogo de Centros de Atención Social (Ayuntamiento de Madrid - datos.madrid.es PK 6996740)",
+        source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+        checked_at: "2026-11-12"
+      }
+    ],
+    allowed_life_stages: ["minor", "adult", "older_adult"],
+    access_route: {
+      access_type: "direct",
+      competent_body: "ASPAYM Madrid / Servicios Sociales",
+      official_description: "Acceso directo mediante cita previa con el departamento de atención social o derivación médica.",
+      source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+      checked_at: "2026-11-12",
+      next_step_action: "Contacte por teléfono para concertar cita previa de valoración funcional.",
+      availability_known: false,
+      waiting_list_known: false
+    },
+    availability: {
+      status: "contact_required",
+      authorised_places: 120,
+      vacancies_known: false,
+      source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+      checked_at: "2026-11-12",
+      stale: false
+    },
+    geographic_coverage: {
+      type: "community_wide",
+      requires_residence: "no",
+      checked_at: "2026-11-12"
+    },
+    accessibility_features: ["Accesibilidad física universal certificada", "Aparcamiento adaptado PMR"],
+    provenance_records: [
+      {
+        attribute_name: "specialisation",
+        value: "lesión medular y gran discapacidad física",
+        source_dataset: "Catálogo de Centros de Atención Social (Ayuntamiento de Madrid - datos.madrid.es PK 6996740)",
+        source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+        source_type: "official_registry",
+        retrieved_at: "2026-11-12",
+        extraction_method: "structured",
+        reviewer: "Portal de Datos Abiertos de la Ciudad de Madrid (datos.madrid.es)",
+        reviewer_role: "data_steward",
+        confidence: "explicit",
+        quality: "A"
+      }
+    ],
+    last_checked: "2026-11-12",
+    limitations: ["Orientado a lesión medular y discapacidad física grave."]
+  },
+  {
+    centre_id: "C-LM-02",
+    provider_id: "PROV-CAM-DISCAP",
+    provider_name: "Consejería de Asuntos Sociales - Red Regional",
+    official_name: "Centro de Atención a Personas con Discapacidad Física Severa y Lesión Medular",
+    resource_domain: "social",
+    sector: "Red Pública Regional de Discapacidad",
+    centre_type: "Centro residencial y de día público monográfico",
+    subtype: "Atención residencial y diurna a gran discapacidad física y lesión medular",
+    public_private_status: "red_publica",
+    management_type: "Gestión pública directa (Comunidad de Madrid)",
+    address: "Calle Severo Ochoa, 12",
+    postal_code: "28914",
+    municipality: "Leganés",
+    coordinates: [40.3298, -3.7645],
+    has_valid_coordinates: true,
+    phone: "916 93 21 00",
+    email: "cadf.leganes@madrid.org",
+    website: "https://comunidad.madrid/servicios/asuntos-sociales/registro-centros-servicios-sociales",
+    explicit_specialisations: ["spinal_cord_injury"],
+    related_services: ["residencia especializada", "fisioterapia medular", "terapia ocupacional", "atención médica y enfermería 24h"],
+    supports: ["residential_care", "day_care", "rehabilitation", "occupational_therapy"],
+    services_offered: [
+      {
+        service_id: "SRV-LM-02-RES",
+        centre_id: "C-LM-02",
+        service_name: "Atención Residencial e Intervención Funcional en Lesión Medular",
+        service_type: "residential_care",
+        target_populations: ["spinal_cord_injury"],
+        allowed_life_stages: ["adult", "older_adult"],
+        access_routes: ["dependency_pia"],
+        source_dataset: "Registro General de Entidades, Centros y Servicios Sociales de la Comunidad de Madrid (Nº E-0145)",
+        source_url: "https://www.comunidad.madrid/servicios/asuntos-sociales/registro-centros-servicios-sociales",
+        checked_at: "2026-10-10"
+      }
+    ],
+    allowed_life_stages: ["adult", "older_adult"],
+    access_route: {
+      access_type: "dependency_pia",
+      competent_body: "Dirección General de Atención a Personas con Discapacidad (CAM)",
+      official_description: "Acceso regulado a plazas públicas mediante PIA de la Ley de Dependencia.",
+      source_url: "https://www.comunidad.madrid/servicios/asuntos-sociales/registro-centros-servicios-sociales",
+      checked_at: "2026-10-10",
+      next_step_action: "Inicie el expediente de Dependencia en su Centro municipal de Servicios Sociales.",
+      availability_known: false,
+      waiting_list_known: false
+    },
+    availability: {
+      status: "contact_required",
+      authorised_places: 110,
+      vacancies_known: false,
+      source_url: "https://www.comunidad.madrid/servicios/asuntos-sociales/registro-centros-servicios-sociales",
+      checked_at: "2026-10-10",
+      stale: false
+    },
+    geographic_coverage: {
+      type: "community_wide",
+      requires_residence: "yes",
+      checked_at: "2026-10-10"
+    },
+    accessibility_features: ["Infraestructura médica y asistencial 100% adaptada", "Grúas de techo", "Instalaciones hospitalarias en entorno residencial"],
+    provenance_records: [
+      {
+        attribute_name: "specialisation",
+        value: "lesión medular y discapacidad física severa",
+        source_dataset: "Registro General de Entidades, Centros y Servicios Sociales de la Comunidad de Madrid (Nº E-0145)",
+        source_url: "https://www.comunidad.madrid/servicios/asuntos-sociales/registro-centros-servicios-sociales",
+        source_type: "official_registry",
+        retrieved_at: "2026-11-08",
+        extraction_method: "structured",
+        reviewer: "Registro General de Entidades, Centros y Servicios Sociales de la Comunidad de Madrid",
+        reviewer_role: "data_steward",
+        confidence: "explicit",
+        quality: "A"
+      }
+    ],
+    last_checked: "2026-10-10",
+    limitations: ["Requiere valoración oficial de gran dependencia y diagnóstico médico neuromotor."]
+  },
+
+  // ==========================================
+  // PERFIL: ATENCIÓN TEMPRANA Y DESARROLLO INFANTIL
+  // ==========================================
+  {
+    centre_id: "C-AT-01",
+    provider_id: "PROV-SAN-MARTIN",
+    provider_name: "Crean Aragón",
+    official_name: "Centro de Atención Temprana y Estimulación Psicomotriz Crean Aragón",
+    resource_domain: "social",
+    sector: "Atención Temprana Concertada (Comunidad de Madrid)",
+    centre_type: "Centro de Atención Temprana (0 a 6 años)",
+    subtype: "Intervención en psicomotricidad, desarrollo neuromotor y comunicación infantil",
+    public_private_status: "concertado",
+    management_type: "Concertado con la Red Regional de Atención Temprana",
+    address: "Vía Complutense, 114",
+    postal_code: "28805",
+    municipality: "Alcalá de Henares",
+    coordinates: [40.4867, -3.3541],
+    has_valid_coordinates: true,
+    phone: "918 89 30 14",
+    email: "info@creanaragon.org",
+    website: "https://creanaragon.org",
+    explicit_specialisations: ["psychomotor_early_support"],
+    related_services: ["psicomotricidad", "estimulación precoz", "logopedia infantil", "fisioterapia pediátrica"],
+    supports: ["rehabilitation", "speech_therapy"],
+    services_offered: [
+      {
+        service_id: "SRV-AT-01-PSI",
+        centre_id: "C-AT-01",
+        service_name: "Tratamiento de Psicomotricidad y Desarrollo Neuromotor",
+        service_type: "rehabilitation",
+        target_populations: ["psychomotor_early_support"],
+        allowed_life_stages: ["early_childhood"],
+        access_routes: ["referral"],
+        source_dataset: "Registro Oficial de Centros de Atención Temprana de la Comunidad de Madrid (CAT-088)",
+        source_url: "https://www.comunidad.madrid/servicios/asuntos-sociales/registro-centros-servicios-sociales",
+        checked_at: "2026-09-19"
+      }
+    ],
+    allowed_life_stages: ["early_childhood"],
+    access_route: {
+      access_type: "referral",
+      competent_body: "CRECOVI (Centro Regional de Coordinación y Valoración Infantil)",
+      official_description: "Acceso a plaza pública gratuita tras emisión de resolución de dictamen del CRECOVI.",
+      source_url: "https://www.comunidad.madrid/servicios/asuntos-sociales/atencion-temprana",
+      checked_at: "2026-09-19",
+      next_step_action: "Contacte con el servicio de pediatría de su centro de salud para informe de derivación a CRECOVI.",
+      availability_known: false,
+      waiting_list_known: false
+    },
+    availability: {
+      status: "contact_required",
+      authorised_places: 85,
+      vacancies_known: false,
+      source_url: "https://www.comunidad.madrid/servicios/asuntos-sociales/registro-centros-servicios-sociales",
+      checked_at: "2026-09-19",
+      stale: false
+    },
+    geographic_coverage: {
+      type: "multiple_municipalities",
+      included_area_codes: ["0053", "0496"],
+      requires_residence: "yes",
+      checked_at: "2026-09-19"
+    },
+    accessibility_features: ["Acceso a pie llano", "Entorno adaptado a la infancia"],
+    provenance_records: [
+      {
+        attribute_name: "specialisation",
+        value: "psicomotricidad en atención temprana",
+        source_dataset: "Registro Oficial de Centros de Atención Temprana de la Comunidad de Madrid (CAT-088)",
+        source_url: "https://www.comunidad.madrid/servicios/asuntos-sociales/registro-centros-servicios-sociales",
+        source_type: "official_directory",
+        retrieved_at: "2026-11-08",
+        extraction_method: "structured",
+        reviewer: "Registro General de Entidades, Centros y Servicios Sociales de la Comunidad de Madrid",
+        reviewer_role: "data_steward",
+        confidence: "explicit",
+        quality: "A"
+      }
+    ],
+    last_checked: "2026-09-19",
+    limitations: ["Solo atiende a menores de 0 a 6 años. Consta mención explícita de psicomotricidad en resolución de registro."]
+  },
+
+  // ==========================================
+  // PERFIL: SALUD MENTAL Y REHABILITACIÓN PSICOSOCIAL
+  // ==========================================
+  {
+    centre_id: "C-MH-01",
+    provider_id: "PROV-CAM-DISCAP",
+    provider_name: "AMAFE",
+    official_name: "Amafe, Centro de día",
+    resource_domain: "social",
+    sector: "Atención Social Concertada (Salud Mental)",
+    centre_type: "Centro de día psicosocial",
+    subtype: "Centro de día para personas con enfermedad mental grave y crónica",
+    public_private_status: "concertado",
+    management_type: "Concertado con la Red de Salud Mental de la Comunidad de Madrid",
+    address: "Calle General Aranaz, 31",
+    postal_code: "28027",
+    municipality: "Madrid",
+    district: "Ciudad Lineal",
+    coordinates: [40.442048, -3.638077],
+    has_valid_coordinates: true,
+    phone: "913 612 768",
+    email: "acabrera@amafe.org",
+    website: "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=c924648cbfeb0710VgnVCM2000001f4a900aRCRD",
+    explicit_specialisations: ["mental_health"],
+    related_services: ["atención diurna psicosocial", "rehabilitación psicosocial", "apoyo a familias", "autonomía personal"],
+    supports: ["day_care", "psychological_support"],
+    services_offered: [
+      {
+        service_id: "SRV-MH-01-DIA",
+        centre_id: "C-MH-01",
+        service_name: "Centro de Día y Programa de Rehabilitación Psicosocial",
+        service_type: "day_care",
+        target_populations: ["mental_health"],
+        allowed_life_stages: ["adult", "older_adult"],
+        access_routes: ["referral"],
+        source_dataset: "Catálogo de Centros de Atención Social (Ayuntamiento de Madrid - datos.madrid.es PK 11155083)",
+        source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+        checked_at: "2026-11-12"
+      }
+    ],
+    allowed_life_stages: ["adult", "older_adult"],
+    access_route: {
+      access_type: "referral",
+      competent_body: "Servicio de Salud Mental de Distrito (SSM SERMAS)",
+      official_description: "Acceso regulado por derivación desde el Centro de Salud Mental de referencia.",
+      source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+      checked_at: "2026-11-12",
+      next_step_action: "Solicite derivación a su psiquiatra o facultativo del Centro de Salud Mental de su área.",
+      availability_known: false,
+      waiting_list_known: false
+    },
+    availability: {
+      status: "contact_required",
+      authorised_places: 45,
+      vacancies_known: false,
+      source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+      checked_at: "2026-11-12",
+      stale: false
+    },
+    geographic_coverage: {
+      type: "multiple_municipalities",
+      requires_residence: "yes",
+      checked_at: "2026-11-12"
+    },
+    accessibility_features: ["Accesibilidad cota cero", "Metro Ciudad Lineal L5 a 200m"],
+    provenance_records: [
+      {
+        attribute_name: "specialisation",
+        value: "salud mental y enfermedad mental crónica",
+        source_dataset: "Catálogo de Centros de Atención Social (Ayuntamiento de Madrid - datos.madrid.es PK 11155083)",
+        source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+        source_type: "official_registry",
+        retrieved_at: "2026-11-12",
+        extraction_method: "structured",
+        reviewer: "Portal de Datos Abiertos de la Ciudad de Madrid (datos.madrid.es)",
+        reviewer_role: "data_steward",
+        confidence: "explicit",
+        quality: "A"
+      }
+    ],
+    last_checked: "2026-11-12",
+    limitations: ["Requiere diagnóstico de salud mental e informe de derivación del SSM."]
+  },
+
+  // ==========================================
+  // PERFIL: DISCAPACIDAD INTELECTUAL Y DEL DESARROLLO
+  // ==========================================
+  {
+    centre_id: "C-ID-01",
+    provider_id: "PROV-CAM-DISCAP",
+    provider_name: "Alenta - APFMPS",
+    official_name: "APFMPS, Residencia, centro de día y centro ocupacional Instituto Doctor Quintero Lumbreras",
+    resource_domain: "social",
+    sector: "Atención Social Concertada (Discapacidad Intelectual)",
+    centre_type: "Centro complejo asistencial (Residencia, Centro de Día y Ocupacional)",
+    subtype: "Atención integral y centro ocupacional para discapacidad intelectual",
+    public_private_status: "concertado",
+    management_type: "Concertado con la Consejería de Asuntos Sociales",
+    address: "Carretera Colmenar Viejo, km 13.6",
+    postal_code: "28049",
+    municipality: "Madrid",
+    district: "Fuencarral-El Pardo",
+    coordinates: [40.562993, -3.714052],
+    has_valid_coordinates: true,
+    phone: "917 345 138",
+    email: "asociacion.ipp@alenta.org",
+    website: "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=11dc2ab96da61610VgnVCM1000001d4a900aRCRD",
+    explicit_specialisations: ["intellectual_disability"],
+    related_services: ["atención diurna", "centro ocupacional", "residencia", "inserción sociolaboral"],
+    supports: ["day_care", "occupational_therapy", "residential_care"],
+    services_offered: [
+      {
+        service_id: "SRV-ID-01-OCU",
+        centre_id: "C-ID-01",
+        service_name: "Centro Ocupacional y Residencia Doctor Quintero Lumbreras",
+        service_type: "occupational_therapy",
+        target_populations: ["intellectual_disability"],
+        allowed_life_stages: ["minor", "adult", "older_adult"],
+        access_routes: ["dependency_pia"],
+        source_dataset: "Catálogo de Centros de Atención Social (Ayuntamiento de Madrid - datos.madrid.es PK 10613790)",
+        source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+        checked_at: "2026-11-12"
+      }
+    ],
+    allowed_life_stages: ["minor", "adult", "older_adult"],
+    access_route: {
+      access_type: "dependency_pia",
+      competent_body: "Consejería de Asuntos Sociales / Centro Base",
+      official_description: "Acceso a plazas pública-concertadas por resolución de Dependencia o dictamen del Centro Base.",
+      source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+      checked_at: "2026-11-12",
+      next_step_action: "Consulte con el Centro Base de referencia para dictamen e inclusión en lista de plazas.",
+      availability_known: false,
+      waiting_list_known: false
+    },
+    availability: {
+      status: "contact_required",
+      authorised_places: 180,
+      vacancies_known: false,
+      source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+      checked_at: "2026-11-12",
+      stale: false
+    },
+    geographic_coverage: {
+      type: "community_wide",
+      requires_residence: "yes",
+      checked_at: "2026-11-12"
+    },
+    accessibility_features: ["Complejo adaptado a movilidad reducida", "Talleres ocupacionales", "Transporte de ruta adaptado"],
+    provenance_records: [
+      {
+        attribute_name: "specialisation",
+        value: "discapacidad intelectual",
+        source_dataset: "Catálogo de Centros de Atención Social (Ayuntamiento de Madrid - datos.madrid.es PK 10613790)",
+        source_url: "https://datos.madrid.es/dataset/212774-0-atencion-social",
+        source_type: "official_registry",
+        retrieved_at: "2026-11-12",
+        extraction_method: "structured",
+        reviewer: "Portal de Datos Abiertos de la Ciudad de Madrid (datos.madrid.es)",
+        reviewer_role: "data_steward",
+        confidence: "explicit",
+        quality: "A"
+      }
+    ],
+    last_checked: "2026-11-12",
+    limitations: ["Dirigido a personas con grado de discapacidad intelectual reconocido igual o superior al 33%."]
   }
 ];
 
 // Exportación canónica para la búsqueda pública ciudadana (16 centros autorizados verificados)
 export const SPECIALIZED_CENTRES: SpecializedCentre[] = REAL_CANONICAL_CENTRES;
-

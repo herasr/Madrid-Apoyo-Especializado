@@ -128,11 +128,11 @@ export async function runIngestionProcess() {
   // 2. Decodificar según codificación Latin1/ISO-8859-1 oficial
   const decodedContent = new TextDecoder('latin1').decode(rawBuffer);
 
-  // 3. Guardar captura exacta del snapshot
+  // 3. Guardar captura en su formato original exacto (mantiene la huella SHA-256 idéntica al archivo en disco)
   const rawFilePath = path.join(snapshotsDir, `snapshot-${dateStr}.csv`);
   const latestFilePath = path.join(snapshotsDir, `snapshot-latest.csv`);
-  fs.writeFileSync(rawFilePath, decodedContent, 'utf-8');
-  fs.writeFileSync(latestFilePath, decodedContent, 'utf-8');
+  fs.writeFileSync(rawFilePath, rawBuffer);
+  fs.writeFileSync(latestFilePath, rawBuffer);
 
   // 4. Parsear registros reales del catálogo
   const rows = parseCSV(decodedContent);
