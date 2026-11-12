@@ -32,7 +32,7 @@ import { TaxonomyGovernanceView } from './components/specialized/TaxonomyGoverna
 import { SpecializedTestsRunnerView } from './components/specialized/SpecializedTestsRunnerView';
 import { LifeStageTransitionBanner } from './components/specialized/LifeStageTransitionBanner';
 
-import { AlertTriangle, RotateCcw, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, RotateCcw } from 'lucide-react';
 import { CORE_PROFILES, EXPERIMENTAL_PROFILES, PENDING_PROFILES, LIFE_STAGES, SUPPORT_TYPES, FUNCTIONAL_NEEDS } from './data/specializedTaxonomy';
 import { MADRID_MUNICIPALITIES } from './data/municipalitiesData';
 import { ProfileId, SupportTypeId, FunctionalNeedId, LifeStage, NetworkPreference, CombinationMode } from './types/specialized';
@@ -395,19 +395,6 @@ export default function App() {
                 onDismiss={() => setDismissedTransition(true)}
               />
             )}
-
-            {/* Indicador de procedencia de datos abiertos reales */}
-            <div className="mb-4 px-3.5 py-2.5 bg-emerald-50/70 border border-emerald-200/90 rounded-xl text-xs text-emerald-950 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" aria-hidden="true" />
-                <span>
-                  <strong>Datos Abiertos Oficiales:</strong> Recursos verificados contra el Catálogo de Centros de Atención Social (<a href="https://datos.madrid.es/dataset/212774-0-atencion-social" target="_blank" rel="noreferrer" className="underline font-semibold hover:text-emerald-900">datos.madrid.es</a>) y registros públicos de la Comunidad de Madrid. Firma SHA-256 contrastada.
-                </span>
-              </div>
-              <span className="text-[11px] font-mono font-semibold text-emerald-800 bg-emerald-100/70 px-2 py-0.5 rounded self-start sm:self-auto shrink-0">
-                100% Real · Sin datos ficticios
-              </span>
-            </div>
 
             {/* Filtros acumulativos con lógica AND entre dimensiones y OR en apoyos */}
             <SpecializedSearchFilters
