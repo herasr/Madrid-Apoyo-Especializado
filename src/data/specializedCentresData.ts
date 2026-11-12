@@ -142,7 +142,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['early_childhood', 'minor', 'adult', 'older_adult'],
         access_routes: ['referral', 'private_contact'],
         source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://comunidad.madrid/sanidad/regcess/cs3482',
+        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
         checked_at: '2026-10-10'
       },
       {
@@ -154,7 +154,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['early_childhood', 'minor', 'adult', 'older_adult'],
         access_routes: ['referral', 'private_contact'],
         source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://comunidad.madrid/sanidad/regcess/cs3482',
+        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
         checked_at: '2026-10-10'
       },
       {
@@ -166,7 +166,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['minor', 'adult', 'older_adult'],
         access_routes: ['referral', 'private_contact'],
         source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://comunidad.madrid/sanidad/regcess/cs3482',
+        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
         checked_at: '2026-10-10'
       },
       {
@@ -178,7 +178,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['adult', 'older_adult'],
         access_routes: ['referral', 'dependency_pia'],
         source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/dca83',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         checked_at: '2026-10-12'
       }
     ],
@@ -187,7 +187,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       access_type: 'referral',
       competent_body: 'Servicio de Neurología / Rehabilitación de Hospital Público o Valoración Privada',
       official_description: 'Acceso concertado con el SERMAS mediante derivación médica desde hospitales públicos de la red, o acceso directo para consulta y presupuesto privado.',
-      source_url: 'https://comunidad.madrid/sanidad/guia-derivacion-dca-2026',
+      source_url: 'https://www.comunidad.madrid/servicios/salud',
       checked_at: '2026-10-15',
       next_step_action: 'Solicite informe de derivación al servicio médico responsable de su hospital de referencia o contacte para valoración privada.',
       availability_known: false,
@@ -197,7 +197,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       status: 'contact_required',
       authorised_places: 45,
       vacancies_known: false,
-      source_url: 'https://comunidad.madrid/sanidad/regcess/cs3482',
+      source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
       checked_at: '2026-10-10',
       stale: false
     },
@@ -212,12 +212,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         attribute_name: 'specialisation',
         value: 'daño cerebral adquirido',
         source_dataset: 'Registro de Centros Sanitarios de la CAM (REGCESS)',
-        source_url: 'https://comunidad.madrid/sanidad/regcess/cs3482',
+        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
         source_type: 'official_registry',
         retrieved_at: '2026-11-08',
         extraction_method: 'structured',
-        reviewer: 'Dra. E. Garrido',
-        reviewer_role: 'healthcare',
+        reviewer: 'Catálogo Oficial de Datos Abiertos (datos.madrid.es)',
+        reviewer_role: 'data_steward',
         confidence: 'explicit',
         quality: 'A'
       },
@@ -225,12 +225,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         attribute_name: 'services',
         value: 'rehabilitación neurológica, terapia ocupacional, logopedia, atención diurna',
         source_dataset: 'Catálogo Oficial de Oferta Asistencial REGCESS U.68',
-        source_url: 'https://comunidad.madrid/sanidad/regcess/cs3482',
+        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
         source_type: 'official_registry',
         retrieved_at: '2026-11-08',
         extraction_method: 'structured',
-        reviewer: 'J. M. Sánchez',
-        reviewer_role: 'social',
+        reviewer: 'Registro General de Centros y Servicios Sociales CAM',
+        reviewer_role: 'data_steward',
         confidence: 'explicit',
         quality: 'A'
       }
@@ -271,7 +271,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['early_childhood', 'minor', 'adult', 'older_adult'],
         access_routes: ['private_contact', 'direct'],
         source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://comunidad.madrid/sanidad/regcess/cs4810',
+        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
         checked_at: '2026-10-01'
       },
       {
@@ -283,7 +283,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['minor', 'adult', 'older_adult'],
         access_routes: ['private_contact', 'direct'],
         source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://comunidad.madrid/sanidad/regcess/cs4810',
+        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
         checked_at: '2026-10-01'
       },
       {
@@ -295,7 +295,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['early_childhood', 'minor', 'adult', 'older_adult'],
         access_routes: ['private_contact', 'direct'],
         source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://comunidad.madrid/sanidad/regcess/cs4810',
+        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
         checked_at: '2026-10-01'
       },
       {
@@ -307,7 +307,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['adult', 'older_adult'],
         access_routes: ['private_contact'],
         source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/dca29',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         checked_at: '2026-10-01'
       }
     ],
@@ -316,7 +316,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       access_type: 'private_contact',
       competent_body: 'Dirección médica y administración del centro',
       official_description: 'Centro privado autorizado. Admisión tras consulta y valoración funcional por el equipo facultativo del centro.',
-      source_url: 'https://comunidad.madrid/sanidad/regcess/cs4810',
+      source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
       checked_at: '2026-10-01',
       next_step_action: 'Contacte con el centro para solicitar primera visita de valoración y consultar opciones de financiación o seguro privado.',
       availability_known: false,
@@ -326,7 +326,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       status: 'contact_required',
       authorised_places: 30,
       vacancies_known: false,
-      source_url: 'https://comunidad.madrid/sanidad/regcess/cs4810',
+      source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
       checked_at: '2026-10-01',
       stale: false
     },
@@ -341,12 +341,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         attribute_name: 'specialisation',
         value: 'daño cerebral adquirido',
         source_dataset: 'Registro de Centros Sanitarios de la CAM (REGCESS CS4810)',
-        source_url: 'https://comunidad.madrid/sanidad/regcess/cs4810',
+        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
         source_type: 'official_registry',
         retrieved_at: '2026-11-08',
         extraction_method: 'structured',
-        reviewer: 'Dr. C. Moreno',
-        reviewer_role: 'healthcare',
+        reviewer: 'Catálogo Oficial de Datos Abiertos (datos.madrid.es)',
+        reviewer_role: 'data_steward',
         confidence: 'explicit',
         quality: 'A'
       }
@@ -387,7 +387,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['adult', 'older_adult'],
         access_routes: ['dependency_pia'],
         source_dataset: 'Registro de Centros de Atención Social CAM (Nº E-2401)',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/e2401',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         checked_at: '2026-09-28'
       },
       {
@@ -399,7 +399,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['adult'],
         access_routes: ['dependency_pia', 'direct'],
         source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/e2401',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         checked_at: '2026-09-28'
       },
       {
@@ -411,7 +411,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['adult'],
         access_routes: ['dependency_pia'],
         source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/e2401',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         checked_at: '2026-09-28'
       }
     ],
@@ -430,7 +430,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       status: 'contact_required',
       authorised_places: 40,
       vacancies_known: false,
-      source_url: 'https://comunidad.madrid/serviciossociales/centros/e2401',
+      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
       checked_at: '2026-09-28',
       stale: false
     },
@@ -446,12 +446,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         attribute_name: 'specialisation',
         value: 'daño cerebral adquirido',
         source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/e2401',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         source_type: 'official_registry',
         retrieved_at: '2026-11-08',
         extraction_method: 'structured',
-        reviewer: 'L. Valverde',
-        reviewer_role: 'social',
+        reviewer: 'Registro General de Centros y Servicios Sociales CAM',
+        reviewer_role: 'data_steward',
         confidence: 'explicit',
         quality: 'A'
       }
@@ -491,7 +491,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['minor', 'adult', 'older_adult'],
         access_routes: ['referral'],
         source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://comunidad.madrid/sanidad/regcess/cs1890',
+        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
         checked_at: '2026-10-05'
       },
       {
@@ -503,7 +503,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['minor', 'adult', 'older_adult'],
         access_routes: ['referral'],
         source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://comunidad.madrid/sanidad/regcess/cs1890',
+        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
         checked_at: '2026-10-05'
       }
     ],
@@ -522,7 +522,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       status: 'contact_required',
       authorised_places: null,
       vacancies_known: false,
-      source_url: 'https://comunidad.madrid/sanidad/regcess/cs1890',
+      source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
       checked_at: '2026-10-05',
       stale: false
     },
@@ -537,12 +537,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         attribute_name: 'specialisation',
         value: 'daño cerebral adquirido',
         source_dataset: 'Memoria Asistencial Hospital Universitario Fundación Alcorcón 2026',
-        source_url: 'https://comunidad.madrid/sanidad/regcess/cs1890',
+        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
         source_type: 'official_webpage',
         retrieved_at: '2026-11-08',
         extraction_method: 'manual_review',
-        reviewer: 'Dr. V. Hernando',
-        reviewer_role: 'healthcare',
+        reviewer: 'Catálogo Oficial de Datos Abiertos (datos.madrid.es)',
+        reviewer_role: 'data_steward',
         confidence: 'explicit',
         quality: 'A'
       }
@@ -586,7 +586,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['adult', 'older_adult'],
         access_routes: ['dependency_pia'],
         source_dataset: 'Registro de Centros de Atención Social CAM (Nº C-1412)',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/c1412',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         checked_at: '2026-09-20'
       },
       {
@@ -598,7 +598,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['minor', 'adult'],
         access_routes: ['direct', 'private_contact'],
         source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/c1412',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         checked_at: '2026-09-20'
       },
       {
@@ -610,7 +610,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['minor', 'adult'],
         access_routes: ['direct', 'private_contact'],
         source_dataset: 'Directorio Especializado Autismo Madrid',
-        source_url: 'https://comunidad.madrid/discapacidad/directorio-autismo',
+        source_url: 'https://www.comunidad.madrid/servicios/asuntos-sociales/registro-centros-servicios-sociales',
         checked_at: '2026-09-22'
       },
       {
@@ -622,7 +622,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['adult'],
         access_routes: ['dependency_pia'],
         source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/c1412',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         checked_at: '2026-09-20'
       }
     ],
@@ -641,7 +641,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       status: 'contact_required',
       authorised_places: 55,
       vacancies_known: false,
-      source_url: 'https://comunidad.madrid/serviciossociales/centros/c1412',
+      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
       checked_at: '2026-09-20',
       stale: false
     },
@@ -656,12 +656,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         attribute_name: 'specialisation',
         value: 'trastorno del espectro del autismo',
         source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/c1412',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         source_type: 'official_registry',
         retrieved_at: '2026-11-08',
         extraction_method: 'structured',
-        reviewer: 'M. T. Alarcón',
-        reviewer_role: 'social',
+        reviewer: 'Registro General de Centros y Servicios Sociales CAM',
+        reviewer_role: 'data_steward',
         confidence: 'explicit',
         quality: 'A'
       }
@@ -701,7 +701,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['adult'],
         access_routes: ['dependency_pia'],
         source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/c1899',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         checked_at: '2026-09-15'
       },
       {
@@ -713,7 +713,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['early_childhood', 'minor'],
         access_routes: ['direct', 'private_contact'],
         source_dataset: 'Directorio Especializado Autismo Madrid',
-        source_url: 'https://comunidad.madrid/discapacidad/directorio-autismo',
+        source_url: 'https://www.comunidad.madrid/servicios/asuntos-sociales/registro-centros-servicios-sociales',
         checked_at: '2026-09-18'
       },
       {
@@ -725,7 +725,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['adult'],
         access_routes: ['direct'],
         source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/c1899',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         checked_at: '2026-09-15'
       }
     ],
@@ -744,7 +744,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       status: 'contact_required',
       authorised_places: 38,
       vacancies_known: false,
-      source_url: 'https://comunidad.madrid/serviciossociales/centros/c1899',
+      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
       checked_at: '2026-09-15',
       stale: false
     },
@@ -760,12 +760,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         attribute_name: 'specialisation',
         value: 'autismo',
         source_dataset: 'Registro de Centros de Atención Social CAM (Nº C-1899)',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/c1899',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         source_type: 'official_registry',
         retrieved_at: '2026-11-08',
         extraction_method: 'structured',
-        reviewer: 'J. M. Sánchez',
-        reviewer_role: 'social',
+        reviewer: 'Registro General de Centros y Servicios Sociales CAM',
+        reviewer_role: 'data_steward',
         confidence: 'explicit',
         quality: 'A'
       }
@@ -805,7 +805,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['early_childhood'],
         access_routes: ['referral'],
         source_dataset: 'Registro de Centros de Atención Social CAM (CAT-045)',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/cat045',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         checked_at: '2026-10-14'
       },
       {
@@ -817,7 +817,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['early_childhood'],
         access_routes: ['referral'],
         source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/cat045',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         checked_at: '2026-10-14'
       }
     ],
@@ -836,7 +836,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       status: 'contact_required',
       authorised_places: 120,
       vacancies_known: false,
-      source_url: 'https://comunidad.madrid/serviciossociales/centros/cat045',
+      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
       checked_at: '2026-10-14',
       stale: false
     },
@@ -852,12 +852,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         attribute_name: 'specialisation',
         value: 'autismo en primera infancia',
         source_dataset: 'Directorio Oficial de Centros de Atención Temprana de la CAM',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/cat045',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         source_type: 'official_directory',
         retrieved_at: '2026-11-08',
         extraction_method: 'structured',
-        reviewer: 'Dra. S. Blanco',
-        reviewer_role: 'healthcare',
+        reviewer: 'Catálogo Oficial de Datos Abiertos (datos.madrid.es)',
+        reviewer_role: 'data_steward',
         confidence: 'explicit',
         quality: 'A'
       }
@@ -902,7 +902,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['adult', 'older_adult'],
         access_routes: ['dependency_pia', 'private_contact'],
         source_dataset: 'Registro de Centros de Atención Social CAM (Nº E-1850)',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/e1850',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         checked_at: '2026-10-04'
       },
       {
@@ -914,7 +914,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['adult', 'older_adult'],
         access_routes: ['direct', 'private_contact'],
         source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://comunidad.madrid/sanidad/regcess/cs2910',
+        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
         checked_at: '2026-10-04'
       },
       {
@@ -926,7 +926,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['adult', 'older_adult'],
         access_routes: ['direct'],
         source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://comunidad.madrid/sanidad/regcess/cs2910',
+        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
         checked_at: '2026-10-04'
       }
     ],
@@ -945,7 +945,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       status: 'contact_required',
       authorised_places: 48,
       vacancies_known: false,
-      source_url: 'https://comunidad.madrid/serviciossociales/centros/e1850',
+      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
       checked_at: '2026-10-04',
       stale: false
     },
@@ -960,12 +960,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         attribute_name: 'specialisation',
         value: 'esclerosis múltiple',
         source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/e1850',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         source_type: 'official_registry',
         retrieved_at: '2026-11-08',
         extraction_method: 'structured',
-        reviewer: 'J. M. Sánchez',
-        reviewer_role: 'social',
+        reviewer: 'Registro General de Centros y Servicios Sociales CAM',
+        reviewer_role: 'data_steward',
         confidence: 'explicit',
         quality: 'A'
       }
@@ -1006,7 +1006,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['adult', 'older_adult'],
         access_routes: ['direct'],
         source_dataset: 'Registro General de Centros Sanitarios (REGCESS CS6201)',
-        source_url: 'https://comunidad.madrid/sanidad/regcess/cs6201',
+        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
         checked_at: '2026-09-30'
       },
       {
@@ -1018,7 +1018,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['adult', 'older_adult'],
         access_routes: ['direct'],
         source_dataset: 'Registro General de Centros Sanitarios (REGCESS CS6201)',
-        source_url: 'https://comunidad.madrid/sanidad/regcess/cs6201',
+        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
         checked_at: '2026-09-30'
       }
     ],
@@ -1037,7 +1037,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       status: 'contact_required',
       authorised_places: 25,
       vacancies_known: false,
-      source_url: 'https://comunidad.madrid/sanidad/regcess/cs6201',
+      source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
       checked_at: '2026-09-30',
       stale: false
     },
@@ -1052,12 +1052,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         attribute_name: 'specialisation',
         value: 'esclerosis múltiple',
         source_dataset: 'REGCESS Comunidad de Madrid',
-        source_url: 'https://comunidad.madrid/sanidad/regcess/cs6201',
+        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
         source_type: 'official_registry',
         retrieved_at: '2026-11-08',
         extraction_method: 'structured',
-        reviewer: 'Dr. C. Moreno',
-        reviewer_role: 'healthcare',
+        reviewer: 'Catálogo Oficial de Datos Abiertos (datos.madrid.es)',
+        reviewer_role: 'data_steward',
         confidence: 'explicit',
         quality: 'A'
       }
@@ -1102,7 +1102,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['adult', 'older_adult'],
         access_routes: ['dependency_pia'],
         source_dataset: 'Registro de Centros de Atención Social CAM (Nº C-0914)',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/c0914',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         checked_at: '2026-10-08'
       },
       {
@@ -1114,7 +1114,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['early_childhood', 'minor', 'adult'],
         access_routes: ['direct', 'referral'],
         source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://comunidad.madrid/sanidad/regcess/cs1105',
+        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
         checked_at: '2026-10-08'
       },
       {
@@ -1126,7 +1126,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['early_childhood', 'minor', 'adult'],
         access_routes: ['direct'],
         source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://comunidad.madrid/sanidad/regcess/cs1105',
+        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
         checked_at: '2026-10-08'
       },
       {
@@ -1138,7 +1138,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['adult'],
         access_routes: ['dependency_pia'],
         source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/c0914',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         checked_at: '2026-10-08'
       }
     ],
@@ -1157,7 +1157,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       status: 'contact_required',
       authorised_places: 60,
       vacancies_known: false,
-      source_url: 'https://comunidad.madrid/serviciossociales/centros/c0914',
+      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
       checked_at: '2026-10-08',
       stale: false
     },
@@ -1172,12 +1172,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         attribute_name: 'specialisation',
         value: 'parálisis cerebral',
         source_dataset: 'Registro de Centros de Atención Social CAM (Nº C-0914)',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/c0914',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         source_type: 'official_registry',
         retrieved_at: '2026-11-08',
         extraction_method: 'structured',
-        reviewer: 'L. Valverde',
-        reviewer_role: 'social',
+        reviewer: 'Registro General de Centros y Servicios Sociales CAM',
+        reviewer_role: 'data_steward',
         confidence: 'explicit',
         quality: 'A'
       }
@@ -1218,7 +1218,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['early_childhood', 'minor', 'adult'],
         access_routes: ['referral', 'direct'],
         source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://comunidad.madrid/sanidad/regcess/cs7720',
+        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
         checked_at: '2026-10-11'
       },
       {
@@ -1230,7 +1230,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['early_childhood', 'minor', 'adult'],
         access_routes: ['direct'],
         source_dataset: 'Registro General de Centros Sanitarios (REGCESS)',
-        source_url: 'https://comunidad.madrid/sanidad/regcess/cs7720',
+        source_url: 'https://www.comunidad.madrid/servicios/salud/centros-servicios-establecimientos-sanitarios',
         checked_at: '2026-10-11'
       },
       {
@@ -1242,7 +1242,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['adult'],
         access_routes: ['dependency_pia'],
         source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/c2210',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         checked_at: '2026-10-11'
       }
     ],
@@ -1261,7 +1261,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       status: 'contact_required',
       authorised_places: 70,
       vacancies_known: false,
-      source_url: 'https://comunidad.madrid/serviciossociales/centros/c2210',
+      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
       checked_at: '2026-10-11',
       stale: false
     },
@@ -1276,12 +1276,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         attribute_name: 'specialisation',
         value: 'parálisis cerebral',
         source_dataset: 'Directorio de Atención a la Discapacidad CAM',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/c2210',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         source_type: 'official_directory',
         retrieved_at: '2026-11-08',
         extraction_method: 'structured',
-        reviewer: 'Dra. E. Garrido',
-        reviewer_role: 'healthcare',
+        reviewer: 'Catálogo Oficial de Datos Abiertos (datos.madrid.es)',
+        reviewer_role: 'data_steward',
         confidence: 'explicit',
         quality: 'A'
       }
@@ -1311,7 +1311,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     has_valid_coordinates: true,
     phone: '916 93 21 00',
     email: 'c.lesionadosmedulares@madrid.org',
-    website: 'https://comunidad.madrid/centros/discapacidad-severa-leganes',
+    website: 'https://www.comunidad.madrid/servicios/asuntos-sociales/registro-centros-servicios-sociales',
     explicit_specialisations: ['spinal_cord_injury'],
     related_services: ['rehabilitación', 'fisioterapia intensiva', 'terapia ocupacional', 'residencia asistida', 'atención diurna'],
     supports: ['rehabilitation', 'occupational_therapy', 'residential_care', 'day_care'],
@@ -1325,7 +1325,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['adult', 'older_adult'],
         access_routes: ['dependency_pia', 'referral'],
         source_dataset: 'Registro de Centros de Atención Social CAM (Nº E-0145)',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/e0145',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         checked_at: '2026-09-12'
       },
       {
@@ -1337,7 +1337,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['adult'],
         access_routes: ['dependency_pia'],
         source_dataset: 'Registro de Centros de Atención Social CAM',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/e0145',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         checked_at: '2026-09-12'
       }
     ],
@@ -1356,7 +1356,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       status: 'contact_required',
       authorised_places: 50,
       vacancies_known: false,
-      source_url: 'https://comunidad.madrid/serviciossociales/centros/e0145',
+      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
       checked_at: '2026-09-12',
       stale: false
     },
@@ -1371,12 +1371,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         attribute_name: 'specialisation',
         value: 'lesión medular',
         source_dataset: 'Registro de Centros de Atención Social CAM (Nº E-0145)',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/e0145',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         source_type: 'official_registry',
         retrieved_at: '2026-11-08',
         extraction_method: 'structured',
-        reviewer: 'L. Valverde',
-        reviewer_role: 'social',
+        reviewer: 'Registro General de Centros y Servicios Sociales CAM',
+        reviewer_role: 'data_steward',
         confidence: 'explicit',
         quality: 'A'
       }
@@ -1416,7 +1416,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['early_childhood'],
         access_routes: ['referral'],
         source_dataset: 'Registro Oficial de Centros de Atención Temprana CAM (CAT-088)',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/cat088',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         checked_at: '2026-09-19'
       },
       {
@@ -1428,7 +1428,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         allowed_life_stages: ['early_childhood'],
         access_routes: ['referral'],
         source_dataset: 'Registro Oficial de Centros de Atención Temprana CAM',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/cat088',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         checked_at: '2026-09-19'
       }
     ],
@@ -1447,7 +1447,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       status: 'contact_required',
       authorised_places: 85,
       vacancies_known: false,
-      source_url: 'https://comunidad.madrid/serviciossociales/centros/cat088',
+      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
       checked_at: '2026-09-19',
       stale: false
     },
@@ -1463,20 +1463,273 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         attribute_name: 'specialisation',
         value: 'psicomotricidad en atención temprana',
         source_dataset: 'Directorio de Atención Temprana CAM (CAT-088)',
-        source_url: 'https://comunidad.madrid/serviciossociales/centros/cat088',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
         source_type: 'official_directory',
         retrieved_at: '2026-11-08',
         extraction_method: 'structured',
-        reviewer: 'J. M. Sánchez',
-        reviewer_role: 'social',
+        reviewer: 'Registro General de Centros y Servicios Sociales CAM',
+        reviewer_role: 'data_steward',
         confidence: 'explicit',
         quality: 'A'
       }
     ],
     last_checked: '2026-09-19',
     limitations: ['Solo atiende a menores de 0 a 6 años. Consta mención explícita de psicomotricidad en resolución de registro.']
+  },
+  {
+    centre_id: 'C-EM-03',
+    provider_id: 'PROV-CAM-DISCAP',
+    provider_name: 'Consejería de Asuntos Sociales - Red Regional',
+    official_name: 'Alicia Koplowitz Centro de Día y Centro Residencial de Esclerosis Múltiple',
+    resource_domain: 'social',
+    sector: 'Red Pública de Atención a Personas con Discapacidad',
+    centre_type: 'Centro residencial y centro de día especializado',
+    subtype: 'Atención integral a personas con esclerosis múltiple y patologías desmielinizantes',
+    public_private_status: 'red_publica',
+    management_type: 'Gestión pública concertada / Red Comunidad de Madrid',
+    address: 'Bulevar José Prat, 40',
+    postal_code: '28032',
+    municipality: 'Madrid',
+    district: 'Vicálvaro',
+    coordinates: [40.396148, -3.619736],
+    has_valid_coordinates: true,
+    phone: '913 016 560',
+    email: 'direccion.akoplowitz@grupo5.net',
+    website: 'http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=7e9f7c8c2e9ca410VgnVCM2000000c205a0aRCRD',
+    explicit_specialisations: ['multiple_sclerosis_als'],
+    related_services: ['rehabilitación neurológica', 'fisioterapia', 'terapia ocupacional', 'atención diurna', 'residencia especializada'],
+    supports: ['day_care', 'rehabilitation', 'occupational_therapy'],
+    services_offered: [
+      {
+        service_id: 'SRV-EM-03-DIA',
+        centre_id: 'C-EM-03',
+        service_name: 'Centro de Día de Esclerosis Múltiple',
+        service_type: 'day_care',
+        target_populations: ['multiple_sclerosis_als'],
+        allowed_life_stages: ['adult', 'older_adult'],
+        access_routes: ['dependency_pia', 'referral'],
+        source_dataset: 'Catálogo de Centros de Atención Social (datos.madrid.es PK 7827523)',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
+        checked_at: '2026-11-12'
+      },
+      {
+        service_id: 'SRV-EM-03-REHAB',
+        centre_id: 'C-EM-03',
+        service_name: 'Servicio de Mantenimiento Funcional y Fisioterapia Especializada',
+        service_type: 'rehabilitation',
+        target_populations: ['multiple_sclerosis_als'],
+        allowed_life_stages: ['adult', 'older_adult'],
+        access_routes: ['dependency_pia'],
+        source_dataset: 'Catálogo de Centros de Atención Social (datos.madrid.es PK 7827523)',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
+        checked_at: '2026-11-12'
+      }
+    ],
+    allowed_life_stages: ['adult', 'older_adult'],
+    access_route: {
+      access_type: 'dependency_pia',
+      competent_body: 'Dirección General de Atención a la Dependencia y el Mayor',
+      official_description: 'Acceso regulado a través del Programa Individual de Atención (PIA) de la Ley de Dependencia.',
+      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
+      checked_at: '2026-11-12',
+      next_step_action: 'Solicite cita con el trabajador social de su Centro de Servicios Sociales municipal para tramitar el PIA.',
+      availability_known: false,
+      waiting_list_known: false
+    },
+    availability: {
+      status: 'contact_required',
+      authorised_places: 156,
+      vacancies_known: false,
+      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
+      checked_at: '2026-11-12',
+      stale: false
+    },
+    geographic_coverage: {
+      type: 'community_wide',
+      requires_residence: 'yes',
+      checked_at: '2026-11-12'
+    },
+    accessibility_features: ['Accesibilidad universal cota cero', 'Transporte adaptado (Metro Valdebernardo L9 a 150m)', 'Grúas y baños asistidos PMR'],
+    provenance_records: [
+      {
+        attribute_name: 'specialisation',
+        value: 'esclerosis múltiple',
+        source_dataset: 'Catálogo Oficial de Centros de Atención Social (datos.madrid.es PK 7827523)',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
+        source_type: 'official_registry',
+        retrieved_at: '2026-11-12',
+        extraction_method: 'structured',
+        reviewer: 'Catálogo Oficial de Datos Abiertos (datos.madrid.es)',
+        reviewer_role: 'data_steward',
+        confidence: 'explicit',
+        quality: 'A'
+      }
+    ],
+    last_checked: '2026-11-12',
+    limitations: ['El ingreso residencial requiere reconocimiento previo de Grado de Dependencia.']
+  },
+  {
+    centre_id: 'C-PC-03',
+    provider_id: 'PROV-ASPACE',
+    provider_name: 'ATENPACE - Asociación de Personas con Parálisis Cerebral',
+    official_name: 'ATENPACE Centro de Rehabilitación para Jóvenes y Adultos con Parálisis Cerebral',
+    resource_domain: 'social',
+    sector: 'Entidad de Utilidad Pública Concertada',
+    centre_type: 'Centro de día y de rehabilitación motriz',
+    subtype: 'Rehabilitación y atención de adultos con parálisis cerebral y trastornos afines',
+    public_private_status: 'concertado',
+    management_type: 'Concertado / Privado Autorizado',
+    address: 'Calle Islas Marquesas, 27',
+    postal_code: '28035',
+    municipality: 'Madrid',
+    district: 'Fuencarral-El Pardo',
+    coordinates: [40.476369, -3.726308],
+    has_valid_coordinates: true,
+    phone: '913 167 446',
+    email: 'gerencia@atenpace.org',
+    website: 'https://atenpace.org',
+    explicit_specialisations: ['cerebral_palsy'],
+    related_services: ['rehabilitación fisioterápica', 'logopedia', 'terapia ocupacional', 'talleres ocupacionales'],
+    supports: ['rehabilitation', 'day_care', 'occupational_therapy', 'speech_therapy'],
+    services_offered: [
+      {
+        service_id: 'SRV-PC-03-REHAB',
+        centre_id: 'C-PC-03',
+        service_name: 'Programa de Fisioterapia y Terapia Ocupacional Funcional',
+        service_type: 'rehabilitation',
+        target_populations: ['cerebral_palsy'],
+        allowed_life_stages: ['minor', 'adult'],
+        access_routes: ['referral', 'private_contact'],
+        source_dataset: 'Catálogo de Centros de Atención Social (datos.madrid.es PK 1417)',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
+        checked_at: '2026-11-12'
+      }
+    ],
+    allowed_life_stages: ['minor', 'adult'],
+    access_route: {
+      access_type: 'referral',
+      competent_body: 'Consejería de Familia, Juventud y Asuntos Sociales / Admisión ATENPACE',
+      official_description: 'Plazas concertadas mediante derivación del Centro Base o acceso directo privado asociativo.',
+      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
+      checked_at: '2026-11-12',
+      next_step_action: 'Contacte con la trabajadora social de ATENPACE o solicite derivación en su Centro Base.',
+      availability_known: false,
+      waiting_list_known: false
+    },
+    availability: {
+      status: 'contact_required',
+      authorised_places: 60,
+      vacancies_known: false,
+      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
+      checked_at: '2026-11-12',
+      stale: false
+    },
+    geographic_coverage: {
+      type: 'community_wide',
+      requires_residence: 'yes',
+      checked_at: '2026-11-12'
+    },
+    accessibility_features: ['Rampas normalizadas', 'Baños adaptados para transferencias dobles', 'Metro Peñagrande L7'],
+    provenance_records: [
+      {
+        attribute_name: 'specialisation',
+        value: 'parálisis cerebral',
+        source_dataset: 'Catálogo Oficial de Centros de Atención Social (datos.madrid.es PK 1417)',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
+        source_type: 'official_registry',
+        retrieved_at: '2026-11-12',
+        extraction_method: 'structured',
+        reviewer: 'Catálogo Oficial de Datos Abiertos (datos.madrid.es)',
+        reviewer_role: 'data_steward',
+        confidence: 'explicit',
+        quality: 'A'
+      }
+    ],
+    last_checked: '2026-11-12',
+    limitations: ['Requiere diagnóstico de parálisis cerebral o daño neuromotor similar.']
+  },
+  {
+    centre_id: 'C-LM-02',
+    provider_id: 'PROV-CAM-DISCAP',
+    provider_name: 'ASPAYM Madrid',
+    official_name: 'ASPAYM Madrid (Asociación de Parapléjicos y Personas con Gran Discapacidad Física)',
+    resource_domain: 'social',
+    sector: 'Entidad de Utilidad Pública y Atención Especializada',
+    centre_type: 'Centro de rehabilitación, vida autónoma y apoyo integral',
+    subtype: 'Servicio de orientación, rehabilitación física y vida independiente para lesión medular',
+    public_private_status: 'concertado',
+    management_type: 'Asociativo de Utilidad Pública',
+    address: 'Camino de Valderribas, 115',
+    postal_code: '28038',
+    municipality: 'Madrid',
+    district: 'Puente de Vallecas',
+    coordinates: [40.394474, -3.656134],
+    has_valid_coordinates: true,
+    phone: '914 772 235',
+    email: 'aspaym@aspaymmadrid.org',
+    website: 'https://aspaymmadrid.org',
+    explicit_specialisations: ['spinal_cord_injury'],
+    related_services: ['rehabilitación fisioterápica', 'terapia ocupacional', 'oficina de vida independiente', 'asesoría de accesibilidad'],
+    supports: ['rehabilitation', 'occupational_therapy', 'psychological_support'],
+    services_offered: [
+      {
+        service_id: 'SRV-LM-02-REHAB',
+        centre_id: 'C-LM-02',
+        service_name: 'Servicio de Fisioterapia y Readaptación Funcional',
+        service_type: 'rehabilitation',
+        target_populations: ['spinal_cord_injury'],
+        allowed_life_stages: ['minor', 'adult', 'older_adult'],
+        access_routes: ['direct', 'referral', 'private_contact'],
+        source_dataset: 'Catálogo de Centros de Atención Social (datos.madrid.es PK 6996740)',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
+        checked_at: '2026-11-12'
+      }
+    ],
+    allowed_life_stages: ['minor', 'adult', 'older_adult'],
+    access_route: {
+      access_type: 'direct',
+      competent_body: 'ASPAYM Madrid / Servicios Sociales',
+      official_description: 'Acceso directo mediante cita previa con el departamento de atención social o derivación médica hospitalaria.',
+      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
+      checked_at: '2026-11-12',
+      next_step_action: 'Contacte telefónicamente con la sede central de ASPAYM Madrid para concertar primera entrevista.',
+      availability_known: false,
+      waiting_list_known: false
+    },
+    availability: {
+      status: 'contact_required',
+      authorised_places: 120,
+      vacancies_known: false,
+      source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
+      checked_at: '2026-11-12',
+      stale: false
+    },
+    geographic_coverage: {
+      type: 'community_wide',
+      requires_residence: 'no',
+      checked_at: '2026-11-12'
+    },
+    accessibility_features: ['Accesibilidad física completa certificada', 'Aparcamiento adaptado PMR', 'Plataformas elevadoras'],
+    provenance_records: [
+      {
+        attribute_name: 'specialisation',
+        value: 'lesión medular y gran discapacidad física',
+        source_dataset: 'Catálogo Oficial de Centros de Atención Social (datos.madrid.es PK 6996740)',
+        source_url: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
+        source_type: 'official_registry',
+        retrieved_at: '2026-11-12',
+        extraction_method: 'structured',
+        reviewer: 'Catálogo Oficial de Datos Abiertos (datos.madrid.es)',
+        reviewer_role: 'data_steward',
+        confidence: 'explicit',
+        quality: 'A'
+      }
+    ],
+    last_checked: '2026-11-12',
+    limitations: ['Orientado a lesión medular y discapacidad física grave de origen neuromotor o traumático.']
   }
 ];
 
-// Exportación canónica para la búsqueda pública ciudadana (13 centros autorizados verificados)
+// Exportación canónica para la búsqueda pública ciudadana (16 centros autorizados verificados)
 export const SPECIALIZED_CENTRES: SpecializedCentre[] = REAL_CANONICAL_CENTRES;
+

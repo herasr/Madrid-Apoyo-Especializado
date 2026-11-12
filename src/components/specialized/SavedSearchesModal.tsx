@@ -5,7 +5,8 @@
  * Almacenamiento 100% local en localStorage sin persistencia de coordenadas exactas ni datos médicos (§83)
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { SavedSearch, SearchQueryState } from '../../types/specialized';
 import { 
   X, 
@@ -108,7 +109,10 @@ export const SavedSearchesModal: React.FC<SavedSearchesModalProps> = ({
     onClose();
   };
 
-  React.useEffect(() => {
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, isOpen);
+
+  useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -127,6 +131,7 @@ export const SavedSearchesModal: React.FC<SavedSearchesModalProps> = ({
       aria-labelledby="saved-searches-modal-title"
     >
       <div 
+        ref={modalRef}
         className="bg-white rounded-2xl max-w-2xl w-full border border-stone-200 shadow-xl overflow-hidden my-8 max-h-[90vh] flex flex-col"
         tabIndex={-1}
       >

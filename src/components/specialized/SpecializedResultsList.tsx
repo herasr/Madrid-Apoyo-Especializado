@@ -171,29 +171,35 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
         {/* Acciones de exportación y enlace compartible */}
         <div className="flex flex-wrap items-center gap-2.5 text-xs">
           <button
+            type="button"
             onClick={handleCopyShareLink}
             className="px-2.5 py-1 bg-white border border-stone-300 hover:bg-stone-50 text-stone-800 rounded-lg text-[11px] font-medium transition-colors flex items-center gap-1"
             title="Copiar enlace URL con todos los criterios de esta búsqueda"
+            aria-label="Copiar enlace URL con todos los criterios de esta búsqueda"
           >
-            {copiedLink ? <Check className="w-3 h-3 text-emerald-600" /> : <Share2 className="w-3 h-3 text-stone-600" />}
+            {copiedLink ? <Check className="w-3 h-3 text-emerald-600" aria-hidden="true" /> : <Share2 className="w-3 h-3 text-stone-600" aria-hidden="true" />}
             <span>{copiedLink ? '¡Enlace copiado!' : 'Compartir búsqueda'}</span>
           </button>
 
           <button
+            type="button"
             onClick={handleExportCSV}
             className="px-2.5 py-1 bg-white border border-stone-300 text-stone-700 hover:bg-stone-50 rounded-lg font-medium transition-colors flex items-center gap-1"
             title="Exportar resultados en formato CSV con fuentes y procedencia"
+            aria-label="Exportar resultados en formato CSV con fuentes y procedencia"
           >
-            <FileSpreadsheet className="w-3.5 h-3.5 text-stone-600" />
+            <FileSpreadsheet className="w-3.5 h-3.5 text-stone-600" aria-hidden="true" />
             <span>CSV</span>
           </button>
 
           <button
+            type="button"
             onClick={handleExportJSON}
             className="px-2.5 py-1 bg-white border border-stone-300 text-stone-700 hover:bg-stone-50 rounded-lg font-medium transition-colors flex items-center gap-1"
             title="Exportar estructurado completo en JSON"
+            aria-label="Exportar estructurado completo en JSON"
           >
-            <Download className="w-3.5 h-3.5 text-stone-600" />
+            <Download className="w-3.5 h-3.5 text-stone-600" aria-hidden="true" />
             <span>JSON</span>
           </button>
         </div>
@@ -300,13 +306,14 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
         <div className="pt-6 border-t border-stone-200">
           <button
             type="button"
+            aria-expanded={showIncompatibles}
             onClick={() => setShowIncompatibles(prev => !prev)}
-            className="text-xs font-bold text-stone-600 hover:text-stone-900 flex items-center justify-between w-full p-3 rounded-lg bg-stone-100 border border-stone-200"
+            className="text-xs font-bold text-stone-600 hover:text-stone-900 flex items-center justify-between w-full p-3 rounded-lg bg-stone-100 border border-stone-200 cursor-pointer"
           >
             <span>
               Recursos excluidos por incompatibilidad de criterios ({incompatibleResults.length})
             </span>
-            {showIncompatibles ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            {showIncompatibles ? <ChevronUp className="w-4 h-4" aria-hidden="true" /> : <ChevronDown className="w-4 h-4" aria-hidden="true" />}
           </button>
 
           {showIncompatibles && (

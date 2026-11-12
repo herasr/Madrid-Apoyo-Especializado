@@ -70,11 +70,13 @@ export const SpecializedTestsRunnerView: React.FC = () => {
 
         {/* Botón de re-ejecución */}
         <button
+          type="button"
           onClick={handleRunTests}
           disabled={isRunning}
-          className="px-4 py-2 bg-stone-900 text-white rounded-lg hover:bg-stone-800 text-xs font-semibold flex items-center gap-2 transition-colors self-start shrink-0"
+          aria-label="Re-ejecutar pruebas canónicas"
+          className="px-4 py-2 bg-stone-900 text-white rounded-lg hover:bg-stone-800 text-xs font-semibold flex items-center gap-2 transition-colors self-start shrink-0 cursor-pointer disabled:opacity-50"
         >
-          {isRunning ? <RotateCcw className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+          {isRunning ? <RotateCcw className="w-4 h-4 animate-spin" aria-hidden="true" /> : <Play className="w-4 h-4" aria-hidden="true" />}
           <span>{isRunning ? 'Ejecutando suite...' : 'Re-ejecutar pruebas canónicas'}</span>
         </button>
       </div>
@@ -117,13 +119,16 @@ export const SpecializedTestsRunnerView: React.FC = () => {
       </div>
 
       {/* Filtros por categoría */}
-      <div className="flex items-center gap-1.5 overflow-x-auto text-xs pb-1">
-        <Filter className="w-3.5 h-3.5 text-stone-400 shrink-0 mr-1" />
+      <div className="flex items-center gap-1.5 overflow-x-auto text-xs pb-1" role="group" aria-label="Categorías de pruebas">
+        <Filter className="w-3.5 h-3.5 text-stone-400 shrink-0 mr-1" aria-hidden="true" />
         {categories.map((cat) => (
           <button
             key={cat.id}
+            type="button"
+            aria-pressed={selectedCategory === cat.id}
+            aria-label={`Filtrar pruebas por categoría: ${cat.label}`}
             onClick={() => setSelectedCategory(cat.id)}
-            className={`px-3 py-1.5 rounded-lg border whitespace-nowrap transition-colors font-medium ${
+            className={`px-3 py-1.5 rounded-lg border whitespace-nowrap transition-colors font-medium cursor-pointer ${
               selectedCategory === cat.id
                 ? 'bg-stone-900 text-white border-stone-900 font-semibold'
                 : 'bg-white text-stone-700 border-stone-200 hover:bg-stone-50'

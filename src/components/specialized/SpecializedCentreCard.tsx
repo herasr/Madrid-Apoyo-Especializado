@@ -54,17 +54,17 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
             {centre.official_name}
           </h3>
           
-          <div className="flex items-center gap-2 text-xs text-stone-500 mt-1 flex-wrap">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-stone-500 mt-1.5">
             <span className="font-semibold text-stone-700">{centre.municipality}</span>
             {centre.district && (
               <>
-                <span aria-hidden="true">·</span>
+                <span aria-hidden="true" className="text-stone-300">·</span>
                 <span>Distrito {centre.district}</span>
               </>
             )}
-            <span aria-hidden="true">·</span>
+            <span aria-hidden="true" className="text-stone-300">·</span>
             <span>{centre.subtype || centre.centre_type}</span>
-            <span aria-hidden="true">·</span>
+            <span aria-hidden="true" className="text-stone-300">·</span>
             <span>
               {centre.public_private_status === 'red_publica'
                 ? 'Red Pública'
@@ -74,17 +74,20 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
             </span>
             {distance_label && (
               <>
-                <span aria-hidden="true">·</span>
-                <span className="font-mono text-stone-900 font-semibold inline-flex items-center gap-1 bg-stone-100 px-1.5 py-0.5 rounded text-[11px]">
-                  <MapPin className="w-3 h-3 text-stone-500" />
+                <span aria-hidden="true" className="text-stone-300">·</span>
+                <span className="font-mono text-stone-800 font-semibold inline-flex items-center gap-1 whitespace-nowrap">
+                  <MapPin className="w-3 h-3 text-stone-500 shrink-0" aria-hidden="true" />
                   {distance_label}
                 </span>
-                {transit_time_label && (
-                  <span className="font-mono text-blue-900 font-semibold inline-flex items-center gap-1 bg-blue-50 border border-blue-200/60 px-1.5 py-0.5 rounded text-[11px]">
-                    <Bus className="w-3 h-3 text-blue-700" />
-                    {transit_time_label}
-                  </span>
-                )}
+              </>
+            )}
+            {transit_time_label && (
+              <>
+                <span aria-hidden="true" className="text-stone-300">·</span>
+                <span className="font-mono text-blue-800 font-semibold inline-flex items-center gap-1 whitespace-nowrap">
+                  <Bus className="w-3 h-3 text-blue-600 shrink-0" aria-hidden="true" />
+                  {transit_time_label}
+                </span>
               </>
             )}
           </div>
@@ -136,6 +139,7 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
           <button
             type="button"
             onClick={() => onWhyAppears(item)}
+            aria-label={`¿Por qué aparece ${centre.official_name}? Ver informe de trazabilidad y nivel de evidencia`}
             className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-stone-900 text-white hover:bg-stone-800 transition-colors"
           >
             ¿Por qué aparece?
@@ -144,9 +148,10 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
           <button
             type="button"
             onClick={() => onPrepareContact(item)}
+            aria-label={`Preparar contacto con ${centre.official_name} e imprimir ficha`}
             className="px-3 py-1.5 text-xs font-medium rounded-lg border border-stone-300 text-stone-700 hover:bg-stone-50 transition-colors flex items-center gap-1"
           >
-            <Printer className="w-3.5 h-3.5 text-stone-500" />
+            <Printer className="w-3.5 h-3.5 text-stone-500" aria-hidden="true" />
             <span>Preparar contacto</span>
           </button>
         </div>
@@ -155,9 +160,10 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
           {centre.phone && (
             <a 
               href={`tel:${centre.phone.replace(/\s+/g, '')}`}
+              aria-label={`Llamar a ${centre.official_name} al teléfono ${centre.phone}`}
               className="flex items-center gap-1 hover:text-stone-900 font-medium"
             >
-              <Phone className="w-3.5 h-3.5 text-stone-500" />
+              <Phone className="w-3.5 h-3.5 text-stone-500" aria-hidden="true" />
               <span>{centre.phone}</span>
             </a>
           )}
@@ -168,8 +174,9 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
               rel="noreferrer"
               className="hover:text-stone-900 p-1"
               title="Web oficial"
+              aria-label={`Visitar web oficial de ${centre.official_name} (se abre en nueva pestaña)`}
             >
-              <ExternalLink className="w-3.5 h-3.5 text-stone-500" />
+              <ExternalLink className="w-3.5 h-3.5 text-stone-500" aria-hidden="true" />
             </a>
           )}
         </div>

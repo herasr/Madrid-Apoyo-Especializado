@@ -5,7 +5,8 @@
  * Tratamiento de «neurodivergente» y «psicomotriz» sin realizar diagnósticos libres (§54)
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { DISAMBIGUATION_TERMS } from '../../data/specializedTaxonomy';
 import { SearchQueryState, ProfileId, SupportTypeId, FunctionalNeedId } from '../../types/specialized';
 import { X, HelpCircle, ArrowRight, ShieldAlert, Check } from 'lucide-react';
@@ -21,6 +22,9 @@ export const DisambiguationModal: React.FC<DisambiguationModalProps> = ({
   onClose,
   setQuery
 }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, !!term);
+
   React.useEffect(() => {
     if (!term) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -66,6 +70,7 @@ export const DisambiguationModal: React.FC<DisambiguationModalProps> = ({
       aria-labelledby="disambiguation-modal-title"
     >
       <div 
+        ref={modalRef}
         className="bg-white rounded-2xl max-w-xl w-full border border-stone-200 shadow-xl overflow-hidden my-8"
         tabIndex={-1}
       >
@@ -84,7 +89,8 @@ export const DisambiguationModal: React.FC<DisambiguationModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg transition-colors"
+            aria-label="Cerrar modal de desambiguación"
+            className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>

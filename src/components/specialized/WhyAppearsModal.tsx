@@ -5,7 +5,8 @@
  * Explicabilidad completa, procedencia por atributo y matriz criterio por criterio (§14, §27.1, §71)
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { EvaluatedCentreResult } from '../../types/specialized';
 import { 
   X, 
@@ -27,6 +28,9 @@ interface WhyAppearsModalProps {
 }
 
 export const WhyAppearsModal: React.FC<WhyAppearsModalProps> = ({ item, onClose }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, !!item);
+
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -47,6 +51,7 @@ export const WhyAppearsModal: React.FC<WhyAppearsModalProps> = ({ item, onClose 
       aria-labelledby="why-appears-modal-title"
     >
       <div 
+        ref={modalRef}
         className="bg-white rounded-2xl max-w-3xl w-full border border-stone-200 shadow-xl overflow-hidden my-8 max-h-[90vh] flex flex-col"
         tabIndex={-1}
       >

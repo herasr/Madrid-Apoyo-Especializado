@@ -83,7 +83,7 @@ export const TaxonomyGovernanceView: React.FC = () => {
         </div>
 
         {/* Pestañas de gobernanza */}
-        <div className="flex items-center gap-2 mt-6 overflow-x-auto text-xs font-semibold">
+        <div className="flex items-center gap-2 mt-6 overflow-x-auto text-xs font-semibold" role="tablist" aria-label="Secciones de gobernanza taxonómica">
           {[
             { id: 'categories', label: 'Catálogo y Ciclo de Vida' },
             { id: 'rules', label: 'Reglas Negativas de Inferencia' },
@@ -92,8 +92,14 @@ export const TaxonomyGovernanceView: React.FC = () => {
           ].map((t) => (
             <button
               key={t.id}
+              type="button"
+              role="tab"
+              id={`tab-${t.id}`}
+              aria-selected={activeTab === t.id}
+              aria-controls={`tabpanel-${t.id}`}
+              aria-label={`Sección: ${t.label}`}
               onClick={() => setActiveTab(t.id as any)}
-              className={`px-3 py-1.5 rounded-lg border transition-colors whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-lg border transition-colors whitespace-nowrap cursor-pointer ${
                 activeTab === t.id
                   ? 'bg-stone-900 text-white border-stone-900'
                   : 'bg-white text-stone-700 border-stone-200 hover:bg-stone-50'

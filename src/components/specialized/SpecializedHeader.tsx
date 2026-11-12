@@ -41,6 +41,7 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
           <div className="flex items-center gap-3 shrink-0">
             <button 
               onClick={() => setActiveTab('search')}
+              aria-label="Volver al inicio de búsqueda de Madrid Apoyo"
               className="text-left group cursor-pointer focus:outline-none flex items-center gap-2"
             >
               <div className="w-8 h-8 rounded-lg bg-stone-900 text-white flex items-center justify-center font-bold text-sm shadow-xs">
@@ -58,7 +59,7 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
           </div>
 
           {/* Zona 2: Navegación principal limpia (Búsqueda, Mapa, Comparador) */}
-          <nav className="hidden md:flex items-center gap-2 bg-stone-100 p-1 rounded-xl text-xs font-semibold text-stone-700">
+          <nav aria-label="Navegación principal" className="hidden md:flex items-center gap-2 bg-stone-100 p-1 rounded-xl text-xs font-semibold text-stone-700">
             <button
               onClick={() => setActiveTab('search')}
               className={`px-4 py-2 rounded-lg transition-all ${
@@ -91,13 +92,14 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
             <button
               onClick={() => setEasyReadMode(prev => !prev)}
               title="Lectura fácil"
+              aria-label="Activar o desactivar modo de lectura fácil"
               className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors flex items-center gap-1.5 ${
                 easyReadMode 
                   ? 'bg-amber-100 border-amber-300 text-amber-900 font-semibold' 
                   : 'bg-white border-stone-300 text-stone-700 hover:bg-stone-50'
               }`}
             >
-              <Eye className="w-3.5 h-3.5 text-stone-500" />
+              <Eye className="w-3.5 h-3.5 text-stone-500" aria-hidden="true" />
               <span className="hidden sm:inline">Lectura fácil</span>
             </button>
 
@@ -106,9 +108,10 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
             <button
               onClick={openSavedSearches}
               title="Búsquedas guardadas"
+              aria-label={`Ver búsquedas guardadas en el navegador${savedSearchesCount > 0 ? ` (${savedSearchesCount})` : ''}`}
               className="px-3 py-1.5 text-xs font-medium rounded-lg border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 transition-colors flex items-center gap-1.5"
             >
-              <Bookmark className="w-3.5 h-3.5 text-stone-500" />
+              <Bookmark className="w-3.5 h-3.5 text-stone-500" aria-hidden="true" />
               <span className="hidden sm:inline">Guardadas</span>
               {savedSearchesCount > 0 && (
                 <span className="ml-0.5 text-xs font-mono font-semibold text-stone-900">
@@ -120,10 +123,11 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
             {/* Glosario */}
             <button
               onClick={openGlossary}
-              title="Glosario"
+              title="Glosario en lectura fácil"
+              aria-label="Abrir glosario en lectura fácil y siglas oficiales"
               className="p-2 text-stone-600 hover:text-stone-900 rounded-lg hover:bg-stone-100 transition-colors"
             >
-              <BookOpen className="w-4 h-4" />
+              <BookOpen className="w-4 h-4" aria-hidden="true" />
             </button>
 
             {/* Reportar discrepancia de datos / GitHub Issues */}
@@ -132,9 +136,10 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
               target="_blank"
               rel="noreferrer"
               title="Reportar discrepancia o sugerir corrección registral"
+              aria-label="Reportar discrepancia o sugerir corrección registral en GitHub"
               className="p-2 text-stone-600 hover:text-stone-900 rounded-lg hover:bg-stone-100 transition-colors"
             >
-              <AlertCircle className="w-4 h-4" />
+              <AlertCircle className="w-4 h-4" aria-hidden="true" />
             </a>
           </div>
         </div>

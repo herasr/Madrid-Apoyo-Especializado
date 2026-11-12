@@ -5,7 +5,8 @@
  * Definiciones breves y claras de conceptos administrativos y sociosanitarios (§30)
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { X, BookOpen, Search } from 'lucide-react';
 
 interface EasyReadGlossaryModalProps {
@@ -68,6 +69,8 @@ const GLOSSARY_TERMS = [
 
 export const EasyReadGlossaryModal: React.FC<EasyReadGlossaryModalProps> = ({ isOpen, onClose }) => {
   const [filter, setFilter] = useState('');
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, isOpen);
 
   React.useEffect(() => {
     if (!isOpen) return;
@@ -93,6 +96,7 @@ export const EasyReadGlossaryModal: React.FC<EasyReadGlossaryModalProps> = ({ is
       aria-labelledby="glossary-modal-title"
     >
       <div 
+        ref={modalRef}
         className="bg-white rounded-2xl max-w-2xl w-full border border-stone-200 shadow-xl overflow-hidden my-8 max-h-[90vh] flex flex-col"
         tabIndex={-1}
       >

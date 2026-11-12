@@ -352,20 +352,24 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
 
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={handleFitAll}
-            className="px-2.5 py-1.5 rounded-lg border border-stone-300 bg-white hover:bg-stone-100 text-stone-700 text-xs font-medium flex items-center gap-1"
+            className="px-2.5 py-1.5 rounded-lg border border-stone-300 bg-white hover:bg-stone-100 text-stone-700 text-xs font-medium flex items-center gap-1 cursor-pointer"
             title="Ajustar la vista a todos los centros"
+            aria-label="Ajustar la vista del mapa a todos los centros"
           >
-            <Maximize2 className="w-3.5 h-3.5" />
+            <Maximize2 className="w-3.5 h-3.5" aria-hidden="true" />
             <span className="hidden sm:inline">Ajustar vista</span>
           </button>
 
           <button
+            type="button"
             onClick={handleCenterOrigin}
-            className="px-2.5 py-1.5 rounded-lg border border-stone-300 bg-white hover:bg-stone-100 text-stone-700 text-xs font-medium flex items-center gap-1"
+            className="px-2.5 py-1.5 rounded-lg border border-stone-300 bg-white hover:bg-stone-100 text-stone-700 text-xs font-medium flex items-center gap-1 cursor-pointer"
             title="Centrar en el punto de origen seleccionado"
+            aria-label="Centrar el mapa en el punto de origen seleccionado"
           >
-            <Crosshair className="w-3.5 h-3.5" />
+            <Crosshair className="w-3.5 h-3.5" aria-hidden="true" />
             <span className="hidden sm:inline">Ir al origen</span>
           </button>
         </div>
@@ -377,20 +381,24 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
           <div ref={mapContainerRef} className="w-full h-full z-0" />
 
           {/* Controles de Zoom */}
-          <div className="absolute top-3 left-3 z-[400] flex flex-col gap-1 shadow-md rounded-lg overflow-hidden border border-stone-300 bg-white">
+          <div className="absolute top-3 left-3 z-[400] flex flex-col gap-1 shadow-md rounded-lg overflow-hidden border border-stone-300 bg-white" role="toolbar" aria-label="Controles de zoom del mapa">
             <button
+              type="button"
               onClick={() => mapInstanceRef.current?.zoomIn()}
-              className="p-2 hover:bg-stone-100 text-stone-700 transition-colors border-b border-stone-200"
-              title="Acercar"
+              className="p-2 hover:bg-stone-100 text-stone-700 transition-colors border-b border-stone-200 cursor-pointer"
+              title="Acercar mapa"
+              aria-label="Acercar mapa"
             >
-              <ZoomIn className="w-4 h-4" />
+              <ZoomIn className="w-4 h-4" aria-hidden="true" />
             </button>
             <button
+              type="button"
               onClick={() => mapInstanceRef.current?.zoomOut()}
-              className="p-2 hover:bg-stone-100 text-stone-700 transition-colors"
-              title="Alejar"
+              className="p-2 hover:bg-stone-100 text-stone-700 transition-colors cursor-pointer"
+              title="Alejar mapa"
+              aria-label="Alejar mapa"
             >
-              <ZoomOut className="w-4 h-4" />
+              <ZoomOut className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
 
@@ -437,8 +445,18 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
                 return (
                   <div
                     key={item.centre.centre_id}
+                    role="button"
+                    tabIndex={0}
+                    aria-pressed={isSelected}
+                    aria-label={`Ver ${item.centre.official_name} en el mapa`}
                     onClick={() => handleCentreCardClick(item)}
-                    className={`p-3 rounded-lg text-left cursor-pointer transition-all border ${
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleCentreCardClick(item);
+                      }
+                    }}
+                    className={`p-3 rounded-lg text-left cursor-pointer transition-all border outline-none focus-visible:ring-2 focus-visible:ring-stone-900 ${
                       isSelected
                         ? 'border-stone-900 bg-stone-50 shadow-xs'
                         : 'border-transparent hover:border-stone-200 hover:bg-stone-50/70'

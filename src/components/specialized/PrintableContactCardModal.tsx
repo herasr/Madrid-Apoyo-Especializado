@@ -5,7 +5,8 @@
  * Documento imprimible con preguntas clave, vía de acceso y advertencias (§32.1, §81.1)
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { EvaluatedCentreResult } from '../../types/specialized';
 import { 
   X, 
@@ -27,6 +28,9 @@ interface PrintableContactCardProps {
 }
 
 export const PrintableContactCardModal: React.FC<PrintableContactCardProps> = ({ item, onClose }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, !!item);
+
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -52,6 +56,7 @@ export const PrintableContactCardModal: React.FC<PrintableContactCardProps> = ({
       aria-labelledby="contact-card-modal-title"
     >
       <div 
+        ref={modalRef}
         className="bg-white rounded-2xl max-w-2xl w-full border border-stone-200 shadow-xl overflow-hidden my-8 max-h-[90vh] flex flex-col"
         tabIndex={-1}
       >

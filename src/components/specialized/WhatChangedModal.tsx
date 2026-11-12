@@ -5,7 +5,8 @@
  * Detección de cambios entre snapshots del registro oficial (§84, §110)
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { 
   SNAPSHOT_DIFFERENCES, 
   CURRENT_SNAPSHOT_DATE, 
@@ -29,6 +30,9 @@ interface WhatChangedModalProps {
 }
 
 export const WhatChangedModal: React.FC<WhatChangedModalProps> = ({ isOpen, onClose }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, isOpen);
+
   React.useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -48,6 +52,7 @@ export const WhatChangedModal: React.FC<WhatChangedModalProps> = ({ isOpen, onCl
       aria-labelledby="what-changed-modal-title"
     >
       <div 
+        ref={modalRef}
         className="bg-white rounded-2xl max-w-3xl w-full border border-stone-200 shadow-xl overflow-hidden my-8 max-h-[90vh] flex flex-col"
         tabIndex={-1}
       >

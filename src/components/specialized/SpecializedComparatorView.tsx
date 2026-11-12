@@ -209,24 +209,28 @@ export const SpecializedComparatorView: React.FC<ComparatorViewProps> = ({
 
         <div className="flex items-center gap-3">
           <button
+            type="button"
             onClick={() => window.print()}
-            className="px-3.5 py-1.5 bg-white border border-stone-300 text-stone-800 rounded-lg text-xs font-semibold hover:bg-stone-50 transition-colors inline-flex items-center gap-1.5 shadow-xs"
+            className="px-3.5 py-1.5 bg-white border border-stone-300 text-stone-800 rounded-lg text-xs font-semibold hover:bg-stone-50 transition-colors inline-flex items-center gap-1.5 shadow-xs cursor-pointer"
             title="Imprimir o guardar como informe PDF profesional para familias u organismos"
+            aria-label="Imprimir o exportar matriz comparativa a PDF"
           >
-            <Printer className="w-3.5 h-3.5 text-stone-600" />
+            <Printer className="w-3.5 h-3.5 text-stone-600" aria-hidden="true" />
             <span>Imprimir / Exportar Informe (PDF)</span>
           </button>
 
           <button
+            type="button"
             onClick={onClearCompare}
-            className="text-xs text-stone-500 hover:text-stone-900 transition-colors"
+            className="text-xs text-stone-500 hover:text-stone-900 transition-colors cursor-pointer"
           >
             Limpiar comparación
           </button>
 
           <button
+            type="button"
             onClick={onGoToSearch}
-            className="px-3.5 py-1.5 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-stone-800 transition-colors"
+            className="px-3.5 py-1.5 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-stone-800 transition-colors cursor-pointer"
           >
             Añadir más centros
           </button>
@@ -253,11 +257,13 @@ export const SpecializedComparatorView: React.FC<ComparatorViewProps> = ({
                       </div>
                     </div>
                     <button
+                      type="button"
                       onClick={() => onRemoveFromCompare(item.centre.centre_id)}
-                      className="text-stone-400 hover:text-stone-700 p-1"
+                      className="text-stone-400 hover:text-stone-700 p-1 cursor-pointer"
                       title="Quitar del comparador"
+                      aria-label={`Quitar ${item.centre.official_name} del comparador`}
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-4 h-4" aria-hidden="true" />
                     </button>
                   </div>
                   <button
