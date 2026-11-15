@@ -7,13 +7,16 @@
 
 import React from 'react';
 import { EvaluatedCentreResult } from '../../types/specialized';
+import { auditCentreAgainstSnapshot } from '../../utils/specializedEngine';
 import { 
   MapPin, 
   Phone, 
   ExternalLink, 
   Printer, 
   ArrowRight,
-  Bus
+  Bus,
+  ShieldCheck,
+  AlertTriangle
 } from 'lucide-react';
 
 interface CentreCardProps {
@@ -34,6 +37,7 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
   easyReadMode
 }) => {
   const { centre, evidence_level, suitability, distance_label, transit_time_label } = item;
+  const auditResult = auditCentreAgainstSnapshot(centre);
 
   const evidenceLabels: Record<string, { label: string; dotClass: string }> = {
     A1: { label: 'Nivel A1 · Especialización publicada', dotClass: 'bg-emerald-600' },
@@ -104,7 +108,7 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
         </label>
       </div>
 
-      {/* 2. Compact Status & Evidence Row */}
+      {/* 2. Compact Status & Evidence Row + Audit Verification Badge */}
       <div className="flex flex-wrap items-center gap-2 text-xs pt-1 border-t border-stone-100">
         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-stone-100 font-medium text-stone-800">
           <span className={`w-2 h-2 rounded-full ${evInfo.dotClass}`} />
@@ -114,6 +118,40 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
         <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-stone-50 text-stone-600 border border-stone-200">
           {suitability === 'complete' ? '✓ Coincidencia completa' : suitability === 'partial' ? '○ Coincidencia parcial' : 'Orientación'}
         </span>
+
+        {auditResult.audit_status === 'verified_official' && (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-900 border border-emerald-200 font-medium" title={auditResult.audit_note}>
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+            <span>Verificado en CSV oficial (datos.madrid.es)</span>
+          </span>
+        )}
+
+        {auditResult.audit_status === 'verified_regional' && (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-blue-50 text-blue-900 border border-blue-200 font-medium" title={auditResult.audit_note}>
+            <ShieldCheck className="w-3.5 h-3.5 text-blue-700 shrink-0" />
+            <span>Verificado en CSV oficial (Comunidad de Madrid)</span>
+          </span>
+        )}
+
+        {auditResult.audit_status === 'discrepancy' && (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-rose-50 text-rose-950 border border-rose-300 font-semibold" title={auditResult.audit_note}>
+            <AlertTriangle className="w-3.5 h-3.5 text-rose-700 shrink-0" />
+            <span>Discrepancia respecto al CSV oficial: {auditResult.discrepancies.join(', ')}</span>
+          </span>
+        )}
+
+        {auditResult.audit_status === 'unverified' && (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50 text-amber-950 border border-amber-300 font-semibold" title={auditResult.audit_note}>
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+            <span>No proviene del CSV oficial</span>
+          </span>
+        )}
+
+        {typeof centre.availability.authorised_places === 'number' && (
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-stone-50 text-stone-700 border border-stone-200 font-mono text-[11px]" title="Cupo máximo registral (no indica vacantes libres)">
+            {centre.availability.authorised_places} plazas autorizadas
+          </span>
+        )}
       </div>
 
       {/* 3. Access Route & Next Step (Simplified) */}

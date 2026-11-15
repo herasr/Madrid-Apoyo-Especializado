@@ -8,15 +8,25 @@
 
 import { REAL_CANONICAL_CENTRES } from '../data/specializedCentresData';
 import { BENCHMARK_TEST_CENTRES } from '../data/testCentresData';
-import { evaluateCentre, runSpecializedSearch } from './specializedEngine';
-import { SearchQueryState } from '../types/specialized';
+import { auditCentreAgainstSnapshot, evaluateCentre, runSpecializedSearch } from './specializedEngine';
+import { SearchQueryState, SpecializedCentre } from '../types/specialized';
 import { DISAMBIGUATION_TERMS, EDUCATION_BRIDGE_MAPPINGS } from '../data/specializedTaxonomy';
 
 const ALL_BENCHMARK_CENTRES = [...REAL_CANONICAL_CENTRES, ...BENCHMARK_TEST_CENTRES];
 
 export interface TestCaseResult {
   id: string;
-  category: 'TAXONOMIA' | 'EVIDENCIA' | 'REGLAS_NEGATIVAS' | 'COMBINACION' | 'ACCESO' | 'GEOGRAFIA' | 'ORDEN' | 'PRIVACIDAD' | 'PUENTE_EDUCATIVO';
+  category:
+    | 'TAXONOMIA'
+    | 'EVIDENCIA'
+    | 'REGLAS_NEGATIVAS'
+    | 'COMBINACION'
+    | 'ACCESO'
+    | 'GEOGRAFIA'
+    | 'ORDEN'
+    | 'PRIVACIDAD'
+    | 'PUENTE_EDUCATIVO'
+    | 'AUDITORIA_CSV';
   title: string;
   expected: string;
   actual: string;
@@ -41,15 +51,15 @@ export function runAllCanonicalTests(): {
     support_combination_mode: 'any_support',
     life_stage: null,
     municipality: null,
-    radius_km: 25,
+    radius_km: 50,
     network_preference: 'all',
     accessibility_needs: [],
     user_ephemeral_location: null,
     location_mode: 'all'
   };
 
-  // 1. TAX-001 & EV-001: TEA explícito en fuente + apoyo -> A1
-  const teaCenter = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'C-TEA-01')!;
+  // 1. TAX-001 & EV-001: TEA explícito en fuente CSV real + apoyo -> A1
+  const teaCenter = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'CAM-C0382')!;
   const qEv001: SearchQueryState = {
     ...defaultQuery,
     profile: 'autism',
@@ -59,18 +69,18 @@ export function runAllCanonicalTests(): {
   tests.push({
     id: 'TAX-001',
     category: 'EVIDENCIA',
-    title: 'TEA explícito en fuente oficial y apoyo coincidente',
+    title: 'TEA explícito en registro oficial CAM y apoyo coincidente',
     expected: 'Nivel A1',
     actual: `Nivel ${resEv001.evidence_level}`,
     passed: resEv001.evidence_level === 'A1',
-    notes: 'Condición y apoyo declarados explícitamente en la resolución de registro.'
+    notes: `${teaCenter.official_name} (CAM-C0382) declara autismo y centro de día en el CSV oficial.`
   });
 
-  // 2. EV-002: Condición literal, apoyo ausente o no solicitado -> A2
+  // 2. EV-002: Condición literal, apoyo ausente en la sede -> A2
   const qEv002: SearchQueryState = {
     ...defaultQuery,
     profile: 'autism',
-    support_types: ['residential_care'] // Residencia en centro que solo tiene ambulatorio (ej. Sede Centro C-DUP-01A)
+    support_types: ['residential_care']
   };
   const dupCenterA = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'C-DUP-01A')!;
   const resEv002 = evaluateCentre(dupCenterA, qEv002, ALL_BENCHMARK_CENTRES, null);
@@ -149,15 +159,15 @@ export function runAllCanonicalTests(): {
     notes: 'Protege contra diagnósticos libres y garantiza precisión taxonómica.'
   });
 
-  // 7. COMB-001: Varios apoyos y "Todos en el mismo centro"
-  const beataCenter = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'C-DCA-01')!;
+  // 7. COMB-001: Varios apoyos y "Todos en el mismo centro" en recurso CSV oficial
+  const jazminCenter = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'MAD-PK5416084')!;
   const qComb001: SearchQueryState = {
     ...defaultQuery,
-    profile: 'acquired_brain_injury',
-    support_types: ['rehabilitation', 'speech_therapy', 'occupational_therapy'],
+    profile: 'alzheimer',
+    support_types: ['rehabilitation', 'day_care'],
     support_combination_mode: 'all_supports_same_centre'
   };
-  const resComb001 = evaluateCentre(beataCenter, qComb001, ALL_BENCHMARK_CENTRES, null);
+  const resComb001 = evaluateCentre(jazminCenter, qComb001, ALL_BENCHMARK_CENTRES, null);
   tests.push({
     id: 'COMB-001',
     category: 'COMBINACION',
@@ -165,7 +175,7 @@ export function runAllCanonicalTests(): {
     expected: 'all_same_centre (todos confirmados para el mismo centre_id)',
     actual: resComb001.combination_status,
     passed: resComb001.combination_status === 'all_same_centre',
-    notes: 'Hospital Beata María Ana confirma rehabilitación, logopedia y TO en su sede física.'
+    notes: `${jazminCenter.official_name} (MAD-PK5416084) confirma rehabilitación y atención diurna en su sede.`
   });
 
   // 8. COMB-002 & DUP-001: Mismo proveedor, sedes distintas
@@ -186,16 +196,16 @@ export function runAllCanonicalTests(): {
     notes: 'No confunde mismo proveedor con misma sede. Respeta la separación centre_id vs provider_id.'
   });
 
-  // 9. ACC-001 & ACC-004: Vía documentada con derivación / PIA
-  const polibeaCenter = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'C-DCA-03')!;
+  // 9. ACC-004: Vía documentada con derivación / PIA en recurso oficial concertado
+  const apanefaCenter = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'CAM-C5107')!;
   tests.push({
     id: 'ACC-004',
     category: 'ACCESO',
     title: 'Vía de acceso documentada: Dependencia / PIA',
     expected: 'Tarjeta PIA con organismo y trámite documentado',
-    actual: `Tipo: ${polibeaCenter.access_route.access_type}`,
-    passed: polibeaCenter.access_route.access_type === 'dependency_pia' && polibeaCenter.access_route.next_step_action.includes('PIA'),
-    notes: 'Indica claramente que se requiere resolución del Programa Individual de Atención.'
+    actual: `Tipo: ${apanefaCenter.access_route.access_type}`,
+    passed: apanefaCenter.access_route.access_type === 'dependency_pia' && apanefaCenter.access_route.next_step_action.includes('PIA'),
+    notes: `${apanefaCenter.official_name} (CAM-C5107) cuenta con plazas concertadas sujetas a resolución PIA.`
   });
 
   // 10. ACC-002 & ACC-005: Vía ausente en la fuente -> "Debe confirmarse"
@@ -210,16 +220,16 @@ export function runAllCanonicalTests(): {
     notes: 'No promete acceso directo cuando no existe documentación fehaciente.'
   });
 
-  // 11. ACC-003: Centro privado autorizado no se etiqueta como Red Pública
-  const lescerCenter = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'C-DCA-02')!;
+  // 11. ACC-003: Centro privado autorizado sin concierto público no se etiqueta como Red Pública
+  const amdemCenter = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'CAM-C2978')!;
   tests.push({
     id: 'ACC-003',
     category: 'ACCESO',
-    title: 'Centro privado autorizado sin concierto público',
+    title: 'Centro privado autorizado sin concierto público (AMDEM CAM-C2978)',
     expected: 'privado_autorizado (no confundir con red pública)',
-    actual: lescerCenter.public_private_status,
-    passed: lescerCenter.public_private_status === 'privado_autorizado',
-    notes: 'Estar autorizado por Sanidad no equivale a financiación ni concierto público.'
+    actual: amdemCenter.public_private_status,
+    passed: amdemCenter.public_private_status === 'privado_autorizado',
+    notes: 'Tener autorización administrativa o PEVS no equivale a gestión o concierto público directo.'
   });
 
   // 12. CAP-001 & NEG-004: Plazas autorizadas no se etiquetan como vacantes disponibles
@@ -255,7 +265,7 @@ export function runAllCanonicalTests(): {
     notes: 'Los centros sin coordenadas no se descartan silenciosamente.'
   });
 
-  // 14. SORT-001 & SORT-002 & RANK-001: Nivel A a 30 km y Nivel C a 2 km -> A siempre primero
+  // 14. SORT-001 & SORT-002 & RANK-001: Nivel A siempre por delante de C
   const qSort: SearchQueryState = {
     ...defaultQuery,
     profile: 'autism',
@@ -324,6 +334,150 @@ export function runAllCanonicalTests(): {
     notes: 'Cumplimiento estricto de RGPD y Sección 30 del Prompt Maestro.'
   });
 
+  // 19. REG-LESCER-POLIBEA: Regresión cero falsos positivos DCA en Lescer y Polibea
+  const lescer = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'CAM-C8019')!;
+  const polibea = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'CAM-C3456')!;
+  const evalLescerDca = evaluateCentre(lescer, { ...defaultQuery, profile: 'acquired_brain_injury' }, ALL_BENCHMARK_CENTRES, null);
+  const evalPolibeaDca = evaluateCentre(polibea, { ...defaultQuery, profile: 'acquired_brain_injury' }, ALL_BENCHMARK_CENTRES, null);
+  tests.push({
+    id: 'REG-LESCER-POLIBEA',
+    category: 'REGLAS_NEGATIVAS',
+    title: 'Lescer (CAM-C8019) y Polibea (CAM-C3456) no se marcan como DCA nivel A',
+    expected: 'Ninguno obtiene A1/A2 para daño cerebral adquirido (el CSV oficial solo dice discapacidad física)',
+    actual: `Lescer: ${evalLescerDca.evidence_level}, Polibea: ${evalPolibeaDca.evidence_level}`,
+    passed:
+      lescer.explicit_specialisations.length === 0 &&
+      polibea.explicit_specialisations.length === 0 &&
+      !['A1', 'A2'].includes(evalLescerDca.evidence_level) &&
+      !['A1', 'A2'].includes(evalPolibeaDca.evidence_level),
+    notes: 'Evita falsos positivos por memoria previa o marca comercial cuando el registro oficial dice «discapacidad física».'
+  });
+
+  // 20. REG-CEPRI-QUINTERO: Regresión CEPRI y Quintero Lumbreras no inferir TEA
+  const cepri = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'CAM-C2412')!;
+  const quintero = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'CAM-C1812')!;
+  const evalCepriTea = evaluateCentre(cepri, { ...defaultQuery, profile: 'autism' }, ALL_BENCHMARK_CENTRES, null);
+  const evalQuinteroTea = evaluateCentre(quintero, { ...defaultQuery, profile: 'autism' }, ALL_BENCHMARK_CENTRES, null);
+  tests.push({
+    id: 'REG-CEPRI-QUINTERO',
+    category: 'REGLAS_NEGATIVAS',
+    title: 'CEPRI (CAM-C2412) y Quintero Lumbreras (CAM-C1812) bloqueados para TEA',
+    expected: 'Nivel C / incompatible por NEG-003 (el CSV oficial solo dice discapacidad intelectual)',
+    actual: `CEPRI: ${evalCepriTea.evidence_level}/${evalCepriTea.suitability}, Quintero: ${evalQuinteroTea.evidence_level}/${evalQuinteroTea.suitability}`,
+    passed:
+      cepri.explicit_specialisations.length === 0 &&
+      quintero.explicit_specialisations.length === 0 &&
+      evalCepriTea.suitability === 'incompatible' &&
+      evalQuinteroTea.suitability === 'incompatible',
+    notes: 'Aplica NEG-003 sobre fichas reales cuyo sector registral oficial es «Personas con discapacidad intelectual».'
+  });
+
+  // 21. REG-BOBATH-AT: Regresión Bobath Atención Temprana (CAM-C2758) y APADIS AT (CAM-C1591)
+  const bobathAt = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'CAM-C2758')!;
+  const apadisAt = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'CAM-C1591')!;
+  const evalBobathCp = evaluateCentre(bobathAt, { ...defaultQuery, profile: 'cerebral_palsy' }, ALL_BENCHMARK_CENTRES, null);
+  const evalApadisPsy = evaluateCentre(apadisAt, { ...defaultQuery, profile: 'psychomotor_early_support' }, ALL_BENCHMARK_CENTRES, null);
+  tests.push({
+    id: 'REG-BOBATH-AT',
+    category: 'REGLAS_NEGATIVAS',
+    title: 'Centros de atención temprana genérica (Bobath AT y APADIS AT) sin falsos A1',
+    expected: 'No alcanzan A1 para parálisis cerebral o psicomotricidad si el CSV solo indica Infancia/Atención Temprana',
+    actual: `Bobath AT: ${evalBobathCp.evidence_level}, APADIS AT: ${evalApadisPsy.evidence_level}`,
+    passed:
+      bobathAt.explicit_specialisations.length === 0 &&
+      apadisAt.explicit_specialisations.length === 0 &&
+      !['A1', 'A2'].includes(evalBobathCp.evidence_level) &&
+      !['A1', 'A2'].includes(evalApadisPsy.evidence_level),
+    notes: 'El servicio independiente CAM-SRV-S3848 mantiene su ficha diferenciada; el centro infantil CAM-C2758 no hereda parálisis cerebral.'
+  });
+
+  // 22. REG-AMAFE: Regresión AMAFE (CAM-C8927) no debe salir como neurodegenerativa
+  const amafe = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'CAM-C8927')!;
+  const evalAmafeNeuro = evaluateCentre(amafe, { ...defaultQuery, profile: 'neurodegenerative_diseases' }, ALL_BENCHMARK_CENTRES, null);
+  tests.push({
+    id: 'REG-AMAFE',
+    category: 'REGLAS_NEGATIVAS',
+    title: 'AMAFE (CAM-C8927 · Psicosis/Enfermedad mental crónica) sin falso A1 neurodegenerativo',
+    expected: 'Nivel C e incompatible para enfermedades neurodegenerativas',
+    actual: `Nivel ${evalAmafeNeuro.evidence_level}, Adecuación ${evalAmafeNeuro.suitability}`,
+    passed: amafe.explicit_specialisations.length === 0 && evalAmafeNeuro.evidence_level === 'C',
+    notes: 'El sector registral oficial «Personas con enfermedad mental crónica» no se cruza con neurodegenerativas.'
+  });
+
+  // 23. AUD-001: Auditoría crítica de campos (teléfono, dirección, plazas, SHA-256) contra snapshot oficial
+  const mockMeta = {
+    status: 'SUCCESS',
+    sha256_hash: 'e62d139f5f04eb97a1b35faeaa76ca1301b8263068be5d6aa456af82813d5d17',
+    extracted_records_count: 613,
+    sources: [
+      {
+        source_id: 'madrid_municipal',
+        status: 'SUCCESS',
+        extracted_records_count: 613,
+        sha256_hash: 'e62d139f5f04eb97a1b35faeaa76ca1301b8263068be5d6aa456af82813d5d17'
+      },
+      {
+        source_id: 'cam_centros',
+        status: 'SUCCESS',
+        extracted_records_count: 2633,
+        sha256_hash: 'f0856b4696961e554f1a8097c7505b54bc36891622a194313bb63d0323e5cf14'
+      }
+    ]
+  };
+  const liveIndex = new Map([
+    [
+      teaCenter.centre_id,
+      {
+        registry_key: teaCenter.centre_id,
+        source_id: 'cam_centros' as const,
+        official_name: teaCenter.official_name,
+        phone: teaCenter.phone,
+        address: teaCenter.address,
+        municipality: teaCenter.municipality,
+        postal_code: teaCenter.postal_code,
+        authorised_places: teaCenter.availability.authorised_places
+      }
+    ]
+  ]);
+  const tamperedCenter: SpecializedCentre = { ...teaCenter, phone: '910999888' };
+  const fakeManualCenter: SpecializedCentre = {
+    ...teaCenter,
+    centre_id: 'INVENTADO-999',
+    provenance_records: [
+      {
+        attribute_name: 'specialisation',
+        value: 'Manual',
+        source_dataset: 'Ficha manual',
+        source_url: 'https://example.org',
+        source_type: 'official_registry',
+        retrieved_at: '2026-11-15',
+        extraction_method: 'structured',
+        reviewer: 'Manual',
+        reviewer_role: 'social',
+        confidence: 'explicit',
+        quality: 'C'
+      }
+    ]
+  };
+  const auditPass = auditCentreAgainstSnapshot(teaCenter, mockMeta, liveIndex);
+  const auditMismatch = auditCentreAgainstSnapshot(tamperedCenter, mockMeta, liveIndex);
+  const auditFake = auditCentreAgainstSnapshot(fakeManualCenter, mockMeta, liveIndex);
+  tests.push({
+    id: 'AUD-001',
+    category: 'AUDITORIA_CSV',
+    title: 'Función auditCentreAgainstSnapshot detecta coincidencia, discrepancia y datos no CSV',
+    expected: 'verified_regional para CSV exacto, discrepancy si cambia teléfono, unverified si no viene de CSV',
+    actual: `Exacto: ${auditPass.audit_status}, Manipulado: ${auditMismatch.audit_status}, Manual: ${auditFake.audit_status}`,
+    passed:
+      auditPass.audit_status === 'verified_regional' &&
+      auditPass.is_official_csv &&
+      auditMismatch.audit_status === 'discrepancy' &&
+      !auditMismatch.phone_verified &&
+      auditFake.audit_status === 'unverified' &&
+      !auditFake.is_official_csv,
+    notes: 'Contrasta teléfono, dirección, plazas autorizadas y firma SHA-256 contra snapshot-metadata.json.'
+  });
+
   const executionTimeMs = performance.now() - startTime;
   const passedCount = tests.filter(t => t.passed).length;
   const failedCount = tests.filter(t => !t.passed).length;
@@ -336,3 +490,4 @@ export function runAllCanonicalTests(): {
     executionTimeMs
   };
 }
+

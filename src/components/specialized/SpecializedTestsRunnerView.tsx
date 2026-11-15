@@ -35,6 +35,7 @@ export const SpecializedTestsRunnerView: React.FC = () => {
     { id: 'ALL', label: 'Todas las pruebas' },
     { id: 'EVIDENCIA', label: 'Modelo de Evidencia (A1-C)' },
     { id: 'REGLAS_NEGATIVAS', label: 'Reglas Negativas de Inferencia' },
+    { id: 'AUDITORIA_CSV', label: 'Auditoría CSV y SHA-256' },
     { id: 'COMBINACION', label: 'Combinación en Misma Sede (v1.7)' },
     { id: 'ACCESO', label: 'Vías de Acceso y Advertencias' },
     { id: 'ORDEN', label: 'Orden Lexicográfico Estricto' },
@@ -57,7 +58,7 @@ export const SpecializedTestsRunnerView: React.FC = () => {
               Suite Canónica v1.7
             </span>
             <span className="text-xs text-stone-500 font-mono">
-              18 Casos de Prueba Oficiales
+              {suiteResult.total} Casos de Prueba Oficiales
             </span>
           </div>
           <h1 className="text-xl font-bold text-stone-900 mt-1">

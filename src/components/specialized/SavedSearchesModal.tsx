@@ -20,6 +20,7 @@ import {
   Check
 } from 'lucide-react';
 import { CORE_PROFILES, SUPPORT_TYPES, LIFE_STAGES } from '../../data/specializedTaxonomy';
+import { getProfileDefinition } from '../../utils/specializedEngine';
 
 interface SavedSearchesModalProps {
   isOpen: boolean;
@@ -40,8 +41,7 @@ export const SavedSearchesModal: React.FC<SavedSearchesModalProps> = ({
 }) => {
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
   const [newSearchName, setNewSearchName] = useState('');
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editName, setEditName] = useState('');
+  const [confirmClearAll, setConfirmClearAll] = useState(false);
 
   // Cargar búsquedas locales del navegador
   useEffect(() => {
@@ -99,9 +99,12 @@ export const SavedSearchesModal: React.FC<SavedSearchesModalProps> = ({
   };
 
   const handleClearAll = () => {
-    if (confirm('¿Desea eliminar todas las búsquedas guardadas en este navegador?')) {
-      saveSearchesToStorage([]);
+    if (!confirmClearAll) {
+      setConfirmClearAll(true);
+      return;
     }
+    saveSearchesToStorage([]);
+    setConfirmClearAll(false);
   };
 
   const handleApply = (search: SavedSearch) => {
@@ -229,7 +232,7 @@ export const SavedSearchesModal: React.FC<SavedSearchesModalProps> = ({
                 <div className="flex flex-wrap gap-1 text-[11px] text-stone-600">
                   {s.filters.profile && (
                     <span className="bg-stone-100 px-2 py-0.5 rounded text-stone-800">
-                      {CORE_PROFILES[s.filters.profile as keyof typeof CORE_PROFILES]?.preferred_label || s.filters.profile}
+                      {getProfileDefinition(s.filters.profile)?.preferred_label || CORE_PROFILES[s.filters.profile as keyof typeof CORE_PROFILES]?.preferred_label || s.filters.profile}
                     </span>
                   )}
                   {s.filters.support_types.map(st => (
@@ -267,12 +270,32 @@ export const SavedSearchesModal: React.FC<SavedSearchesModalProps> = ({
           </button>
 
           {savedSearches.length > 0 && (
-            <button
-              onClick={handleClearAll}
-              className="text-stone-400 hover:text-rose-600 transition-colors"
-            >
-              Borrar todas las búsquedas locales
-            </button>
+            confirmClearAll ? (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleClearAll}
+                  className="px-2.5 py-1 bg-rose-600 text-white rounded font-semibold hover:bg-rose-700 transition-colors"
+                >
+                  Confirmar borrado
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmClearAll(false)}
+                  className="text-stone-500 hover:text-stone-800"
+                >
+                  Cancelar
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={handleClearAll}
+                className="text-stone-400 hover:text-rose-600 transition-colors"
+              >
+                Borrar todas las búsquedas locales
+              </button>
+            )
           )}
         </div>
       </div>

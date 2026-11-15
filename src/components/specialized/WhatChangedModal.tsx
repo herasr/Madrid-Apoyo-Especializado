@@ -2,73 +2,86 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  * Madrid Apoyo Especializado v1.7 - Función «Qué ha cambiado»
- * Detección de cambios entre snapshots del registro oficial (§84, §110)
+ * Detección de cambios reales entre snapshots del registro oficial (§84, §110)
  */
 
 import React, { useRef } from 'react';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
-import { 
-  SNAPSHOT_DIFFERENCES, 
-  CURRENT_SNAPSHOT_DATE, 
-  PREVIOUS_SNAPSHOT_DATE 
-} from '../../data/snapshotDiffsData';
-import { 
-  X, 
-  History, 
-  PlusCircle, 
-  AlertCircle, 
-  FileCheck2, 
-  Link2Off, 
-  Layers, 
-  Clock,
-  Sparkles
+import { SNAPSHOT_DIFFERENCES } from '../../data/snapshotDiffsData';
+import { DynamicIngestionState } from '../../utils/liveSnapshotParser';
+import {
+  X,
+  History,
+  CheckCircle2,
+  AlertTriangle
 } from 'lucide-react';
 
 interface WhatChangedModalProps {
   isOpen: boolean;
   onClose: () => void;
+  dynamicState?: DynamicIngestionState | null;
+  inline?: boolean;
 }
 
-export const WhatChangedModal: React.FC<WhatChangedModalProps> = ({ isOpen, onClose }) => {
+export const WhatChangedModal: React.FC<WhatChangedModalProps> = ({
+  isOpen,
+  onClose,
+  dynamicState,
+  inline = false
+}) => {
   const modalRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(modalRef, isOpen);
+  useFocusTrap(modalRef, isOpen && !inline);
 
   React.useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || inline) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, inline, onClose]);
 
   if (!isOpen) return null;
 
-  return (
-    <div 
-      className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="what-changed-modal-title"
+  const activeDiffs = dynamicState ? dynamicState.diffs : SNAPSHOT_DIFFERENCES;
+  const formattedTimestamp = dynamicState?.timestamp
+    ? new Date(dynamicState.timestamp).toLocaleString('es-ES')
+    : 'Pendiente de lectura';
+
+  const cardBody = (
+    <div
+      ref={modalRef}
+      className={
+        inline
+          ? 'bg-white rounded-2xl w-full border border-stone-200 shadow-xs overflow-hidden flex flex-col'
+          : 'bg-white rounded-2xl max-w-3xl w-full border border-stone-200 shadow-xl overflow-hidden my-8 max-h-[90vh] flex flex-col'
+      }
+      tabIndex={-1}
     >
-      <div 
-        ref={modalRef}
-        className="bg-white rounded-2xl max-w-3xl w-full border border-stone-200 shadow-xl overflow-hidden my-8 max-h-[90vh] flex flex-col"
-        tabIndex={-1}
-      >
-        {/* Cabecera */}
-        <div className="px-6 py-4 border-b border-stone-200 flex items-center justify-between bg-stone-50">
-          <div className="flex items-center gap-2">
-            <History className="w-5 h-5 text-stone-700" />
-            <div>
-              <h2 id="what-changed-modal-title" className="text-base font-bold text-stone-900">
-                ¿Qué ha cambiado entre versiones del registro oficial? (§84)
-              </h2>
-              <div className="text-[11px] text-stone-500 font-mono">
-                Comparativa: Snapshot {PREVIOUS_SNAPSHOT_DATE} ➔ Snapshot {CURRENT_SNAPSHOT_DATE}
-              </div>
+      {/* Cabecera */}
+      <div className="px-6 py-4 border-b border-stone-200 flex items-center justify-between bg-stone-50">
+        <div className="flex items-center gap-2">
+          <History className="w-5 h-5 text-stone-700" />
+          <div>
+            <h2 id="what-changed-modal-title" className="text-base font-bold text-stone-900">
+              ¿Qué ha cambiado entre versiones del registro oficial? (§84)
+            </h2>
+            <div className="text-[11px] text-stone-500 font-mono">
+              {dynamicState?.loaded ? (
+                <span className="text-emerald-700 font-bold">
+                  ✓ Evaluado en vivo desde 3 CSV oficiales ({dynamicState.total_csv_records} filas · {dynamicState.active_centres_count} recursos activos · {formattedTimestamp})
+                </span>
+              ) : dynamicState?.error ? (
+                <span className="text-rose-700 font-bold">
+                  Error de lectura CSV: {dynamicState.error}
+                </span>
+              ) : (
+                'Cargando verificación SHA-256 de snapshots oficiales...'
+              )}
             </div>
           </div>
+        </div>
+        {!inline && (
           <button
             onClick={onClose}
             aria-label="Cerrar modal"
@@ -76,34 +89,60 @@ export const WhatChangedModal: React.FC<WhatChangedModalProps> = ({ isOpen, onCl
           >
             <X className="w-5 h-5" />
           </button>
+        )}
+      </div>
+
+      {/* Contenido con trazabilidad SHA-256 real por fuente */}
+      <div className="p-6 overflow-y-auto space-y-4 text-xs">
+        <div className="p-3 bg-stone-100/70 border border-stone-200 rounded-lg text-stone-700 leading-relaxed">
+          <strong>Comparativa real automatizada (§84.2):</strong> El script de ingesta compara cada descarga oficial (Ayuntamiento de Madrid y Comunidad de Madrid Centros/Servicios) frente al snapshot inmediatamente anterior y verifica las firmas criptográficas SHA-256 exactas en disco.
         </div>
 
-        {/* Contenido con reglas de veracidad CHG-002 y CHG-003 */}
-        <div className="p-6 overflow-y-auto space-y-4 text-xs">
-          <div className="p-3 bg-stone-100/70 border border-stone-200 rounded-lg text-stone-700 leading-relaxed">
-            <strong>Reglas de integridad y veracidad (§84.2):</strong> Toda diferencia incluye snapshot anterior, snapshot actual y motivo justificado. Una fuente institucional caída o enlace roto se reporta como <em>incidencia técnica</em> y nunca como cierre del centro (CHG-002). Las fusiones de registros duplicados se identifican claramente sin confundirlas con bajas asistenciales (CHG-003).
+        {dynamicState?.sources && dynamicState.sources.length > 0 && (
+          <div className="border border-stone-200 rounded-xl overflow-hidden">
+            <table className="w-full text-left border-collapse text-[11px]">
+              <thead>
+                <tr className="bg-stone-100 text-stone-700 font-bold border-b border-stone-200">
+                  <th className="p-2.5">Fuente oficial CSV</th>
+                  <th className="p-2.5">Registros</th>
+                  <th className="p-2.5">Huella SHA-256 verificada</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-stone-100">
+                {dynamicState.sources.map((src) => (
+                  <tr key={src.source_id}>
+                    <td className="p-2.5 font-medium text-stone-900">{src.source_name || src.source_id}</td>
+                    <td className="p-2.5 font-mono text-stone-700">{src.extracted_records_count}</td>
+                    <td className="p-2.5 font-mono text-stone-600 break-all">{src.sha256_hash.slice(0, 24)}...</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
+        )}
 
+        {activeDiffs.length === 0 ? (
+          <div className="p-6 rounded-xl border border-emerald-200 bg-emerald-50/50 text-center space-y-2">
+            <CheckCircle2 className="w-6 h-6 text-emerald-700 mx-auto" />
+            <div className="text-sm font-bold text-stone-900">
+              Sin diferencias respecto al snapshot oficial anterior
+            </div>
+            <p className="text-stone-600 max-w-lg mx-auto leading-relaxed">
+              Las firmas SHA-256 de los ficheros CSV descargados coinciden con la captura previa. No se muestran cambios ficticios ni manipulados; cualquier alta, baja o cambio futuro de teléfono o dirección aparecerá aquí automáticamente.
+            </p>
+          </div>
+        ) : (
           <div className="space-y-3">
-            {SNAPSHOT_DIFFERENCES.map((diff) => {
+            {activeDiffs.map((diff) => {
               let badgeColor = 'bg-stone-100 text-stone-800 border-stone-200';
-              let Icon = FileCheck2;
-
               if (diff.category === 'alta') {
                 badgeColor = 'bg-emerald-50 text-emerald-900 border-emerald-200';
-                Icon = PlusCircle;
               } else if (diff.category === 'servicio') {
                 badgeColor = 'bg-sky-50 text-sky-900 border-sky-200';
-                Icon = FileCheck2;
               } else if (diff.category === 'vigencia') {
                 badgeColor = 'bg-amber-50 text-amber-900 border-amber-200';
-                Icon = Clock;
-              } else if (diff.category === 'incidencia_fuente') {
+              } else if (diff.category === 'incidencia_fuente' || diff.category === 'baja') {
                 badgeColor = 'bg-rose-50 text-rose-900 border-rose-200';
-                Icon = Link2Off;
-              } else if (diff.category === 'deduplicacion') {
-                badgeColor = 'bg-indigo-50 text-indigo-900 border-indigo-200';
-                Icon = Layers;
               }
 
               return (
@@ -116,9 +155,9 @@ export const WhatChangedModal: React.FC<WhatChangedModalProps> = ({ isOpen, onCl
                       <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase border ${badgeColor}`}>
                         {diff.category}
                       </span>
-                      <h4 className="font-bold text-stone-900 text-sm">
+                      <h3 className="font-bold text-stone-900 text-sm">
                         {diff.centre_name}
-                      </h4>
+                      </h3>
                     </div>
                     <span className="font-mono text-[11px] text-stone-400 shrink-0">
                       {diff.change_id}
@@ -141,21 +180,38 @@ export const WhatChangedModal: React.FC<WhatChangedModalProps> = ({ isOpen, onCl
               );
             })}
           </div>
-        </div>
+        )}
+      </div>
 
-        {/* Pie */}
-        <div className="px-6 py-3 border-t border-stone-200 bg-stone-50 flex items-center justify-between text-xs">
-          <span className="text-stone-500">
-            {SNAPSHOT_DIFFERENCES.length} cambios oficiales auditados y documentados
-          </span>
+      {/* Pie */}
+      <div className="px-6 py-3 border-t border-stone-200 bg-stone-50 flex items-center justify-between text-xs">
+        <span className="text-stone-500 font-mono">
+          {activeDiffs.length} cambios calculados | SHA-256 principal: {dynamicState?.sha256_hash ? `${dynamicState.sha256_hash.slice(0, 16)}...` : 'Pendiente'}
+        </span>
+        {!inline && (
           <button
             onClick={onClose}
             className="px-4 py-1.5 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-stone-800 transition-colors"
           >
             Cerrar
           </button>
-        </div>
+        )}
       </div>
+    </div>
+  );
+
+  if (inline) {
+    return cardBody;
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="what-changed-modal-title"
+    >
+      {cardBody}
     </div>
   );
 };

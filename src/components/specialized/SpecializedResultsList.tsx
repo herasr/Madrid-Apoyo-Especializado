@@ -6,7 +6,7 @@
  * Manejo estricto de incertidumbre y cero resultados sin relajar en silencio (§38).
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EvaluatedCentreResult, SearchQueryState } from '../../types/specialized';
 import { SpecializedCentreCard } from './SpecializedCentreCard';
 import { 
@@ -45,6 +45,11 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
 }) => {
   const [showIncompatibles, setShowIncompatibles] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [displayLimit, setDisplayLimit] = useState(40);
+
+  useEffect(() => {
+    setDisplayLimit(40);
+  }, [results]);
 
   // Copiar enlace reproducibilidad de la búsqueda completa
   const handleCopyShareLink = () => {
@@ -111,10 +116,11 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
     document.body.removeChild(link);
   };
 
-  // Agrupación permanente por nivel de evidencia (§37.1, §77)
-  const groupA = results.filter(r => r.evidence_level === 'A1' || r.evidence_level === 'A2');
-  const groupB = results.filter(r => r.evidence_level === 'B1' || r.evidence_level === 'B2');
-  const groupC = results.filter(r => r.evidence_level === 'C');
+  // Agrupación permanente por nivel de evidencia (§37.1, §77) con límite de render progresivo
+  const visibleSlice = results.slice(0, displayLimit);
+  const groupA = visibleSlice.filter(r => r.evidence_level === 'A1' || r.evidence_level === 'A2');
+  const groupB = visibleSlice.filter(r => r.evidence_level === 'B1' || r.evidence_level === 'B2');
+  const groupC = visibleSlice.filter(r => r.evidence_level === 'C');
 
   // Si no hay resultados (§38: Diseño para incertidumbre y ausencia de resultados)
   if (results.length === 0) {
@@ -299,6 +305,21 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
           </section>
         )}
       </div>
+
+      {results.length > displayLimit && (
+        <div className="flex flex-col items-center gap-2 pt-2">
+          <div className="text-xs text-stone-500 font-mono">
+            Mostrando {visibleSlice.length} de {results.length} recursos oficiales
+          </div>
+          <button
+            type="button"
+            onClick={() => setDisplayLimit(prev => prev + 60)}
+            className="px-5 py-2 bg-white border border-stone-300 text-stone-900 rounded-lg text-xs font-semibold hover:bg-stone-50 transition-colors shadow-xs cursor-pointer"
+          >
+            Mostrar más recursos (+60)
+          </button>
+        </div>
+      )}
 
 
       {/* 4. Sección de Centros Incompatibles Excluidos de la Lista Principal (§78) */}

@@ -152,11 +152,11 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
   const handleSelectMunicipality = (muniName: string) => {
     setGeoStatus('idle');
     if (!muniName) {
-      // Si selecciona la opción vacía, vuelve a Madrid Centro por defecto
+      // Sin municipio seleccionado, vuelve al ámbito regional completo (Comunidad de Madrid)
       setQuery(prev => ({
         ...prev,
         municipality: null,
-        user_ephemeral_location: [40.4168, -3.7038],
+        user_ephemeral_location: null,
         location_mode: 'all'
       }));
       return;
@@ -561,7 +561,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                   ? 'Tu ubicación actual (GPS efímero)'
                   : query.municipality
                   ? `${query.municipality} (centroide oficial)`
-                  : 'Madrid Centro (Km 0 · Puerta del Sol)'}
+                  : 'Comunidad de Madrid (sin filtro de origen · mostrando todos)'}
               </span>
             </div>
           </div>

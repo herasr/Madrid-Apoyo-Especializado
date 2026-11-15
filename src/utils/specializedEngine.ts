@@ -27,6 +27,11 @@ import {
   LIFE_STAGES 
 } from '../data/specializedTaxonomy';
 import { resolveSearchOrigin, OriginReference, calculateHaversineDistanceKm } from '../data/municipalitiesData';
+import {
+  SnapshotCentreRecord,
+  normalizePhoneComparable,
+  normalizeAddressComparable
+} from './officialRegistryParser';
 
 export const ACCESSIBILITY_MAP: Record<string, { label: string; keywords: string[] }> = {
   wheelchair_access: {
@@ -261,8 +266,10 @@ export function evaluateCentre(
     } else {
       // Reglas negativas (§26.1, §44)
       if (query.profile === 'autism') {
-        const mentionsDI = centre.subtype?.toLowerCase().includes('discapacidad intelectual') || 
-                           centre.sector?.toLowerCase().includes('discapacidad intelectual');
+        const mentionsDI =
+          centre.subtype?.toLowerCase().includes('discapacidad intelectual') ||
+          centre.sector?.toLowerCase().includes('discapacidad intelectual') ||
+          centre.related_services.some(s => s.toLowerCase().includes('discapacidad intelectual'));
         if (mentionsDI) {
           isForbiddenInference = true;
           suitability_reasons.push('Regla negativa NEG-003: Discapacidad Intelectual no infiere TEA.');
@@ -278,10 +285,32 @@ export function evaluateCentre(
       }
 
       if (query.profile === 'spinal_cord_injury' || query.profile === 'cerebral_palsy') {
-        const hasGenFisio = centre.related_services.some(s => s.toLowerCase().includes('fisioterapia general'));
+        const lowSectorSub = `${centre.sector} ${centre.subtype} ${centre.centre_type}`.toLowerCase();
+        const hasGenFisio =
+          centre.related_services.some(s => s.toLowerCase().includes('fisioterapia general')) ||
+          lowSectorSub.includes('discapacidad física') ||
+          lowSectorSub.includes('discapacidad fisica');
         if (hasGenFisio) {
           isForbiddenInference = true;
           suitability_reasons.push('Regla negativa NEG-002: Fisioterapia o discapacidad física general no demuestra lesión medular ni parálisis cerebral.');
+        }
+      }
+
+      if (query.profile === 'psychomotor_early_support') {
+        const lowAT = `${centre.official_name} ${centre.sector} ${centre.subtype} ${centre.related_services.join(' ')}`.toLowerCase();
+        if (lowAT.includes('atención temprana') || lowAT.includes('atencion temprana') || lowAT.includes('estimulación')) {
+          isForbiddenInference = true;
+          suitability_reasons.push('Regla negativa NEG-007: Atención temprana genérica no infiere psicomotricidad específica sin mención literal.');
+        }
+      }
+
+      if (
+        ['neurodegenerative_diseases', 'acquired_brain_injury', 'cerebral_palsy', 'spinal_cord_injury', 'als', 'parkinson', 'alzheimer', 'autism'].includes(query.profile)
+      ) {
+        const lowMental = `${centre.sector} ${centre.subtype}`.toLowerCase();
+        if (lowMental.includes('enfermedad mental')) {
+          isForbiddenInference = true;
+          suitability_reasons.push('Regla negativa NEG-008: Centro registrado para enfermedad mental crónica; no acredita especialización neurológica ni neurodegenerativa.');
         }
       }
 
@@ -589,3 +618,220 @@ export function runSpecializedSearch(
     resolved_origin: resolvedOrigin
   };
 }
+
+export interface SnapshotSourceMeta {
+  source_id: string;
+  source_name?: string;
+  source_url?: string;
+  file?: string;
+  sha256_hash: string;
+  extracted_records_count: number;
+  status: string;
+}
+
+export interface SnapshotMetadataSummary {
+  ingestion_id?: string;
+  timestamp?: string;
+  sha256_hash?: string;
+  extracted_records_count?: number;
+  total_combined_records?: number;
+  status?: string;
+  sources?: SnapshotSourceMeta[];
+}
+
+export interface CentreAuditResult {
+  centre_id: string;
+  official_name: string;
+  is_official_csv: boolean;
+  phone_verified: boolean;
+  address_verified: boolean;
+  places_verified: boolean;
+  metadata_sha256_verified: boolean;
+  discrepancies: string[];
+  audit_status: 'verified_official' | 'verified_regional' | 'discrepancy' | 'unverified';
+  audit_note: string;
+}
+
+let activeSnapshotMeta: SnapshotMetadataSummary | null = null;
+let activeLiveCsvIndex: Map<string, SnapshotCentreRecord> | null = null;
+
+export function setSnapshotVerificationContext(
+  metadata: SnapshotMetadataSummary | null,
+  liveIndex: Map<string, SnapshotCentreRecord> | null
+): void {
+  activeSnapshotMeta = metadata;
+  activeLiveCsvIndex = liveIndex;
+}
+
+function findMatchingSourceMeta(
+  centre: SpecializedCentre,
+  meta: SnapshotMetadataSummary | null
+): SnapshotSourceMeta | null {
+  if (!meta) return null;
+  const sources = meta.sources || [];
+  if (centre.centre_id.startsWith('MAD-PK') || centre.provenance_records.some(p => p.source_dataset.toLowerCase().includes('datos.madrid.es'))) {
+    const m = sources.find(s => s.source_id === 'madrid_municipal');
+    if (m) return m;
+    if (meta.sha256_hash && meta.status === 'SUCCESS') {
+      return {
+        source_id: 'madrid_municipal',
+        sha256_hash: meta.sha256_hash,
+        extracted_records_count: meta.extracted_records_count || 0,
+        status: meta.status
+      };
+    }
+  }
+  if (centre.centre_id.startsWith('CAM-SRV-')) {
+    return sources.find(s => s.source_id === 'cam_servicios') || null;
+  }
+  if (centre.centre_id.startsWith('CAM-')) {
+    return sources.find(s => s.source_id === 'cam_centros') || null;
+  }
+  return null;
+}
+
+function findCsvRecordForCentre(
+  centre: SpecializedCentre,
+  liveIndex: Map<string, SnapshotCentreRecord>
+): SnapshotCentreRecord | null {
+  if (liveIndex.has(centre.centre_id)) {
+    return liveIndex.get(centre.centre_id)!;
+  }
+  for (const prov of centre.provenance_records) {
+    const pkMatch = prov.source_dataset.match(/PK\s+(\d+)/);
+    if (pkMatch && liveIndex.has(`MAD-PK${pkMatch[1]}`)) {
+      return liveIndex.get(`MAD-PK${pkMatch[1]}`)!;
+    }
+    const camMatch = prov.source_dataset.match(/\(([CS]\d+)\)/);
+    if (camMatch) {
+      const key = camMatch[1].startsWith('S') ? `CAM-SRV-${camMatch[1]}` : `CAM-${camMatch[1]}`;
+      if (liveIndex.has(key)) return liveIndex.get(key)!;
+    }
+  }
+  return null;
+}
+
+/**
+ * Función de auditoría de datos en 'specializedEngine.ts' que verifica si los campos críticos
+ * de cada centro (teléfono, dirección, plazas) coinciden con 'snapshot-metadata.json' y los CSV oficiales.
+ */
+export function auditCentreAgainstSnapshot(
+  centre: SpecializedCentre,
+  snapshotMeta: SnapshotMetadataSummary | null = activeSnapshotMeta,
+  liveCsvIndex: Map<string, SnapshotCentreRecord> | null = activeLiveCsvIndex
+): CentreAuditResult {
+  const hasOfficialOpenDataProvenance = centre.provenance_records.some(p => {
+    const ds = p.source_dataset.toLowerCase();
+    const url = p.source_url.toLowerCase();
+    return (
+      ds.includes('datos.madrid.es') ||
+      ds.includes('registro de centros de atención social cam') ||
+      ds.includes('registro de servicios de atención social cam') ||
+      url.includes('datos.madrid.es') ||
+      url.includes('datos.comunidad.madrid')
+    );
+  });
+
+  const isMunicipalCsv = centre.provenance_records.some(p =>
+    p.source_dataset.toLowerCase().includes('datos.madrid.es') ||
+    p.source_url.toLowerCase().includes('datos.madrid.es')
+  );
+  const isCamCsv = centre.provenance_records.some(p =>
+    p.source_dataset.toLowerCase().includes('registro de centros de atención social cam') ||
+    p.source_dataset.toLowerCase().includes('registro de servicios de atención social cam') ||
+    p.source_url.toLowerCase().includes('datos.comunidad.madrid')
+  );
+
+  const matchedMeta = findMatchingSourceMeta(centre, snapshotMeta);
+  const metadata_sha256_verified = Boolean(
+    matchedMeta &&
+      matchedMeta.status === 'SUCCESS' &&
+      /^[a-f0-9]{64}$/i.test(matchedMeta.sha256_hash) &&
+      matchedMeta.extracted_records_count > 0
+  );
+
+  const discrepancies: string[] = [];
+  let phone_verified = false;
+  let address_verified = false;
+  let places_verified = false;
+  let matchedInLiveCsv = false;
+
+  if (liveCsvIndex && liveCsvIndex.size > 0) {
+    const csvRec = findCsvRecordForCentre(centre, liveCsvIndex);
+    if (csvRec) {
+      matchedInLiveCsv = true;
+
+      const cPhone = normalizePhoneComparable(centre.phone);
+      const rPhone = normalizePhoneComparable(csvRec.phone);
+      phone_verified = cPhone === rPhone;
+      if (!phone_verified) {
+        discrepancies.push(`Teléfono ("${centre.phone || 'vacío'}" vs CSV "${csvRec.phone || 'vacío'}")`);
+      }
+
+      const cAddr = normalizeAddressComparable(centre.address);
+      const rAddr = normalizeAddressComparable(csvRec.address);
+      address_verified = Boolean(cAddr && rAddr && cAddr === rAddr);
+      if (!address_verified) {
+        discrepancies.push(`Dirección ("${centre.address}" vs CSV "${csvRec.address}")`);
+      }
+
+      places_verified = centre.availability.authorised_places === csvRec.authorised_places;
+      if (!places_verified) {
+        discrepancies.push(`Plazas (${centre.availability.authorised_places ?? 'null'} vs CSV ${csvRec.authorised_places ?? 'null'})`);
+      }
+    } else {
+      discrepancies.push('Identificador registral no localizado en la descarga CSV oficial activa.');
+    }
+  } else {
+    // Evaluación estructural previa a la carga completa del índice CSV en vivo
+    phone_verified = hasOfficialOpenDataProvenance && (centre.phone === '' || normalizePhoneComparable(centre.phone).length >= 9);
+    address_verified = hasOfficialOpenDataProvenance && Boolean(centre.address && centre.address.length >= 5);
+    places_verified = hasOfficialOpenDataProvenance && (
+      isCamCsv
+        ? (centre.availability.authorised_places === null || typeof centre.availability.authorised_places === 'number')
+        : centre.availability.authorised_places === null
+    );
+  }
+
+  const is_official_csv =
+    hasOfficialOpenDataProvenance &&
+    (liveCsvIndex && liveCsvIndex.size > 0 ? matchedInLiveCsv : true) &&
+    (snapshotMeta ? metadata_sha256_verified : true);
+
+  let audit_status: CentreAuditResult['audit_status'] = 'unverified';
+  let audit_note = 'ADVERTENCIA: Los datos de este centro no proceden de los ficheros CSV oficiales verificados.';
+
+  if (!is_official_csv) {
+    audit_status = 'unverified';
+    if (snapshotMeta && !metadata_sha256_verified && hasOfficialOpenDataProvenance) {
+      audit_note = 'ADVERTENCIA: La fuente declarada no cuenta con firma SHA-256 verificada en snapshot-metadata.json.';
+    }
+  } else if (discrepancies.length > 0) {
+    audit_status = 'discrepancy';
+    audit_note = `DISCREPANCIA CON EL CSV OFICIAL: ${discrepancies.join('; ')}.`;
+  } else if (isMunicipalCsv && isCamCsv) {
+    audit_status = 'verified_official';
+    audit_note = `Verificado en CSV oficial municipal (datos.madrid.es) y Registro CAM${matchedMeta ? ` · SHA-256 ${matchedMeta.sha256_hash.slice(0, 10)}...` : ''}.`;
+  } else if (isMunicipalCsv) {
+    audit_status = 'verified_official';
+    audit_note = `Verificado campo a campo contra CSV oficial datos.madrid.es${matchedMeta ? ` · SHA-256 ${matchedMeta.sha256_hash.slice(0, 10)}...` : ''}.`;
+  } else if (isCamCsv) {
+    audit_status = 'verified_regional';
+    audit_note = `Verificado campo a campo contra CSV oficial Comunidad de Madrid${matchedMeta ? ` · SHA-256 ${matchedMeta.sha256_hash.slice(0, 10)}...` : ''}.`;
+  }
+
+  return {
+    centre_id: centre.centre_id,
+    official_name: centre.official_name,
+    is_official_csv,
+    phone_verified,
+    address_verified,
+    places_verified,
+    metadata_sha256_verified,
+    discrepancies,
+    audit_status,
+    audit_note
+  };
+}
+
+

@@ -9,6 +9,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
+  SpecializedCentre,
   SearchQueryState, 
   EvaluatedCentreResult, 
   SavedSearch, 
@@ -16,6 +17,7 @@ import {
 } from './types/specialized';
 import { SPECIALIZED_CENTRES } from './data/specializedCentresData';
 import { runSpecializedSearch, evaluateCentre } from './utils/specializedEngine';
+import { loadLiveSnapshotData, DynamicIngestionState } from './utils/liveSnapshotParser';
 import { resolveSearchOrigin, OriginReference } from './data/municipalitiesData';
 import { SpecializedHeader } from './components/specialized/SpecializedHeader';
 import { SpecializedSearchFilters } from './components/specialized/SpecializedSearchFilters';
@@ -44,11 +46,11 @@ const DEFAULT_QUERY: SearchQueryState = {
   support_combination_mode: 'any_support',
   life_stage: null,
   municipality: null,
-  radius_km: 25,
+  radius_km: 50,
   network_preference: 'all',
   accessibility_needs: [],
-  user_ephemeral_location: [40.4168, -3.7038],
-  location_mode: 'browser'
+  user_ephemeral_location: null,
+  location_mode: 'all'
 };
 
 /**
@@ -140,7 +142,7 @@ function validateAndParseUrlParams(): { query: SearchQueryState; errors: string[
     }
   }
 
-  let radius_km = 25;
+  let radius_km = DEFAULT_QUERY.radius_km;
   if (rawRadius !== null && rawRadius !== '') {
     const parsed = parseInt(rawRadius, 10);
     if (!isNaN(parsed) && parsed > 0 && parsed <= 200) {
@@ -246,7 +248,7 @@ export default function App() {
       const params = new URLSearchParams();
       if (query.profile) params.set('profile', query.profile);
       if (query.municipality) params.set('municipality', query.municipality);
-      if (query.radius_km !== 25) params.set('radius', query.radius_km.toString());
+      if (query.radius_km !== 50) params.set('radius', query.radius_km.toString());
       if (query.support_types.length > 0) params.set('supports', query.support_types.join(','));
       if (query.functional_needs.length > 0) params.set('needs', query.functional_needs.join(','));
       if (query.life_stage) params.set('stage', query.life_stage);
@@ -273,8 +275,20 @@ export default function App() {
     query.location_mode
   ]);
 
-  // Selección de centros para comparar (hasta 3 centros §15)
+  // Carga de captura CSV en vivo en tiempo real desde snapshot-latest.csv
+  const [activeCentres, setActiveCentres] = useState<SpecializedCentre[]>(SPECIALIZED_CENTRES);
+  const [dynamicState, setDynamicState] = useState<DynamicIngestionState | null>(null);
+
+  useEffect(() => {
+    loadLiveSnapshotData(SPECIALIZED_CENTRES).then(({ centres: liveCentres, state }) => {
+      setActiveCentres(liveCentres);
+      setDynamicState(state);
+    });
+  }, []);
+
+  // Seleccion de centros para comparar (hasta 3 centros §15)
   const [comparedCentreIds, setComparedCentreIds] = useState<string[]>([]);
+  const [compareLimitNotice, setCompareLimitNotice] = useState<string | null>(null);
   const [selectedMapCentreId, setSelectedMapCentreId] = useState<string | null>(null);
 
   // Modales
@@ -302,8 +316,8 @@ export default function App() {
 
   // Ejecución del motor de búsqueda verificable (§27, §41, §78)
   const searchOutput = useMemo(() => {
-    return runSpecializedSearch(query, SPECIALIZED_CENTRES, resolvedOrigin.coordinates);
-  }, [query, resolvedOrigin]);
+    return runSpecializedSearch(query, activeCentres, resolvedOrigin.coordinates);
+  }, [query, activeCentres, resolvedOrigin]);
 
   // Centros en el comparador (mantiene los seleccionados independientemente de filtros de radio o estado)
   const comparedCentres = useMemo(() => {
@@ -313,20 +327,24 @@ export default function App() {
 
     const missingIds = comparedCentreIds.filter(id => !matched.some(m => m.centre.centre_id === id));
     const missingEvaluated = missingIds.map(id => {
-      const raw = SPECIALIZED_CENTRES.find(c => c.centre_id === id);
-      return raw ? evaluateCentre(raw, query, SPECIALIZED_CENTRES, resolvedOrigin.coordinates) : null;
+      const raw = activeCentres.find(c => c.centre_id === id);
+      return raw ? evaluateCentre(raw, query, activeCentres, resolvedOrigin.coordinates) : null;
     }).filter(Boolean) as EvaluatedCentreResult[];
 
     return [...matched, ...missingEvaluated];
-  }, [searchOutput.results, searchOutput.incompatible_results, comparedCentreIds, query, resolvedOrigin]);
+  }, [searchOutput.results, searchOutput.incompatible_results, comparedCentreIds, query, activeCentres, resolvedOrigin]);
 
   const toggleCompare = (id: string) => {
     setComparedCentreIds(prev => {
-      if (prev.includes(id)) return prev.filter(cId => cId !== id);
+      if (prev.includes(id)) {
+        setCompareLimitNotice(null);
+        return prev.filter(cId => cId !== id);
+      }
       if (prev.length >= 3) {
-        alert('Puede comparar un máximo de 3 centros a la vez (§15).');
+        setCompareLimitNotice('Puede comparar un máximo de 3 centros a la vez (§15). Quite uno del comparador antes de añadir otro.');
         return prev;
       }
+      setCompareLimitNotice(null);
       return [...prev, id];
     });
   };
@@ -385,6 +403,32 @@ export default function App() {
         {/* PESTAÑA: BÚSQUEDA Y RESULTADOS */}
         {activeTab === 'search' && (
           <div>
+            {compareLimitNotice && (
+              <div className="mb-4 p-3 rounded-xl border border-amber-300 bg-amber-50 text-amber-950 text-xs flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0" />
+                  <span>{compareLimitNotice}</span>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('comparator')}
+                    className="px-2.5 py-1 rounded bg-stone-900 text-white font-semibold hover:bg-stone-800 cursor-pointer"
+                  >
+                    Ir al comparador
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCompareLimitNotice(null)}
+                    aria-label="Cerrar aviso"
+                    className="px-2 py-1 text-stone-600 hover:text-stone-900 cursor-pointer"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Aviso de transición vital si la etapa seleccionada lo prevé (§85) */}
             {!dismissedTransition && !isUrlBlocked && (
               <LifeStageTransitionBanner
@@ -516,7 +560,12 @@ export default function App() {
                 Ir al buscador
               </button>
             </div>
-            <WhatChangedModal isOpen={true} onClose={() => setActiveTab('search')} />
+            <WhatChangedModal
+              isOpen={true}
+              inline={true}
+              onClose={() => setActiveTab('search')}
+              dynamicState={dynamicState}
+            />
           </div>
         )}
 
@@ -568,6 +617,7 @@ export default function App() {
       <WhatChangedModal
         isOpen={isWhatChangedOpen}
         onClose={() => setIsWhatChangedOpen(false)}
+        dynamicState={dynamicState}
       />
 
       <DisambiguationModal
@@ -613,10 +663,10 @@ export default function App() {
             <button
               type="button"
               onClick={() => setActiveTab('tests')}
-              aria-label="Ver suite canónica de 18 pruebas oficiales"
+              aria-label="Ver suite canónica de 23 pruebas oficiales"
               className="hover:text-stone-950 underline underline-offset-2 font-mono cursor-pointer"
             >
-              Suite Canónica (18 tests)
+              Suite Canónica (23 tests)
             </button>
           </div>
         </div>
