@@ -1,7 +1,7 @@
 {
-  "ingestion_id": "ING_1794735827343",
-  "timestamp": "2026-11-15T09:43:43.169Z",
-  "previous_timestamp": "2026-11-12T16:24:46.053Z",
+  "ingestion_id": "ING_1794825843050",
+  "timestamp": "2026-11-16T10:43:58.508Z",
+  "previous_timestamp": "2026-11-15T09:43:43.169Z",
   "source_url": "https://datos.madrid.es/dataset/212774-0-atencion-social/resource/212774-0-atencion-social-csv/download/212774-0-atencion-social-csv.csv",
   "sha256_hash": "e62d139f5f04eb97a1b35faeaa76ca1301b8263068be5d6aa456af82813d5d17",
   "file_size_bytes": 832519,
