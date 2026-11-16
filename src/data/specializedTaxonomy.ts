@@ -66,11 +66,11 @@ export interface LifeStageTransitionDef {
 }
 
 export const TAXONOMY_METADATA = {
-  version: '1.7.0',
-  released_at: '2026-11-08',
+  version: '1.8.0',
+  released_at: '2026-11-15',
   status: 'current',
-  active_profiles_count: 4,
-  experimental_profiles_count: 2,
+  active_profiles_count: 3,
+  experimental_profiles_count: 3,
   pending_profiles_count: 7,
   deprecated_profiles_count: 0,
   governance_rules_count: 8,
@@ -142,7 +142,7 @@ export const CORE_PROFILES: Record<CoreProfileId, TaxonomyProfileDefinition> = {
   },
   cerebral_palsy: {
     id: 'cerebral_palsy',
-    status: 'approved',
+    status: 'experimental',
     preferred_label: 'Parálisis cerebral y patologías afines',
     category_family: 'neurológicos',
     explicit_terms: ['parálisis cerebral', 'patologías afines', 'encefalopatía motora'],
@@ -162,9 +162,9 @@ export const CORE_PROFILES: Record<CoreProfileId, TaxonomyProfileDefinition> = {
       level_b_precision: 0.86,
       minimum_explicit_centres: 3
     },
-    review_date: '2026-11-08',
+    review_date: '2026-11-15',
     reviewer_roles: ['healthcare', 'social_services'],
-    description: 'Grupo de trastornos del desarrollo psicomotor y postural causados por lesión o malformación no progresiva del cerebro fetal o infantil.'
+    description: 'Grupo de trastornos del desarrollo psicomotor y postural causados por lesión o malformación no progresiva del cerebro fetal o infantil. En evaluación (2/3 centros explícitos A1 en CSV sociales actuales).'
   },
   neurodegenerative_diseases: {
     id: 'neurodegenerative_diseases',

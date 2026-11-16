@@ -1,7 +1,7 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * Madrid Apoyo Especializado v1.7 - Verified Centre Result Card (Simplified)
+ * Madrid Apoyo Especializado v1.8 - Verified Centre Result Card (Simplified)
  * Disciplina Zero-Pill y diseño compacto y limpio (§14, §27, §42)
  */
 
@@ -36,12 +36,17 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
   onToggleCompare,
   easyReadMode
 }) => {
-  const { centre, evidence_level, suitability, distance_label, transit_time_label } = item;
+  const { centre, evidence_level, evidence_sublevel, suitability, distance_label, transit_time_label } = item;
   const auditResult = auditCentreAgainstSnapshot(centre);
+
+  const a2Label =
+    evidence_sublevel === 'A2_entity'
+      ? 'Nivel A2 · Lo declara la entidad titular'
+      : 'Nivel A2 · Confirme el apoyo';
 
   const evidenceLabels: Record<string, { label: string; dotClass: string }> = {
     A1: { label: 'Nivel A1 · Especialización publicada', dotClass: 'bg-emerald-600' },
-    A2: { label: 'Nivel A2 · Especialización publicada', dotClass: 'bg-teal-600' },
+    A2: { label: a2Label, dotClass: 'bg-teal-600' },
     B1: { label: 'Nivel B1 · Servicios relacionados', dotClass: 'bg-sky-600' },
     B2: { label: 'Nivel B2 · Posible recurso', dotClass: 'bg-indigo-600' },
     C: { label: 'Nivel C · Orientación general', dotClass: 'bg-stone-400' }
@@ -74,6 +79,8 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
                 ? 'Red Pública'
                 : centre.public_private_status === 'concertado'
                 ? 'Red Concertada'
+                : centre.public_private_status === 'no_especificado'
+                ? 'Titularidad no especificada'
                 : 'Privado'}
             </span>
             {distance_label && (
@@ -152,6 +159,15 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
             {centre.availability.authorised_places} plazas autorizadas
           </span>
         )}
+
+        {centre.allowed_life_stages.length === 0 && (
+          <span
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-amber-50/70 text-amber-900 border border-amber-200 text-[11px] font-medium"
+            title="El registro oficial no especifica rango de edad ni etapa vital para este recurso"
+          >
+            Edad: no consta, confirmar
+          </span>
+        )}
       </div>
 
       {/* 3. Access Route & Next Step (Simplified) */}
@@ -167,7 +183,14 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
       {easyReadMode && (
         <div className="p-2.5 bg-amber-50/80 border border-amber-200/90 rounded-lg text-xs text-amber-950 leading-relaxed">
           <span className="font-bold">Lectura fácil: </span>
-          Centro con autorización oficial de la Comunidad de Madrid. Ofrece ayuda especializada y requiere derivación o trámite administrativo para plaza pública.
+          {centre.centre_id.startsWith('MAD-PK')
+            ? 'Recurso publicado en el catálogo oficial del Ayuntamiento de Madrid (datos.madrid.es).'
+            : 'Centro o servicio con autorización oficial de la Comunidad de Madrid.'}{' '}
+          {centre.public_private_status === 'red_publica' || centre.public_private_status === 'concertado'
+            ? 'Puede contar con plazas públicas o concertadas; consulte en sus servicios sociales cómo solicitar acceso.'
+            : centre.public_private_status === 'no_especificado'
+            ? 'Consulte directamente con la entidad o en sus servicios sociales las vías de acceso y condiciones.'
+            : 'Entidad privada autorizada; consulte directamente con el centro las condiciones de admisión.'}
         </div>
       )}
 

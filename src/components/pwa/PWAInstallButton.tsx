@@ -1,10 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { usePWAInstall } from './usePWAInstall';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { Download } from 'lucide-react';
 
 export const PWAInstallButton: React.FC = () => {
   const { isInstallable, isInstalled, isIOS, install } = usePWAInstall();
   const [showIOSGuide, setShowIOSGuide] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, showIOSGuide);
+
+  useEffect(() => {
+    if (!showIOSGuide) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowIOSGuide(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showIOSGuide]);
 
   // If already running as an installed PWA, hide the button
   if (isInstalled) {
@@ -41,9 +53,18 @@ export const PWAInstallButton: React.FC = () => {
         </button>
 
         {showIOSGuide && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60 p-4 backdrop-blur-xs">
-            <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl border border-stone-200">
-              <h3 className="text-base font-bold text-stone-900">Instalar en iPhone / iPad</h3>
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60 p-4 backdrop-blur-xs"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ios-install-title"
+          >
+            <div 
+              ref={modalRef}
+              className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl border border-stone-200"
+              tabIndex={-1}
+            >
+              <h3 id="ios-install-title" className="text-base font-bold text-stone-900">Instalar en iPhone / iPad</h3>
               <p className="mt-2 text-xs text-stone-600 leading-relaxed">
                 1. Toca el botón <strong>Compartir</strong> en la barra de herramientas de Safari.<br />
                 2. Desliza hacia abajo y toca <strong>Añadir a la pantalla de inicio</strong>.

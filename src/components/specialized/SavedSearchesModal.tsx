@@ -1,7 +1,7 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * Madrid Apoyo Especializado v1.7 - Búsquedas Guardadas en el Navegador
+ * Madrid Apoyo Especializado v1.8 - Búsquedas Guardadas en el Navegador
  * Almacenamiento 100% local en localStorage sin persistencia de coordenadas exactas ni datos médicos (§83)
  */
 
@@ -19,8 +19,8 @@ import {
   ShieldCheck,
   Check
 } from 'lucide-react';
-import { CORE_PROFILES, SUPPORT_TYPES, LIFE_STAGES } from '../../data/specializedTaxonomy';
-import { getProfileDefinition } from '../../utils/specializedEngine';
+import { CORE_PROFILES, SUPPORT_TYPES, LIFE_STAGES, FUNCTIONAL_NEEDS } from '../../data/specializedTaxonomy';
+import { getProfileDefinition, ACCESSIBILITY_MAP } from '../../utils/specializedEngine';
 
 interface SavedSearchesModalProps {
   isOpen: boolean;
@@ -28,26 +28,29 @@ interface SavedSearchesModalProps {
   currentQuery: SearchQueryState;
   onLoadSearch: (filters: SavedSearch['filters']) => void;
   onOpenWhatChanged: () => void;
+  datasetSnapshot?: string;
 }
 
-const STORAGE_KEY = 'madrid_apoyo_saved_searches_v17';
+const STORAGE_KEY = 'madrid_apoyo_saved_searches_v18';
+const LEGACY_STORAGE_KEY = 'madrid_apoyo_saved_searches_v17';
 
 export const SavedSearchesModal: React.FC<SavedSearchesModalProps> = ({
   isOpen,
   onClose,
   currentQuery,
   onLoadSearch,
-  onOpenWhatChanged
+  onOpenWhatChanged,
+  datasetSnapshot
 }) => {
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
   const [newSearchName, setNewSearchName] = useState('');
   const [confirmClearAll, setConfirmClearAll] = useState(false);
 
-  // Cargar búsquedas locales del navegador
+  // Cargar búsquedas locales del navegador (migrando desde v1.7 si existe)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
         if (raw) {
           setSavedSearches(JSON.parse(raw));
         }
@@ -85,8 +88,8 @@ export const SavedSearchesModal: React.FC<SavedSearchesModalProps> = ({
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       filters: safeFilters,
-      taxonomy_version: '1.7.0',
-      dataset_snapshot: '2026-11-09'
+      taxonomy_version: '1.8.0',
+      dataset_snapshot: datasetSnapshot || new Date().toISOString().slice(0, 10)
     };
 
     saveSearchesToStorage([newRecord, ...savedSearches]);
@@ -250,6 +253,29 @@ export const SavedSearchesModal: React.FC<SavedSearchesModalProps> = ({
                       {s.filters.municipality} (±{s.filters.radius_km} km)
                     </span>
                   )}
+                  {s.filters.network_preference && s.filters.network_preference !== 'all' && (
+                    <span className="bg-stone-100 px-2 py-0.5 rounded text-stone-800">
+                      {s.filters.network_preference === 'public_network' ? 'Red Pública/Concertada' : 'Privados autorizados'}
+                    </span>
+                  )}
+                  {s.filters.support_combination_mode === 'all_supports_same_centre' && (
+                    <span className="bg-stone-100 px-2 py-0.5 rounded text-stone-800">
+                      Todos en misma sede
+                    </span>
+                  )}
+                  {(s.filters.accessibility_needs || []).map(acc => {
+                    const label = ACCESSIBILITY_MAP[acc]?.label || acc;
+                    return (
+                      <span key={acc} className="bg-stone-100 px-2 py-0.5 rounded text-stone-800">
+                        Acceso: {label.split('(')[0].trim()}
+                      </span>
+                    );
+                  })}
+                  {(s.filters.functional_needs || []).map(fn => (
+                    <span key={fn} className="bg-stone-100 px-2 py-0.5 rounded text-stone-800">
+                      {FUNCTIONAL_NEEDS[fn]?.label || fn}
+                    </span>
+                  ))}
                 </div>
               </div>
             ))

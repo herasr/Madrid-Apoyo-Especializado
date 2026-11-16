@@ -1,7 +1,7 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * Madrid Apoyo Especializado v1.7 - Comparador Ciudadano
+ * Madrid Apoyo Especializado v1.8 - Comparador Ciudadano
  * Matriz comparativa objetiva de hasta 3 centros sin rankings asistenciales, podios ni estrellas (§15)
  */
 
@@ -63,7 +63,10 @@ export const SpecializedComparatorView: React.FC<ComparatorViewProps> = ({
           <span className="font-bold text-stone-900 font-mono text-sm">{item.evidence_level}</span>
           <div className="text-[11px] text-stone-600 mt-0.5">
             {item.evidence_level === 'A1' && 'Especialización y apoyo publicados'}
-            {item.evidence_level === 'A2' && 'Especialización publicada (apoyo a confirmar)'}
+            {item.evidence_level === 'A2' &&
+              (item.evidence_sublevel === 'A2_entity'
+                ? 'Lo declara la entidad titular (confirmar en sede)'
+                : 'Especialización publicada (apoyo a confirmar)')}
             {item.evidence_level === 'B1' && 'Servicios relacionados (especialización no confirmada)'}
             {item.evidence_level === 'B2' && 'Posible recurso (requiere confirmación)'}
             {item.evidence_level === 'C' && 'Orientación general compatible'}
@@ -127,6 +130,8 @@ export const SpecializedComparatorView: React.FC<ComparatorViewProps> = ({
               ? 'Red Pública Directa'
               : item.centre.public_private_status === 'concertado'
               ? 'Plazas Públicas Concertadas'
+              : item.centre.public_private_status === 'no_especificado'
+              ? 'No especificada en datos.madrid.es'
               : 'Privado autorizado'}
           </span>
           <div className="text-[11px] text-stone-500 mt-0.5">
@@ -156,7 +161,9 @@ export const SpecializedComparatorView: React.FC<ComparatorViewProps> = ({
       title: 'Etapas vitales autorizadas',
       render: (item: EvaluatedCentreResult) => (
         <div className="text-stone-700">
-          {item.centre.allowed_life_stages.map(s => LIFE_STAGES[s]?.label).join(', ')}
+          {item.centre.allowed_life_stages.length > 0
+            ? item.centre.allowed_life_stages.map(s => LIFE_STAGES[s]?.label || s).join(', ')
+            : 'No consta en registro (confirmar con el centro)'}
         </div>
       )
     },
@@ -177,7 +184,7 @@ export const SpecializedComparatorView: React.FC<ComparatorViewProps> = ({
       render: (item: EvaluatedCentreResult) => (
         <div className="space-y-1">
           <div className="font-medium text-stone-800">{item.centre.address}</div>
-          <div className="text-stone-600">{item.centre.phone}</div>
+          <div className="text-stone-600">{item.centre.phone || 'Teléfono no publicado'}</div>
           {item.centre.website && (
             <a 
               href={item.centre.website}

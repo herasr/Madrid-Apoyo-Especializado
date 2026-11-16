@@ -16,8 +16,11 @@ import {
 import {
   buildCentresFromOfficialCSVs,
   classifyExplicitSpecialisations,
+  mapCamMunicipalityName,
   utm30NToWgs84
 } from './officialRegistryParser';
+import { findMunicipalityByName, MADRID_MUNICIPALITIES } from '../data/municipalitiesData';
+import { CORE_PROFILES } from '../data/specializedTaxonomy';
 import { runAllCanonicalTests } from './specializedTestsSuite';
 import { SpecializedCentre, SearchQueryState } from '../types/specialized';
 
@@ -258,20 +261,21 @@ describe('Specialized Search Engine (Funciones Puras)', () => {
     });
   });
 
-  describe('Canonical Test Suite (23 casos)', () => {
+  describe('Canonical Test Suite (28 casos)', () => {
     it('supera el 100% de las pruebas canónicas sin regresiones', () => {
       const suite = runAllCanonicalTests();
-      expect(suite.total).toBe(23);
+      expect(suite.total).toBe(28);
       expect(suite.failedCount).toBe(0);
     });
   });
 
-  describe('Integración real con los 3 CSV oficiales descargados en disco', () => {
+  describe('Mejoras v1.8 sobre el catálogo real y motor de evaluación', () => {
     const snapshotsDir = path.resolve(process.cwd(), 'public/data/snapshots');
     const meta = JSON.parse(fs.readFileSync(path.join(snapshotsDir, 'snapshot-metadata.json'), 'utf8'));
     const madridBuf = fs.readFileSync(path.join(snapshotsDir, 'snapshot-latest.csv'));
     const camCentrosBuf = fs.readFileSync(path.join(snapshotsDir, 'cam-centros-latest.csv'));
     const camServiciosBuf = fs.readFileSync(path.join(snapshotsDir, 'cam-servicios-latest.csv'));
+    const classifiedJson = JSON.parse(fs.readFileSync(path.join(snapshotsDir, 'catalog-classified.json'), 'utf8'));
 
     const parsed = buildCentresFromOfficialCSVs({
       madridCsvText: madridBuf.toString('latin1'),
@@ -292,6 +296,98 @@ describe('Specialized Search Engine (Funciones Puras)', () => {
       expect(meta.sha256_hash).toBe(shaMadrid);
     });
 
+    it('#1 y #2: filtro silla de ruedas solo admite Código 1/2 y bucle magnético usa Código 6', () => {
+      const wheelchairRes = runSpecializedSearch(
+        { ...DEFAULT_QUERY, accessibility_needs: ['wheelchair_access'] },
+        parsed.centres,
+        null
+      );
+      expect(wheelchairRes.results.length).toBeGreaterThan(50);
+      expect(
+        wheelchairRes.results.every(r =>
+          r.centre.accessibility_features.some(f => f.includes('Código 1') || f.includes('Código 2'))
+        )
+      ).toBe(true);
+      expect(
+        wheelchairRes.results.some(r => r.centre.accessibility_features.some(f => f.includes('Código 3')))
+      ).toBe(false);
+
+      const loopRes = runSpecializedSearch(
+        { ...DEFAULT_QUERY, accessibility_needs: ['magnetic_loops'] },
+        parsed.centres,
+        null
+      );
+      expect(loopRes.results.length).toBeGreaterThan(0);
+    });
+
+    it('#3: centros sin edad declarada (~700) permanecen visibles como partial al buscar minor', () => {
+      const minorSearch = runSpecializedSearch(
+        { ...DEFAULT_QUERY, life_stage: 'minor' },
+        parsed.centres,
+        null
+      );
+      const unstatedKept = minorSearch.results.filter(r => r.centre.allowed_life_stages.length === 0);
+      expect(unstatedKept.length).toBeGreaterThan(500);
+      expect(unstatedKept.every(r => r.suitability === 'partial')).toBe(true);
+    });
+
+    it('#4 y #5: sin PIA deducido por concierto y sin occupational_therapy en centros ocupacionales', () => {
+      expect(parsed.centres.every(c => c.access_route.access_type === 'unknown')).toBe(true);
+      const c1812 = parsed.centres.find(c => c.centre_id === 'CAM-C1812');
+      expect(c1812).toBeDefined();
+      expect(c1812!.supports).not.toContain('occupational_therapy');
+    });
+
+    it('#8 y #9: A2_entity en entidades de TEA y Bobath (CAM-SRV-S3848) con parálisis + daño cerebral', () => {
+      const teaSearch = runSpecializedSearch({ ...DEFAULT_QUERY, profile: 'autism' }, parsed.centres, null);
+      const a2EntityHits = teaSearch.results.filter(r => r.evidence_sublevel === 'A2_entity');
+      expect(a2EntityHits.length).toBeGreaterThan(20);
+
+      const bobathSrv = parsed.centres.find(c => c.centre_id === 'CAM-SRV-S3848');
+      expect(bobathSrv).toBeDefined();
+      expect(bobathSrv!.explicit_specialisations).toContain('acquired_brain_injury');
+      expect(bobathSrv!.explicit_specialisations).toContain('cerebral_palsy');
+    });
+
+    it('clasifica correctamente MAD-PK públicos directos vs titularidad no especificada', () => {
+      const centroBase1 = parsed.centres.find(c => c.centre_id === 'MAD-PK11906');
+      const aspaym = parsed.centres.find(c => c.centre_id === 'MAD-PK6996740');
+      expect(centroBase1).toBeDefined();
+      expect(centroBase1!.public_private_status).toBe('red_publica');
+      expect(aspaym).toBeDefined();
+      expect(aspaym!.public_private_status).toBe('no_especificado');
+    });
+
+    it('#11: anonimización RGPD y capitalización española correcta en titulares personas físicas', () => {
+      const s7705 = parsed.centres.find(c => c.centre_id === 'CAM-SRV-S7705');
+      expect(s7705).toBeDefined();
+      expect(s7705!.official_name).toContain('Atención');
+      expect(s7705!.official_name).not.toContain('AtencióN');
+      expect(s7705!.phone).toBe('');
+      expect(s7705!.has_valid_coordinates).toBe(false);
+
+      const s9981 = parsed.centres.find(c => c.centre_id === 'CAM-SRV-S9981');
+      if (s9981) {
+        expect(s9981.official_name).toContain('Profesional individual autorizado');
+        expect(s9981.provider_name).toContain('omitido por privacidad');
+        expect(s9981.phone).toBe('');
+        expect(s9981.has_valid_coordinates).toBe(false);
+      }
+    });
+
+    it('marca functional_needs como confirm_required en lugar de confirmed sin respaldo clínico', () => {
+      const ev = evaluateCentre(
+        MOCK_CENTRE_TEA,
+        { ...DEFAULT_QUERY, profile: 'autism', functional_needs: ['swallowing', 'communication'] },
+        [MOCK_CENTRE_TEA],
+        null
+      );
+      const fnItems = ev.criterion_matrix.filter(c => c.criterion_id.startsWith('functional.'));
+      expect(fnItems.length).toBe(2);
+      expect(fnItems.every(c => c.status === 'confirm_required')).toBe(true);
+      expect(ev.match_assessment.does_not_confirm.some(d => d.toLowerCase().includes('necesidades funcionales'))).toBe(true);
+    });
+
     it('mantiene cero falsos positivos A1/A2 en todos los centros críticos vigilados', () => {
       const checkNoA = (centreId: string, profile: any) => {
         const c = parsed.centres.find(item => item.centre_id === centreId);
@@ -310,7 +406,7 @@ describe('Specialized Search Engine (Funciones Puras)', () => {
       checkNoA('CAM-C8927', 'neurodegenerative_diseases'); // Amafe
     });
 
-    it('devuelve recursos A1 reales y verificables para perfiles clave (Esclerosis múltiple, TEA, ELA, Parkinson, Alzheimer, Lesión medular, Parálisis cerebral)', () => {
+    it('devuelve recursos A1 reales y verificables para perfiles clave', () => {
       const profilesToCheck: Array<SearchQueryState['profile']> = [
         'neurodegenerative_diseases',
         'autism',
@@ -329,12 +425,94 @@ describe('Specialized Search Engine (Funciones Puras)', () => {
       }
     });
 
-    it('audita el 100% de los centros extraídos del CSV sin ninguna discrepancia', () => {
-      for (const centre of parsed.centres) {
-        const audit = auditCentreAgainstSnapshot(centre, meta, parsed.lookupIndex);
+    it('#7: catalog-classified.json coincide exactamente con parsed.centres y pasa auditoría CSV al 100%', () => {
+      expect(classifiedJson.centres.length).toBe(parsed.centres.length);
+      const slimMap = new Map<string, any>(classifiedJson.lookup_records);
+      for (const centre of classifiedJson.centres) {
+        const audit = auditCentreAgainstSnapshot(centre, meta, slimMap);
         expect(audit.is_official_csv).toBe(true);
         expect(audit.audit_status).not.toBe('discrepancy');
         expect(audit.audit_status).not.toBe('unverified');
+      }
+    });
+
+    it('marcas de adecuación parcial y ranking honesto para apoyos ausentes, functional_needs y red privada/concertada', () => {
+      const noSpeechCentre: SpecializedCentre = {
+        ...MOCK_CENTRE_TEA,
+        centre_id: 'MOCK-NO-SPEECH',
+        supports: ['day_care']
+      };
+      const evMissingSupport = evaluateCentre(
+        noSpeechCentre,
+        { ...DEFAULT_QUERY, profile: 'autism', support_types: ['speech_therapy'] },
+        [noSpeechCentre],
+        null
+      );
+      expect(evMissingSupport.suitability).toBe('partial');
+
+      const evFunctional = evaluateCentre(
+        MOCK_CENTRE_TEA,
+        { ...DEFAULT_QUERY, profile: 'autism', functional_needs: ['swallowing'] },
+        [MOCK_CENTRE_TEA],
+        null
+      );
+      expect(evFunctional.suitability).toBe('partial');
+
+      const searchCount = runSpecializedSearch(
+        { ...DEFAULT_QUERY, profile: 'autism', functional_needs: ['swallowing', 'communication'] },
+        [MOCK_CENTRE_TEA],
+        null
+      );
+      expect(searchCount.applied_filters_count).toBe(3);
+
+      const concertadoCentre: SpecializedCentre = {
+        ...MOCK_CENTRE_TEA,
+        centre_id: 'MOCK-CONCERTADO',
+        public_private_status: 'concertado'
+      };
+      const privadoCentre: SpecializedCentre = {
+        ...MOCK_CENTRE_TEA,
+        centre_id: 'MOCK-PRIVADO',
+        public_private_status: 'privado_autorizado'
+      };
+      const privRes = runSpecializedSearch(
+        { ...DEFAULT_QUERY, profile: 'autism', network_preference: 'private_authorised' },
+        [concertadoCentre, privadoCentre],
+        null
+      );
+      expect(privRes.results[0].centre.centre_id).toBe('MOCK-PRIVADO');
+      expect(privRes.results[0].suitability).toBe('complete');
+      expect(privRes.results[1].centre.centre_id).toBe('MOCK-CONCERTADO');
+      expect(privRes.results[1].suitability).toBe('partial');
+    });
+
+    it('cubre el nomenclátor completo de municipios CSV, normaliza artículos y sincroniza municipalities.json', () => {
+      expect(mapCamMunicipalityName('Cabrera, La')).toBe('La Cabrera');
+      expect(mapCamMunicipalityName('Alamo, El')).toBe('El Álamo');
+      expect(findMunicipalityByName('a')).toBeNull();
+      expect(findMunicipalityByName('Cabrera, La')?.name).toBe('La Cabrera');
+      expect(findMunicipalityByName('Madrid (ubicación reservada)')?.name).toBe('Madrid');
+
+      const publicMunis = JSON.parse(
+        fs.readFileSync(path.resolve(process.cwd(), 'public/data/municipalities.json'), 'utf8')
+      );
+      expect(publicMunis.length).toBe(MADRID_MUNICIPALITIES.length);
+
+      for (const centre of classifiedJson.centres) {
+        if (centre.municipality === 'Madrid (ubicación reservada)') continue;
+        expect(findMunicipalityByName(centre.municipality)).not.toBeNull();
+      }
+    });
+
+    it('exige mínimo 3 centros explícitos A1 en CSV oficiales para todos los perfiles con estado approved', () => {
+      expect(CORE_PROFILES.cerebral_palsy.status).toBe('experimental');
+      for (const profile of Object.values(CORE_PROFILES)) {
+        if (profile.status === 'approved') {
+          const explicitCount = parsed.centres.filter(c =>
+            c.explicit_specialisations.includes(profile.id)
+          ).length;
+          expect(explicitCount).toBeGreaterThanOrEqual(3);
+        }
       }
     });
   });

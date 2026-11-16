@@ -1,7 +1,7 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * Madrid Apoyo Especializado v1.7 - Results List Container
+ * Madrid Apoyo Especializado v1.8 - Results List Container
  * Resultados agrupados por fuerza de evidencia A1/A2, B1/B2 y C (§37.1)
  * Manejo estricto de incertidumbre y cero resultados sin relajar en silencio (§38).
  */
@@ -60,14 +60,20 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
     }
   };
 
-  // Descarga CSV de resultados con trazabilidad y procedencia de atributos
+  // Descarga CSV de resultados con trazabilidad, procedencia, contacto y URL revocation
   const handleExportCSV = () => {
     const headers = [
       'ID Centro',
       'Nombre Oficial',
       'Municipio',
       'Distrito',
+      'Dirección',
+      'Teléfono',
+      'Correo Electrónico',
+      'Plazas Autorizadas',
+      'Coordenadas (Lat, Lon)',
       'Nivel Evidencia',
+      'Subnivel Evidencia',
       'Adecuación',
       'Distancia (km)',
       'Titularidad',
@@ -79,17 +85,23 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
 
     const rows = results.map(r => [
       `"${r.centre.centre_id}"`,
-      `"${r.centre.official_name.replace(/"/g, '""')}"`,
-      `"${r.centre.municipality}"`,
-      `"${r.centre.district || ''}"`,
+      `"${(r.centre.official_name || '').replace(/"/g, '""')}"`,
+      `"${(r.centre.municipality || '').replace(/"/g, '""')}"`,
+      `"${(r.centre.district || '').replace(/"/g, '""')}"`,
+      `"${(r.centre.address || '').replace(/"/g, '""')}"`,
+      `"${(r.centre.phone || '').replace(/"/g, '""')}"`,
+      `"${(r.centre.email || '').replace(/"/g, '""')}"`,
+      `"${r.centre.availability.authorised_places ?? 'N/D'}"`,
+      `"${r.centre.coordinates ? r.centre.coordinates.join(', ') : 'Sin coordenadas'}"`,
       `"${r.evidence_level}"`,
+      `"${r.evidence_sublevel}"`,
       `"${r.suitability}"`,
       `"${r.distance_km !== null ? r.distance_km.toFixed(1) : 'Sin coords'}"`,
       `"${r.centre.public_private_status}"`,
-      `"${r.centre.centre_type}"`,
-      `"${r.centre.subtype || ''}"`,
+      `"${(r.centre.centre_type || '').replace(/"/g, '""')}"`,
+      `"${(r.centre.subtype || '').replace(/"/g, '""')}"`,
       `"${r.centre.supports.join('; ')}"`,
-      `"${r.centre.provenance_records.map(p => `${p.attribute_name}:${p.source_dataset}`).join('; ')}"`
+      `"${r.centre.provenance_records.map(p => `${p.attribute_name}:${p.source_dataset}`).join('; ').replace(/"/g, '""')}"`
     ]);
 
     const csvStr = '\uFEFF' + [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
@@ -101,9 +113,10 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
-  // Descarga JSON estructurado con datos completos
+  // Descarga JSON estructurado con datos completos y URL revocation
   const handleExportJSON = () => {
     const jsonStr = JSON.stringify(results, null, 2);
     const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8;' });
@@ -114,9 +127,14 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
-  // Agrupación permanente por nivel de evidencia (§37.1, §77) con límite de render progresivo
+  // Totales reales por grupo antes del corte progresivo, evitando cabeceras engañosas
+  const totalGroupA = results.filter(r => r.evidence_level === 'A1' || r.evidence_level === 'A2').length;
+  const totalGroupB = results.filter(r => r.evidence_level === 'B1' || r.evidence_level === 'B2').length;
+  const totalGroupC = results.filter(r => r.evidence_level === 'C').length;
+
   const visibleSlice = results.slice(0, displayLimit);
   const groupA = visibleSlice.filter(r => r.evidence_level === 'A1' || r.evidence_level === 'A2');
   const groupB = visibleSlice.filter(r => r.evidence_level === 'B1' || r.evidence_level === 'B2');
@@ -219,7 +237,7 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-600" />
                 <h3 className="text-sm font-bold text-stone-900">
-                  Especialización Publicada ({groupA.length})
+                  Especialización Publicada ({groupA.length < totalGroupA ? `${groupA.length} mostrados de ${totalGroupA}` : totalGroupA})
                 </h3>
               </div>
               <span className="text-[11px] text-stone-500">
@@ -250,7 +268,7 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-sky-600" />
                 <h3 className="text-sm font-bold text-stone-900">
-                  Servicios Relacionados ({groupB.length})
+                  Servicios Relacionados ({groupB.length < totalGroupB ? `${groupB.length} mostrados de ${totalGroupB}` : totalGroupB})
                 </h3>
               </div>
               <span className="text-[11px] text-stone-500">
@@ -281,7 +299,7 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-stone-400" />
                 <h3 className="text-sm font-bold text-stone-900">
-                  Orientación General ({groupC.length})
+                  Orientación General ({groupC.length < totalGroupC ? `${groupC.length} mostrados de ${totalGroupC}` : totalGroupC})
                 </h3>
               </div>
               <span className="text-[11px] text-stone-500">

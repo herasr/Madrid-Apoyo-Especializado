@@ -1,7 +1,7 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * Madrid Apoyo Especializado v1.7 - Canonical Validation Test Suite Runner
+ * Madrid Apoyo Especializado v1.8 - Canonical Validation Test Suite Runner
  * Ejecutor interactivo de las pruebas canónicas de las Secciones 31, 44, 59, 65, 79 y 90
  */
 
@@ -55,7 +55,7 @@ export const SpecializedTestsRunnerView: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <span className="font-mono text-xs uppercase px-2 py-0.5 rounded bg-stone-900 text-white font-bold">
-              Suite Canónica v1.7
+              Suite Canónica v1.8
             </span>
             <span className="text-xs text-stone-500 font-mono">
               {suiteResult.total} Casos de Prueba Oficiales
@@ -102,13 +102,21 @@ export const SpecializedTestsRunnerView: React.FC = () => {
           </div>
         </div>
 
-        <div className="p-4 rounded-xl border border-stone-200 bg-white">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500">Inferencias Prohibidas</div>
-          <div className="text-2xl font-mono font-bold text-stone-900 mt-1">
-            0 casos
-          </div>
-          <div className="text-[11px] text-emerald-700 font-semibold mt-0.5">Blindadas al 100%</div>
-        </div>
+        {(() => {
+          const negTests = suiteResult.results.filter(t => t.category === 'REGLAS_NEGATIVAS');
+          const negFailed = negTests.filter(t => !t.passed).length;
+          return (
+            <div className="p-4 rounded-xl border border-stone-200 bg-white">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500">Reglas Negativas</div>
+              <div className="text-2xl font-mono font-bold text-stone-900 mt-1">
+                {negFailed} fallos / {negTests.length}
+              </div>
+              <div className={`text-[11px] font-semibold mt-0.5 ${negFailed === 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
+                {negFailed === 0 ? 'Blindadas al 100%' : 'Revisar incidencias'}
+              </div>
+            </div>
+          );
+        })()}
 
         <div className="p-4 rounded-xl border border-stone-200 bg-white">
           <div className="text-[11px] font-bold uppercase tracking-wider text-stone-500">Tiempo de Ejecución</div>

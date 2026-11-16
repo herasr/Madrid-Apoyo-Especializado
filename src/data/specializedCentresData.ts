@@ -1,12 +1,9 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * Madrid Apoyo Especializado v1.7 - Canonical Baseline Dataset
- * Extraído íntegramente y sin modificaciones manuales de las capturas CSV oficiales:
- *   1. Catálogo de Centros de Atención Social (datos.madrid.es)
- *   2. Registro de Centros de Atención Social (datos.comunidad.madrid)
- *   3. Registro de Servicios de Atención Social (datos.comunidad.madrid)
- * En tiempo de ejecución, loadLiveSnapshotData() carga dinámicamente los ficheros CSV completos.
+ * Madrid Apoyo Especializado v1.8 - Canonical Baseline Reserve Dataset
+ * Subconjunto canónico extraído automáticamente sin modificaciones manuales de los CSV oficiales.
+ * En ejecución normal, loadLiveSnapshotData() carga catalog-classified.json con los ~1071 recursos.
  */
 
 import { SpecializedCentre, ProviderRecord } from "../types/specialized";
@@ -45,7 +42,7 @@ export const OFFICIAL_PROVIDERS: Record<string, ProviderRecord> = {
     "legal_name": "FUNDACION DEL LESIONADO MEDULAR",
     "public_name": "FUNDACION DEL LESIONADO MEDULAR",
     "management_type": "privada_concertada",
-    "official_id": "CAM-C2049"
+    "official_id": "CAM-C3207"
   },
   "PROV-g28719847": {
     "provider_id": "PROV-g28719847",
@@ -114,8 +111,8 @@ export const OFFICIAL_PROVIDERS: Record<string, ProviderRecord> = {
     "provider_id": "PROV-g83402669",
     "legal_name": "ASOCIACIÓN LIBRE PARA LA EDUCACIÓN PERSONALIZADA Y HUMANA DE LOS TRASTORNOS DEL ESPECTRO AUTISTA: ALEPH-TEA",
     "public_name": "ASOCIACIÓN LIBRE PARA LA EDUCACIÓN PERSONALIZADA Y HUMANA DE LOS TRASTORNOS DEL ESPECTRO AUTISTA: ALEPH-TEA",
-    "management_type": "privada_autorizada",
-    "official_id": "CAM-C4964"
+    "management_type": "privada_concertada",
+    "official_id": "CAM-C8517"
   },
   "PROV-g80978216": {
     "provider_id": "PROV-g80978216",
@@ -184,15 +181,8 @@ export const OFFICIAL_PROVIDERS: Record<string, ProviderRecord> = {
     "provider_id": "PROV-MAD-6996740",
     "legal_name": "ASPAYM Madrid (Asociación de Parapléjicos y Personas con Gran Discapacidad Física de la Comunidad de Madrid)",
     "public_name": "ASPAYM Madrid (Asociación de Parapléjicos y Personas con Gran Discapacidad Física de la Comunidad de Madrid)",
-    "management_type": "privada_concertada",
+    "management_type": "social_entidad",
     "official_id": "MAD-PK6996740"
-  },
-  "PROV-MAD-5416084": {
-    "provider_id": "PROV-MAD-5416084",
-    "legal_name": "Residencia Municipal de Mayores con Alzheimer 'Jazmín'",
-    "public_name": "Residencia Municipal de Mayores con Alzheimer 'Jazmín'",
-    "management_type": "pública_directa",
-    "official_id": "MAD-PK5416084"
   },
   "PROV-g82633256": {
     "provider_id": "PROV-g82633256",
@@ -265,6 +255,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "explicit_specialisations": [
       "autism"
     ],
+    "entity_declared_specialisations": [],
     "related_services": [
       "CENTROS DE DÍA: OTROS",
       "atención diurna"
@@ -285,7 +276,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
           "adult"
         ],
         "access_routes": [
-          "dependency_pia"
+          "unknown"
         ],
         "source_dataset": "Registro de Centros de Atención Social CAM (C0382)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
@@ -296,12 +287,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "adult"
     ],
     "access_route": {
-      "access_type": "dependency_pia",
-      "competent_body": "Consejería de Familia, Juventud y Asuntos Sociales (CAM) / Servicios Sociales",
-      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS + PEVS.",
+      "access_type": "unknown",
+      "competent_body": "Servicios Sociales municipales / Consejería de Familia (CAM)",
+      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS + PEVS (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Dispone de plazas concertadas (acceso por PIA/derivación oficial) o consulta directa con la entidad.",
+      "next_step_action": "Puede tener plazas públicas o concertadas; pregunte en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -322,7 +313,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "provenance_records": [
       {
         "attribute_name": "specialisation",
-        "value": "NUEVO HORIZONTE, C.D.DE ADULTOS AUTISTAS · ASOCIACION NUEVO HORIZONTE (Personas con discapacidad intelectual)",
+        "value": "NUEVO HORIZONTE, C.D.DE ADULTOS AUTISTAS · CENTROS DE DÍA: OTROS (Personas con discapacidad intelectual)",
         "source_dataset": "Registro de Centros de Atención Social CAM (C0382)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "source_type": "official_registry",
@@ -363,9 +354,11 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "email": "atenciontemprana@apadis.es",
     "website": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
     "explicit_specialisations": [],
+    "entity_declared_specialisations": [],
     "related_services": [
       "CENTROS DE ATENCIÓN",
-      "rehabilitación"
+      "rehabilitación",
+      "atención temprana (relacionado; confirmar servicios clínicos concretos)"
     ],
     "supports": [
       "rehabilitation"
@@ -381,7 +374,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
           "early_childhood"
         ],
         "access_routes": [
-          "dependency_pia"
+          "unknown"
         ],
         "source_dataset": "Registro de Centros de Atención Social CAM (C1591)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
@@ -392,12 +385,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "early_childhood"
     ],
     "access_route": {
-      "access_type": "dependency_pia",
-      "competent_body": "Consejería de Familia, Juventud y Asuntos Sociales (CAM) / Servicios Sociales",
-      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS.",
+      "access_type": "unknown",
+      "competent_body": "Servicios Sociales municipales / Consejería de Familia (CAM)",
+      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Dispone de plazas concertadas (acceso por PIA/derivación oficial) o consulta directa con la entidad.",
+      "next_step_action": "Puede tener plazas públicas o concertadas; pregunte en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -460,14 +453,14 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "email": "asociacion.ipp@alenta.org",
     "website": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=11dc2ab96da61610VgnVCM1000001d4a900aRCRD",
     "explicit_specialisations": [],
+    "entity_declared_specialisations": [],
     "related_services": [
       "CENTROS OCUPACIONALES GENÉRICOS",
       "atención diurna",
-      "terapia ocupacional"
+      "centro ocupacional (relacionado; confirmar si dispone de terapia ocupacional clínica)"
     ],
     "supports": [
-      "day_care",
-      "occupational_therapy"
+      "day_care"
     ],
     "services_offered": [
       {
@@ -480,23 +473,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
           "adult"
         ],
         "access_routes": [
-          "dependency_pia"
-        ],
-        "source_dataset": "Registro de Centros de Atención Social CAM (C1812)",
-        "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
-        "checked_at": "2026-11-15"
-      },
-      {
-        "service_id": "SRV-CAM-C1812-1",
-        "centre_id": "CAM-C1812",
-        "service_name": "CENTROS OCUPACIONALES (CENTROS OCUPACIONALES GENÉRICOS)",
-        "service_type": "occupational_therapy",
-        "target_populations": [],
-        "allowed_life_stages": [
-          "adult"
-        ],
-        "access_routes": [
-          "dependency_pia"
+          "unknown"
         ],
         "source_dataset": "Registro de Centros de Atención Social CAM (C1812)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
@@ -507,12 +484,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "adult"
     ],
     "access_route": {
-      "access_type": "dependency_pia",
-      "competent_body": "Consejería de Familia, Juventud y Asuntos Sociales (CAM) / Servicios Sociales",
-      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS.",
+      "access_type": "unknown",
+      "competent_body": "Servicios Sociales municipales / Consejería de Familia (CAM)",
+      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Dispone de plazas concertadas (acceso por PIA/derivación oficial) o consulta directa con la entidad.",
+      "next_step_action": "Puede tener plazas públicas o concertadas; pregunte en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -530,7 +507,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "checked_at": "2026-11-15"
     },
     "accessibility_features": [
-      "Accesible para movilidad reducida (Código 1 · datos.madrid.es)"
+      "Accesible (Código 1 · datos.madrid.es)"
     ],
     "provenance_records": [
       {
@@ -591,6 +568,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "explicit_specialisations": [
       "cerebral_palsy"
     ],
+    "entity_declared_specialisations": [],
     "related_services": [
       "CENTROS DE RECUPERACIÓN",
       "rehabilitación"
@@ -612,7 +590,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
           "adult"
         ],
         "access_routes": [
-          "dependency_pia"
+          "unknown"
         ],
         "source_dataset": "Registro de Centros de Atención Social CAM (C1887)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
@@ -624,12 +602,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "adult"
     ],
     "access_route": {
-      "access_type": "dependency_pia",
-      "competent_body": "Consejería de Familia, Juventud y Asuntos Sociales (CAM) / Servicios Sociales",
-      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS.",
+      "access_type": "unknown",
+      "competent_body": "Servicios Sociales municipales / Consejería de Familia (CAM)",
+      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Dispone de plazas concertadas (acceso por PIA/derivación oficial) o consulta directa con la entidad.",
+      "next_step_action": "Puede tener plazas públicas o concertadas; pregunte en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -647,12 +625,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "checked_at": "2026-11-15"
     },
     "accessibility_features": [
-      "Sin acreditación de accesibilidad adaptada confirmada en catálogo (Código 3 · datos.madrid.es)"
+      "Sin información (Código 3 · datos.madrid.es)"
     ],
     "provenance_records": [
       {
         "attribute_name": "specialisation",
-        "value": "ATENPACE CENTRO DE REHABILITACION PARA JOVENES Y ADULTOS PARALITICOS CEREBRALES · ASOCIACION PARA LA AYUDA A LA ATENCION DEL PARALITICO CEREBRAL (ATENPACE) (Personas con discapacidad física)",
+        "value": "ATENPACE CENTRO DE REHABILITACION PARA JOVENES Y ADULTOS PARALITICOS CEREBRALES · CENTROS DE RECUPERACIÓN (Personas con discapacidad física)",
         "source_dataset": "Registro de Centros de Atención Social CAM (C1887)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "source_type": "official_registry",
@@ -703,7 +681,8 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "phone": "91 777 55 44",
     "email": "directoragerente@medular.org",
     "website": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=b4a83eb6a4c41610VgnVCM2000001f4a900aRCRD",
-    "explicit_specialisations": [
+    "explicit_specialisations": [],
+    "entity_declared_specialisations": [
       "spinal_cord_injury"
     ],
     "related_services": [
@@ -719,32 +698,24 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "centre_id": "CAM-C2049",
         "service_name": "CENTROS DE REHABILITACIÓN (CENTROS DE RECUPERACIÓN)",
         "service_type": "rehabilitation",
-        "target_populations": [
-          "spinal_cord_injury"
-        ],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
+        "target_populations": [],
+        "allowed_life_stages": [],
         "access_routes": [
-          "dependency_pia"
+          "unknown"
         ],
         "source_dataset": "Registro de Centros de Atención Social CAM (C2049)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "checked_at": "2026-11-15"
       }
     ],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
+    "allowed_life_stages": [],
     "access_route": {
-      "access_type": "dependency_pia",
-      "competent_body": "Consejería de Familia, Juventud y Asuntos Sociales (CAM) / Servicios Sociales",
-      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS + PEVS.",
+      "access_type": "unknown",
+      "competent_body": "Servicios Sociales municipales / Consejería de Familia (CAM)",
+      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS + PEVS (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Dispone de plazas concertadas (acceso por PIA/derivación oficial) o consulta directa con la entidad.",
+      "next_step_action": "Puede tener plazas públicas o concertadas; pregunte en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -762,12 +733,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "checked_at": "2026-11-15"
     },
     "accessibility_features": [
-      "Sin acreditación de accesibilidad adaptada confirmada en catálogo (Código 3 · datos.madrid.es)"
+      "Sin información (Código 3 · datos.madrid.es)"
     ],
     "provenance_records": [
       {
-        "attribute_name": "specialisation",
-        "value": "CENTRO DE SERVICIOS MULTIPLES · FUNDACION DEL LESIONADO MEDULAR (Personas con discapacidad física)",
+        "attribute_name": "entity_specialisation",
+        "value": "Entidad titular: FUNDACION DEL LESIONADO MEDULAR (Denominación centro: CENTRO DE SERVICIOS MULTIPLES)",
         "source_dataset": "Registro de Centros de Atención Social CAM (C2049)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "source_type": "official_registry",
@@ -775,7 +746,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "extraction_method": "structured",
         "reviewer": "Portal de Datos Abiertos Comunidad de Madrid (CSV oficial)",
         "reviewer_role": "data_steward",
-        "confidence": "explicit",
+        "confidence": "potential",
         "quality": "A"
       },
       {
@@ -793,7 +764,10 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       }
     ],
     "last_checked": "2026-11-15",
-    "limitations": []
+    "limitations": [
+      "La especialización proviene de la entidad titular (FUNDACION DEL LESIONADO MEDULAR), no de la denominación individual del centro (CENTRO DE SERVICIOS MULTIPLES).",
+      "Etapa vital o edad admitida no consta en el registro oficial (confirmar con el centro)."
+    ]
   },
   {
     "centre_id": "CAM-C2412",
@@ -819,6 +793,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "email": "cepri@asociacioncepri.org",
     "website": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=2de3014bf7eb0710VgnVCM2000001f4a900aRCRD",
     "explicit_specialisations": [],
+    "entity_declared_specialisations": [],
     "related_services": [
       "CENTROS DE DÍA: OTROS",
       "atención diurna"
@@ -833,29 +808,23 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "service_name": "CENTROS DE DÍA (CENTROS DE DÍA: OTROS)",
         "service_type": "day_care",
         "target_populations": [],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
+        "allowed_life_stages": [],
         "access_routes": [
-          "dependency_pia"
+          "unknown"
         ],
         "source_dataset": "Registro de Centros de Atención Social CAM (C2412)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "checked_at": "2026-11-15"
       }
     ],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
+    "allowed_life_stages": [],
     "access_route": {
-      "access_type": "dependency_pia",
-      "competent_body": "Consejería de Familia, Juventud y Asuntos Sociales (CAM) / Servicios Sociales",
-      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS.",
+      "access_type": "unknown",
+      "competent_body": "Servicios Sociales municipales / Consejería de Familia (CAM)",
+      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Dispone de plazas concertadas (acceso por PIA/derivación oficial) o consulta directa con la entidad.",
+      "next_step_action": "Puede tener plazas públicas o concertadas; pregunte en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -873,7 +842,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "checked_at": "2026-11-15"
     },
     "accessibility_features": [
-      "Sin acreditación de accesibilidad adaptada confirmada en catálogo (Código 3 · datos.madrid.es)"
+      "Sin información (Código 3 · datos.madrid.es)"
     ],
     "provenance_records": [
       {
@@ -905,7 +874,8 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     ],
     "last_checked": "2026-11-15",
     "limitations": [
-      "El registro oficial declara sector \"Personas con discapacidad intelectual\" y denominación \"CEPRI LA PEINETA, CENTRO DE DIA\", sin mencionar literalmente una patología específica."
+      "El registro oficial declara sector \"Personas con discapacidad intelectual\" y denominación \"CEPRI LA PEINETA, CENTRO DE DIA\", sin mencionar literalmente una patología específica.",
+      "Etapa vital o edad admitida no consta en el registro oficial (confirmar con el centro)."
     ]
   },
   {
@@ -934,6 +904,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "explicit_specialisations": [
       "neurodegenerative_diseases"
     ],
+    "entity_declared_specialisations": [],
     "related_services": [
       "CENTROS DE DÍA: OTROS",
       "atención diurna"
@@ -950,29 +921,23 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "target_populations": [
           "neurodegenerative_diseases"
         ],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
+        "allowed_life_stages": [],
         "access_routes": [
-          "dependency_pia"
+          "unknown"
         ],
         "source_dataset": "Registro de Centros de Atención Social CAM (C2703)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "checked_at": "2026-11-15"
       }
     ],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
+    "allowed_life_stages": [],
     "access_route": {
-      "access_type": "dependency_pia",
-      "competent_body": "Consejería de Familia, Juventud y Asuntos Sociales (CAM) / Servicios Sociales",
-      "official_description": "Régimen registral oficial: PROPIA DE GESTIÓN INDIRECTA.",
+      "access_type": "unknown",
+      "competent_body": "Servicios Sociales municipales / Consejería de Familia (CAM)",
+      "official_description": "Régimen registral oficial: PROPIA DE GESTIÓN INDIRECTA (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Centro de titularidad pública de la Comunidad de Madrid: acceso mediante dictamen o resolución PIA.",
+      "next_step_action": "Puede tener plazas públicas; pregunte en sus servicios sociales cómo solicitar acceso.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -990,12 +955,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "checked_at": "2026-11-15"
     },
     "accessibility_features": [
-      "Accesible para movilidad reducida (Código 1 · datos.madrid.es)"
+      "Accesible (Código 1 · datos.madrid.es)"
     ],
     "provenance_records": [
       {
         "attribute_name": "specialisation",
-        "value": "ALICIA KOPLOWITZ, CENTRO DE DIA DE ESCLEROSIS MULTIPLE DE LA COMUNIDAD DE MADRID · COMUNIDAD DE MADRID (CONSEJERIA DE FAMILIA, JUVENTUD Y ASUNTOS SOCIALES) (Personas con discapacidad física)",
+        "value": "ALICIA KOPLOWITZ, CENTRO DE DIA DE ESCLEROSIS MULTIPLE DE LA COMUNIDAD DE MADRID · CENTROS DE DÍA: OTROS (Personas con discapacidad física)",
         "source_dataset": "Registro de Centros de Atención Social CAM (C2703)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "source_type": "official_registry",
@@ -1021,7 +986,9 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       }
     ],
     "last_checked": "2026-11-15",
-    "limitations": []
+    "limitations": [
+      "Etapa vital o edad admitida no consta en el registro oficial (confirmar con el centro)."
+    ]
   },
   {
     "centre_id": "CAM-C2758",
@@ -1047,9 +1014,11 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "email": "aeugercios@fundacionbobath.org",
     "website": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=afd132b520e79110VgnVCM1000000b205a0aRCRD",
     "explicit_specialisations": [],
+    "entity_declared_specialisations": [],
     "related_services": [
       "CENTROS DE ATENCIÓN",
-      "rehabilitación"
+      "rehabilitación",
+      "atención temprana (relacionado; confirmar servicios clínicos concretos)"
     ],
     "supports": [
       "rehabilitation"
@@ -1065,7 +1034,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
           "early_childhood"
         ],
         "access_routes": [
-          "dependency_pia"
+          "unknown"
         ],
         "source_dataset": "Registro de Centros de Atención Social CAM (C2758)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
@@ -1076,12 +1045,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "early_childhood"
     ],
     "access_route": {
-      "access_type": "dependency_pia",
-      "competent_body": "Consejería de Familia, Juventud y Asuntos Sociales (CAM) / Servicios Sociales",
-      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS.",
+      "access_type": "unknown",
+      "competent_body": "Servicios Sociales municipales / Consejería de Familia (CAM)",
+      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Dispone de plazas concertadas (acceso por PIA/derivación oficial) o consulta directa con la entidad.",
+      "next_step_action": "Puede tener plazas públicas o concertadas; pregunte en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -1099,7 +1068,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "checked_at": "2026-11-15"
     },
     "accessibility_features": [
-      "Sin acreditación de accesibilidad adaptada confirmada en catálogo (Código 3 · datos.madrid.es)"
+      "Sin información (Código 3 · datos.madrid.es)"
     ],
     "provenance_records": [
       {
@@ -1160,6 +1129,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "explicit_specialisations": [
       "neurodegenerative_diseases"
     ],
+    "entity_declared_specialisations": [],
     "related_services": [
       "CENTROS DE ATENCIÓN",
       "rehabilitación"
@@ -1176,10 +1146,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "target_populations": [
           "neurodegenerative_diseases"
         ],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
+        "allowed_life_stages": [],
         "access_routes": [
           "unknown"
         ],
@@ -1188,17 +1155,14 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "checked_at": "2026-11-15"
       }
     ],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
+    "allowed_life_stages": [],
     "access_route": {
       "access_type": "unknown",
-      "competent_body": "Entidad titular autorizada (confirmación previa)",
-      "official_description": "Régimen registral oficial: PRIVADA + PEVS.",
+      "competent_body": "Entidad titular autorizada / Servicios Sociales",
+      "official_description": "Régimen registral oficial: PRIVADA + PEVS (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Debe confirmarse con el organismo competente o contactar directamente con el centro titular.",
+      "next_step_action": "Entidad privada autorizada; consulte condiciones directamente con el centro o en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -1219,7 +1183,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "provenance_records": [
       {
         "attribute_name": "specialisation",
-        "value": "AMDEM, CENTRO DE ATENCION A AFECTADOS DE ESCLEROSIS MULTIPLE · ASOCIACION MOSTOLEÑA DE ESCLEROSIS MULTIPLE (AMDEM) (Personas con discapacidad física)",
+        "value": "AMDEM, CENTRO DE ATENCION A AFECTADOS DE ESCLEROSIS MULTIPLE · CENTROS DE ATENCIÓN (Personas con discapacidad física)",
         "source_dataset": "Registro de Centros de Atención Social CAM (C2978)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "source_type": "official_registry",
@@ -1233,6 +1197,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     ],
     "last_checked": "2026-11-15",
     "limitations": [
+      "Etapa vital o edad admitida no consta en el registro oficial (confirmar con el centro).",
       "El registro regional de centros no publica detalle de accesibilidad física."
     ]
   },
@@ -1262,6 +1227,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "explicit_specialisations": [
       "spinal_cord_injury"
     ],
+    "entity_declared_specialisations": [],
     "related_services": [
       "OTRAS RESIDENCIAS",
       "residencia"
@@ -1278,29 +1244,23 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "target_populations": [
           "spinal_cord_injury"
         ],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
+        "allowed_life_stages": [],
         "access_routes": [
-          "dependency_pia"
+          "unknown"
         ],
         "source_dataset": "Registro de Centros de Atención Social CAM (C3207)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "checked_at": "2026-11-15"
       }
     ],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
+    "allowed_life_stages": [],
     "access_route": {
-      "access_type": "dependency_pia",
-      "competent_body": "Consejería de Familia, Juventud y Asuntos Sociales (CAM) / Servicios Sociales",
-      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS + PEVS.",
+      "access_type": "unknown",
+      "competent_body": "Servicios Sociales municipales / Consejería de Familia (CAM)",
+      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS + PEVS (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Dispone de plazas concertadas (acceso por PIA/derivación oficial) o consulta directa con la entidad.",
+      "next_step_action": "Puede tener plazas públicas o concertadas; pregunte en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -1318,12 +1278,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "checked_at": "2026-11-15"
     },
     "accessibility_features": [
-      "Sin acreditación de accesibilidad adaptada confirmada en catálogo (Código 3 · datos.madrid.es)"
+      "Sin información (Código 3 · datos.madrid.es)"
     ],
     "provenance_records": [
       {
         "attribute_name": "specialisation",
-        "value": "RESIDENCIA DEL LESIONADO MEDULAR MIGUEL ANGEL GARCIA OCA · FUNDACION DEL LESIONADO MEDULAR (Personas con discapacidad física)",
+        "value": "RESIDENCIA DEL LESIONADO MEDULAR MIGUEL ANGEL GARCIA OCA · OTRAS RESIDENCIAS (Personas con discapacidad física)",
         "source_dataset": "Registro de Centros de Atención Social CAM (C3207)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "source_type": "official_registry",
@@ -1349,7 +1309,9 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       }
     ],
     "last_checked": "2026-11-15",
-    "limitations": []
+    "limitations": [
+      "Etapa vital o edad admitida no consta en el registro oficial (confirmar con el centro)."
+    ]
   },
   {
     "centre_id": "CAM-C3325",
@@ -1374,7 +1336,8 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "phone": "913135289",
     "email": "centrodedia@asociacionpauta.org",
     "website": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=b3e64b052b679610VgnVCM1000001d4a900aRCRD",
-    "explicit_specialisations": [
+    "explicit_specialisations": [],
+    "entity_declared_specialisations": [
       "autism"
     ],
     "related_services": [
@@ -1390,32 +1353,24 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "centre_id": "CAM-C3325",
         "service_name": "CENTROS DE DÍA (CENTROS DE DÍA: OTROS)",
         "service_type": "day_care",
-        "target_populations": [
-          "autism"
-        ],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
+        "target_populations": [],
+        "allowed_life_stages": [],
         "access_routes": [
-          "dependency_pia"
+          "unknown"
         ],
         "source_dataset": "Registro de Centros de Atención Social CAM (C3325)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "checked_at": "2026-11-15"
       }
     ],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
+    "allowed_life_stages": [],
     "access_route": {
-      "access_type": "dependency_pia",
-      "competent_body": "Consejería de Familia, Juventud y Asuntos Sociales (CAM) / Servicios Sociales",
-      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS.",
+      "access_type": "unknown",
+      "competent_body": "Servicios Sociales municipales / Consejería de Familia (CAM)",
+      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Recurso público municipal: consulte acceso mediante los Servicios Sociales de su distrito o trámite PIA.",
+      "next_step_action": "Centro de titularidad pública directa; pregunte en su Centro de Servicios Sociales o Centro Base cómo solicitar acceso.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -1433,12 +1388,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "checked_at": "2026-11-15"
     },
     "accessibility_features": [
-      "Accesible para movilidad reducida (Código 1 · datos.madrid.es)"
+      "Accesible (Código 1 · datos.madrid.es)"
     ],
     "provenance_records": [
       {
-        "attribute_name": "specialisation",
-        "value": "PAUTA, CENTRO DE DIA · ASOCIACIÓN PAUTA (PSICOPEDAGOGÍA PARA AUTISMO Y TRASTORNOS ASOCIADOS) (Personas con discapacidad intelectual)",
+        "attribute_name": "entity_specialisation",
+        "value": "Entidad titular: ASOCIACIÓN PAUTA (PSICOPEDAGOGÍA PARA AUTISMO Y TRASTORNOS ASOCIADOS) (Denominación centro: PAUTA, CENTRO DE DIA)",
         "source_dataset": "Registro de Centros de Atención Social CAM (C3325)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "source_type": "official_registry",
@@ -1446,7 +1401,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "extraction_method": "structured",
         "reviewer": "Portal de Datos Abiertos Comunidad de Madrid (CSV oficial)",
         "reviewer_role": "data_steward",
-        "confidence": "explicit",
+        "confidence": "potential",
         "quality": "A"
       },
       {
@@ -1464,7 +1419,10 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       }
     ],
     "last_checked": "2026-11-15",
-    "limitations": []
+    "limitations": [
+      "La especialización proviene de la entidad titular (ASOCIACIÓN PAUTA (PSICOPEDAGOGÍA PARA AUTISMO Y TRASTORNOS ASOCIADOS)), no de la denominación individual del centro (PAUTA, CENTRO DE DIA).",
+      "Etapa vital o edad admitida no consta en el registro oficial (confirmar con el centro)."
+    ]
   },
   {
     "centre_id": "CAM-C3456",
@@ -1490,6 +1448,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "email": "josefelix@polibea.com",
     "website": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=46793eb6a4c41610VgnVCM2000001f4a900aRCRD",
     "explicit_specialisations": [],
+    "entity_declared_specialisations": [],
     "related_services": [
       "CENTROS DE RECUPERACIÓN",
       "rehabilitación"
@@ -1504,29 +1463,23 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "service_name": "CENTROS DE REHABILITACIÓN (CENTROS DE RECUPERACIÓN)",
         "service_type": "rehabilitation",
         "target_populations": [],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
+        "allowed_life_stages": [],
         "access_routes": [
-          "dependency_pia"
+          "unknown"
         ],
         "source_dataset": "Registro de Centros de Atención Social CAM (C3456)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "checked_at": "2026-11-15"
       }
     ],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
+    "allowed_life_stages": [],
     "access_route": {
-      "access_type": "dependency_pia",
-      "competent_body": "Consejería de Familia, Juventud y Asuntos Sociales (CAM) / Servicios Sociales",
-      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS + PEVS.",
+      "access_type": "unknown",
+      "competent_body": "Servicios Sociales municipales / Consejería de Familia (CAM)",
+      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS + PEVS (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Dispone de plazas concertadas (acceso por PIA/derivación oficial) o consulta directa con la entidad.",
+      "next_step_action": "Puede tener plazas públicas o concertadas; pregunte en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -1544,7 +1497,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "checked_at": "2026-11-15"
     },
     "accessibility_features": [
-      "Sin acreditación de accesibilidad adaptada confirmada en catálogo (Código 3 · datos.madrid.es)"
+      "Sin información (Código 3 · datos.madrid.es)"
     ],
     "provenance_records": [
       {
@@ -1576,7 +1529,8 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     ],
     "last_checked": "2026-11-15",
     "limitations": [
-      "El registro oficial declara sector \"Personas con discapacidad física\" y denominación \"POLIBEA DATO\", sin mencionar literalmente una patología específica."
+      "El registro oficial declara sector \"Personas con discapacidad física\" y denominación \"POLIBEA DATO\", sin mencionar literalmente una patología específica.",
+      "Etapa vital o edad admitida no consta en el registro oficial (confirmar con el centro)."
     ]
   },
   {
@@ -1605,6 +1559,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "explicit_specialisations": [
       "neurodegenerative_diseases"
     ],
+    "entity_declared_specialisations": [],
     "related_services": [
       "CENTROS DE ATENCIÓN",
       "rehabilitación"
@@ -1621,29 +1576,23 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "target_populations": [
           "neurodegenerative_diseases"
         ],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
+        "allowed_life_stages": [],
         "access_routes": [
-          "dependency_pia"
+          "unknown"
         ],
         "source_dataset": "Registro de Centros de Atención Social CAM (C3595)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "checked_at": "2026-11-15"
       }
     ],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
+    "allowed_life_stages": [],
     "access_route": {
-      "access_type": "dependency_pia",
-      "competent_body": "Consejería de Familia, Juventud y Asuntos Sociales (CAM) / Servicios Sociales",
-      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS + PEVS.",
+      "access_type": "unknown",
+      "competent_body": "Servicios Sociales municipales / Consejería de Familia (CAM)",
+      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS + PEVS (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Dispone de plazas concertadas (acceso por PIA/derivación oficial) o consulta directa con la entidad.",
+      "next_step_action": "Puede tener plazas públicas o concertadas; pregunte en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -1661,12 +1610,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "checked_at": "2026-11-15"
     },
     "accessibility_features": [
-      "Accesible para movilidad reducida (Código 1 · datos.madrid.es)"
+      "Accesible (Código 1 · datos.madrid.es)"
     ],
     "provenance_records": [
       {
         "attribute_name": "specialisation",
-        "value": "ASOCIACION DE ESCLEROSIS MULTIPLE MADRID, CENTRO DE REHABILITACION ADEMM · ASOCIACION DE ESCLEROSIS MULTIPLE MADRID A.D.E.M. MADRID (Personas con discapacidad física)",
+        "value": "ASOCIACION DE ESCLEROSIS MULTIPLE MADRID, CENTRO DE REHABILITACION ADEMM · CENTROS DE ATENCIÓN (Personas con discapacidad física)",
         "source_dataset": "Registro de Centros de Atención Social CAM (C3595)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "source_type": "official_registry",
@@ -1692,7 +1641,9 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       }
     ],
     "last_checked": "2026-11-15",
-    "limitations": []
+    "limitations": [
+      "Etapa vital o edad admitida no consta en el registro oficial (confirmar con el centro)."
+    ]
   },
   {
     "centre_id": "CAM-C3818",
@@ -1717,7 +1668,8 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "phone": "913113530",
     "email": "adela@adelaweb.com",
     "website": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=48cd6755a3156710VgnVCM2000001f4a900aRCRD",
-    "explicit_specialisations": [
+    "explicit_specialisations": [],
+    "entity_declared_specialisations": [
       "als"
     ],
     "related_services": [
@@ -1733,13 +1685,8 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "centre_id": "CAM-C3818",
         "service_name": "CENTROS DE REHABILITACIÓN (CENTROS DE ATENCIÓN)",
         "service_type": "rehabilitation",
-        "target_populations": [
-          "als"
-        ],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
+        "target_populations": [],
+        "allowed_life_stages": [],
         "access_routes": [
           "unknown"
         ],
@@ -1748,17 +1695,14 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "checked_at": "2026-11-15"
       }
     ],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
+    "allowed_life_stages": [],
     "access_route": {
       "access_type": "unknown",
-      "competent_body": "Entidad titular autorizada (confirmación previa)",
-      "official_description": "Régimen registral oficial: PRIVADA TOTAL.",
+      "competent_body": "Entidad titular autorizada / Servicios Sociales",
+      "official_description": "Régimen registral oficial: PRIVADA TOTAL (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Debe confirmarse con el organismo competente o contactar directamente con el centro titular.",
+      "next_step_action": "Entidad privada autorizada; consulte condiciones directamente con el centro o en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -1776,12 +1720,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "checked_at": "2026-11-15"
     },
     "accessibility_features": [
-      "Sin acreditación de accesibilidad adaptada confirmada en catálogo (Código 3 · datos.madrid.es)"
+      "Sin información (Código 3 · datos.madrid.es)"
     ],
     "provenance_records": [
       {
-        "attribute_name": "specialisation",
-        "value": "CENTRO DE ATENCION RAFAEL CATTARINI · ASOCIACION \"ADELA MADRID\" (Personas con discapacidad física)",
+        "attribute_name": "entity_specialisation",
+        "value": "Entidad titular: ASOCIACION \"ADELA MADRID\" (Denominación centro: CENTRO DE ATENCION RAFAEL CATTARINI)",
         "source_dataset": "Registro de Centros de Atención Social CAM (C3818)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "source_type": "official_registry",
@@ -1789,7 +1733,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "extraction_method": "structured",
         "reviewer": "Portal de Datos Abiertos Comunidad de Madrid (CSV oficial)",
         "reviewer_role": "data_steward",
-        "confidence": "explicit",
+        "confidence": "potential",
         "quality": "A"
       },
       {
@@ -1807,7 +1751,10 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       }
     ],
     "last_checked": "2026-11-15",
-    "limitations": []
+    "limitations": [
+      "La especialización proviene de la entidad titular (ASOCIACION \"ADELA MADRID\"), no de la denominación individual del centro (CENTRO DE ATENCION RAFAEL CATTARINI).",
+      "Etapa vital o edad admitida no consta en el registro oficial (confirmar con el centro)."
+    ]
   },
   {
     "centre_id": "CAM-C4959",
@@ -1835,6 +1782,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "explicit_specialisations": [
       "parkinson"
     ],
+    "entity_declared_specialisations": [],
     "related_services": [
       "CENTROS DE REHABILITACIÓN: OTROS",
       "rehabilitación"
@@ -1867,11 +1815,11 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     ],
     "access_route": {
       "access_type": "unknown",
-      "competent_body": "Entidad titular autorizada (confirmación previa)",
-      "official_description": "Régimen registral oficial: PRIVADA + PEVS.",
+      "competent_body": "Entidad titular autorizada / Servicios Sociales",
+      "official_description": "Régimen registral oficial: PRIVADA + PEVS (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Debe confirmarse con el organismo competente o contactar directamente con el centro titular.",
+      "next_step_action": "Entidad privada autorizada; consulte condiciones directamente con el centro o en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -1889,12 +1837,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "checked_at": "2026-11-15"
     },
     "accessibility_features": [
-      "Sin acreditación de accesibilidad adaptada confirmada en catálogo (Código 3 · datos.madrid.es)"
+      "Sin información (Código 3 · datos.madrid.es)"
     ],
     "provenance_records": [
       {
         "attribute_name": "specialisation",
-        "value": "PARKINSON MADRID, CENTRO INTEGRAL MADRID RETIRO · ASOCIACION PARKINSON MADRID (Personas con discapacidad física)",
+        "value": "PARKINSON MADRID, CENTRO INTEGRAL MADRID RETIRO · CENTROS DE REHABILITACIÓN: OTROS (Personas con discapacidad física)",
         "source_dataset": "Registro de Centros de Atención Social CAM (C4959)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "source_type": "official_registry",
@@ -1948,6 +1896,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "explicit_specialisations": [
       "autism"
     ],
+    "entity_declared_specialisations": [],
     "related_services": [
       "PISOS TUTELADOS",
       "residencia"
@@ -1964,10 +1913,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "target_populations": [
           "autism"
         ],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
+        "allowed_life_stages": [],
         "access_routes": [
           "unknown"
         ],
@@ -1976,17 +1922,14 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "checked_at": "2026-11-15"
       }
     ],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
+    "allowed_life_stages": [],
     "access_route": {
       "access_type": "unknown",
-      "competent_body": "Entidad titular autorizada (confirmación previa)",
-      "official_description": "Régimen registral oficial: PRIVADA TOTAL.",
+      "competent_body": "Entidad titular autorizada / Servicios Sociales",
+      "official_description": "Régimen registral oficial: PRIVADA TOTAL (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Debe confirmarse con el organismo competente o contactar directamente con el centro titular.",
+      "next_step_action": "Entidad privada autorizada; consulte condiciones directamente con el centro o en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -2007,7 +1950,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "provenance_records": [
       {
         "attribute_name": "specialisation",
-        "value": "ALEPH-TEA, PISO TUTELADO PARQUE BUJARUELO · ASOCIACIÓN LIBRE PARA LA EDUCACIÓN PERSONALIZADA Y HUMANA DE LOS TRASTORNOS DEL ESPECTRO AUTISTA: ALEPH-TEA (Personas con discapacidad intelectual)",
+        "value": "ALEPH-TEA, PISO TUTELADO PARQUE BUJARUELO · PISOS TUTELADOS (Personas con discapacidad intelectual)",
         "source_dataset": "Registro de Centros de Atención Social CAM (C4964)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "source_type": "official_registry",
@@ -2021,6 +1964,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     ],
     "last_checked": "2026-11-15",
     "limitations": [
+      "Etapa vital o edad admitida no consta en el registro oficial (confirmar con el centro).",
       "El registro regional de centros no publica detalle de accesibilidad física."
     ]
   },
@@ -2047,7 +1991,8 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "phone": "917512013 647620736",
     "email": "apanefa@apanefa.org",
     "website": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=846cbc18998c0710VgnVCM2000001f4a900aRCRD",
-    "explicit_specialisations": [
+    "explicit_specialisations": [],
+    "entity_declared_specialisations": [
       "acquired_brain_injury"
     ],
     "related_services": [
@@ -2063,32 +2008,24 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "centre_id": "CAM-C5107",
         "service_name": "CENTROS DE REHABILITACIÓN (CENTROS DE RECUPERACIÓN)",
         "service_type": "rehabilitation",
-        "target_populations": [
-          "acquired_brain_injury"
-        ],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
+        "target_populations": [],
+        "allowed_life_stages": [],
         "access_routes": [
-          "dependency_pia"
+          "unknown"
         ],
         "source_dataset": "Registro de Centros de Atención Social CAM (C5107)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "checked_at": "2026-11-15"
       }
     ],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
+    "allowed_life_stages": [],
     "access_route": {
-      "access_type": "dependency_pia",
-      "competent_body": "Consejería de Familia, Juventud y Asuntos Sociales (CAM) / Servicios Sociales",
-      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS + PEVS.",
+      "access_type": "unknown",
+      "competent_body": "Servicios Sociales municipales / Consejería de Familia (CAM)",
+      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS + PEVS (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Dispone de plazas concertadas (acceso por PIA/derivación oficial) o consulta directa con la entidad.",
+      "next_step_action": "Puede tener plazas públicas o concertadas; pregunte en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -2106,12 +2043,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "checked_at": "2026-11-15"
     },
     "accessibility_features": [
-      "Sin acreditación de accesibilidad adaptada confirmada en catálogo (Código 3 · datos.madrid.es)"
+      "Sin información (Código 3 · datos.madrid.es)"
     ],
     "provenance_records": [
       {
-        "attribute_name": "specialisation",
-        "value": "CARMEN RODRIGUEZ, CENTRO DE REHABILITACION · DAÑO CEREBRAL MADRID - APANEFA (Personas con discapacidad física)",
+        "attribute_name": "entity_specialisation",
+        "value": "Entidad titular: DAÑO CEREBRAL MADRID - APANEFA (Denominación centro: CARMEN RODRIGUEZ, CENTRO DE REHABILITACION)",
         "source_dataset": "Registro de Centros de Atención Social CAM (C5107)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "source_type": "official_registry",
@@ -2119,7 +2056,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "extraction_method": "structured",
         "reviewer": "Portal de Datos Abiertos Comunidad de Madrid (CSV oficial)",
         "reviewer_role": "data_steward",
-        "confidence": "explicit",
+        "confidence": "potential",
         "quality": "A"
       },
       {
@@ -2137,7 +2074,10 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       }
     ],
     "last_checked": "2026-11-15",
-    "limitations": []
+    "limitations": [
+      "La especialización proviene de la entidad titular (DAÑO CEREBRAL MADRID - APANEFA), no de la denominación individual del centro (CARMEN RODRIGUEZ, CENTRO DE REHABILITACION).",
+      "Etapa vital o edad admitida no consta en el registro oficial (confirmar con el centro)."
+    ]
   },
   {
     "centre_id": "CAM-C5212",
@@ -2159,7 +2099,8 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "phone": "",
     "email": "rberzosa@citapberzosa.org",
     "website": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
-    "explicit_specialisations": [
+    "explicit_specialisations": [],
+    "entity_declared_specialisations": [
       "psychomotor_early_support"
     ],
     "related_services": [
@@ -2175,15 +2116,13 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "centre_id": "CAM-C5212",
         "service_name": "CENTROS RESIDENCIALES (OTRAS RESIDENCIAS)",
         "service_type": "residential_care",
-        "target_populations": [
-          "psychomotor_early_support"
-        ],
+        "target_populations": [],
         "allowed_life_stages": [
           "early_childhood",
           "minor"
         ],
         "access_routes": [
-          "dependency_pia"
+          "unknown"
         ],
         "source_dataset": "Registro de Centros de Atención Social CAM (C5212)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
@@ -2195,12 +2134,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "minor"
     ],
     "access_route": {
-      "access_type": "dependency_pia",
-      "competent_body": "Consejería de Familia, Juventud y Asuntos Sociales (CAM) / Servicios Sociales",
-      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS.",
+      "access_type": "unknown",
+      "competent_body": "Servicios Sociales municipales / Consejería de Familia (CAM)",
+      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Dispone de plazas concertadas (acceso por PIA/derivación oficial) o consulta directa con la entidad.",
+      "next_step_action": "Puede tener plazas públicas o concertadas; pregunte en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -2220,8 +2159,8 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "accessibility_features": [],
     "provenance_records": [
       {
-        "attribute_name": "specialisation",
-        "value": "CITAP BERZOSA, OTRAS RESIDENCIAS · ASOCIACION DE PSICOMOTRICISTAS CENTRO DE INVESTIGACIONES DE TECNICAS APLICADAS DE PSICOMOTRICIDAD (Infancia y Adolescencia)",
+        "attribute_name": "entity_specialisation",
+        "value": "Entidad titular: ASOCIACION DE PSICOMOTRICISTAS CENTRO DE INVESTIGACIONES DE TECNICAS APLICADAS DE PSICOMOTRICIDAD (Denominación centro: CITAP BERZOSA, OTRAS RESIDENCIAS)",
         "source_dataset": "Registro de Centros de Atención Social CAM (C5212)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "source_type": "official_registry",
@@ -2229,12 +2168,13 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "extraction_method": "structured",
         "reviewer": "Portal de Datos Abiertos Comunidad de Madrid (CSV oficial)",
         "reviewer_role": "data_steward",
-        "confidence": "explicit",
+        "confidence": "potential",
         "quality": "A"
       }
     ],
     "last_checked": "2026-11-15",
     "limitations": [
+      "La especialización proviene de la entidad titular (ASOCIACION DE PSICOMOTRICISTAS CENTRO DE INVESTIGACIONES DE TECNICAS APLICADAS DE PSICOMOTRICIDAD), no de la denominación individual del centro (CITAP BERZOSA, OTRAS RESIDENCIAS).",
       "Centro sin coordenadas válidas en el registro oficial (GEO-001/002).",
       "El registro regional de centros no publica detalle de accesibilidad física."
     ]
@@ -2262,7 +2202,8 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "phone": "913767190 693750168",
     "email": "aeugercios@fundacionbobath.org",
     "website": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=7d9f648cbfeb0710VgnVCM2000001f4a900aRCRD",
-    "explicit_specialisations": [
+    "explicit_specialisations": [],
+    "entity_declared_specialisations": [
       "acquired_brain_injury",
       "cerebral_palsy"
     ],
@@ -2279,33 +2220,24 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "centre_id": "CAM-C6102",
         "service_name": "CENTROS DE DÍA (CENTROS DE DÍA: OTROS)",
         "service_type": "day_care",
-        "target_populations": [
-          "acquired_brain_injury",
-          "cerebral_palsy"
-        ],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
+        "target_populations": [],
+        "allowed_life_stages": [],
         "access_routes": [
-          "dependency_pia"
+          "unknown"
         ],
         "source_dataset": "Registro de Centros de Atención Social CAM (C6102)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "checked_at": "2026-11-15"
       }
     ],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
+    "allowed_life_stages": [],
     "access_route": {
-      "access_type": "dependency_pia",
-      "competent_body": "Consejería de Familia, Juventud y Asuntos Sociales (CAM) / Servicios Sociales",
-      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS + PEVS.",
+      "access_type": "unknown",
+      "competent_body": "Servicios Sociales municipales / Consejería de Familia (CAM)",
+      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS + PEVS (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Dispone de plazas concertadas (acceso por PIA/derivación oficial) o consulta directa con la entidad.",
+      "next_step_action": "Puede tener plazas públicas o concertadas; pregunte en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -2323,12 +2255,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "checked_at": "2026-11-15"
     },
     "accessibility_features": [
-      "Sin acreditación de accesibilidad adaptada confirmada en catálogo (Código 3 · datos.madrid.es)"
+      "Sin información (Código 3 · datos.madrid.es)"
     ],
     "provenance_records": [
       {
-        "attribute_name": "specialisation",
-        "value": "ATIPADACE II, CENTRO DE DIA · ASOCIACION PARA EL TRATAMIENTO DE LA PARALISIS Y EL DAÑO CEREBRALES (ATIPADACE) (Personas con discapacidad física)",
+        "attribute_name": "entity_specialisation",
+        "value": "Entidad titular: ASOCIACION PARA EL TRATAMIENTO DE LA PARALISIS Y EL DAÑO CEREBRALES (ATIPADACE) (Denominación centro: ATIPADACE II, CENTRO DE DIA)",
         "source_dataset": "Registro de Centros de Atención Social CAM (C6102)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "source_type": "official_registry",
@@ -2336,7 +2268,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "extraction_method": "structured",
         "reviewer": "Portal de Datos Abiertos Comunidad de Madrid (CSV oficial)",
         "reviewer_role": "data_steward",
-        "confidence": "explicit",
+        "confidence": "potential",
         "quality": "A"
       },
       {
@@ -2354,7 +2286,10 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       }
     ],
     "last_checked": "2026-11-15",
-    "limitations": []
+    "limitations": [
+      "La especialización proviene de la entidad titular (ASOCIACION PARA EL TRATAMIENTO DE LA PARALISIS Y EL DAÑO CEREBRALES (ATIPADACE)), no de la denominación individual del centro (ATIPADACE II, CENTRO DE DIA).",
+      "Etapa vital o edad admitida no consta en el registro oficial (confirmar con el centro)."
+    ]
   },
   {
     "centre_id": "CAM-C6642",
@@ -2379,7 +2314,8 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "phone": "913993245  699086699",
     "email": "proyectos@femmadrid.org",
     "website": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=4a4d3eb6a4c41610VgnVCM2000001f4a900aRCRD",
-    "explicit_specialisations": [
+    "explicit_specialisations": [],
+    "entity_declared_specialisations": [
       "neurodegenerative_diseases"
     ],
     "related_services": [
@@ -2395,32 +2331,24 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "centre_id": "CAM-C6642",
         "service_name": "CENTROS DE REHABILITACIÓN (CENTROS DE RECUPERACIÓN)",
         "service_type": "rehabilitation",
-        "target_populations": [
-          "neurodegenerative_diseases"
-        ],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
+        "target_populations": [],
+        "allowed_life_stages": [],
         "access_routes": [
-          "dependency_pia"
+          "unknown"
         ],
         "source_dataset": "Registro de Centros de Atención Social CAM (C6642)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "checked_at": "2026-11-15"
       }
     ],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
+    "allowed_life_stages": [],
     "access_route": {
-      "access_type": "dependency_pia",
-      "competent_body": "Consejería de Familia, Juventud y Asuntos Sociales (CAM) / Servicios Sociales",
-      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS + PEVS.",
+      "access_type": "unknown",
+      "competent_body": "Servicios Sociales municipales / Consejería de Familia (CAM)",
+      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS + PEVS (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Dispone de plazas concertadas (acceso por PIA/derivación oficial) o consulta directa con la entidad.",
+      "next_step_action": "Puede tener plazas públicas o concertadas; pregunte en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -2438,12 +2366,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "checked_at": "2026-11-15"
     },
     "accessibility_features": [
-      "Sin acreditación de accesibilidad adaptada confirmada en catálogo (Código 3 · datos.madrid.es)"
+      "Sin información (Código 3 · datos.madrid.es)"
     ],
     "provenance_records": [
       {
-        "attribute_name": "specialisation",
-        "value": "CENTRO DE REHABILITACION  INTEGRAL DE LA FEMM · FUNDACION PRIVADA MADRID CONTRA LA ESCLEROSIS MULTIPLE (Personas con discapacidad física)",
+        "attribute_name": "entity_specialisation",
+        "value": "Entidad titular: FUNDACION PRIVADA MADRID CONTRA LA ESCLEROSIS MULTIPLE (Denominación centro: CENTRO DE REHABILITACION  INTEGRAL DE LA FEMM)",
         "source_dataset": "Registro de Centros de Atención Social CAM (C6642)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "source_type": "official_registry",
@@ -2451,7 +2379,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "extraction_method": "structured",
         "reviewer": "Portal de Datos Abiertos Comunidad de Madrid (CSV oficial)",
         "reviewer_role": "data_steward",
-        "confidence": "explicit",
+        "confidence": "potential",
         "quality": "A"
       },
       {
@@ -2469,7 +2397,10 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       }
     ],
     "last_checked": "2026-11-15",
-    "limitations": []
+    "limitations": [
+      "La especialización proviene de la entidad titular (FUNDACION PRIVADA MADRID CONTRA LA ESCLEROSIS MULTIPLE), no de la denominación individual del centro (CENTRO DE REHABILITACION  INTEGRAL DE LA FEMM).",
+      "Etapa vital o edad admitida no consta en el registro oficial (confirmar con el centro)."
+    ]
   },
   {
     "centre_id": "CAM-C6822",
@@ -2494,6 +2425,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "explicit_specialisations": [
       "acquired_brain_injury"
     ],
+    "entity_declared_specialisations": [],
     "related_services": [
       "CENTROS DE RECUPERACIÓN",
       "rehabilitación"
@@ -2510,29 +2442,23 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "target_populations": [
           "acquired_brain_injury"
         ],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
+        "allowed_life_stages": [],
         "access_routes": [
-          "dependency_pia"
+          "unknown"
         ],
         "source_dataset": "Registro de Centros de Atención Social CAM (C6822)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "checked_at": "2026-11-15"
       }
     ],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
+    "allowed_life_stages": [],
     "access_route": {
-      "access_type": "dependency_pia",
-      "competent_body": "Consejería de Familia, Juventud y Asuntos Sociales (CAM) / Servicios Sociales",
-      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS + PEVS.",
+      "access_type": "unknown",
+      "competent_body": "Servicios Sociales municipales / Consejería de Familia (CAM)",
+      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS + PEVS (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Dispone de plazas concertadas (acceso por PIA/derivación oficial) o consulta directa con la entidad.",
+      "next_step_action": "Puede tener plazas públicas o concertadas; pregunte en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -2553,7 +2479,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "provenance_records": [
       {
         "attribute_name": "specialisation",
-        "value": "CENTRO REHABILITACION DCA FUNDACION PITA LOPEZ · FUNDACIÓN PITA LÓPEZ (Personas con discapacidad física)",
+        "value": "CENTRO REHABILITACION DCA FUNDACION PITA LOPEZ · CENTROS DE RECUPERACIÓN (Personas con discapacidad física)",
         "source_dataset": "Registro de Centros de Atención Social CAM (C6822)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "source_type": "official_registry",
@@ -2567,6 +2493,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     ],
     "last_checked": "2026-11-15",
     "limitations": [
+      "Etapa vital o edad admitida no consta en el registro oficial (confirmar con el centro).",
       "Centro sin coordenadas válidas en el registro oficial (GEO-001/002).",
       "El registro regional de centros no publica detalle de accesibilidad física."
     ]
@@ -2594,7 +2521,8 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "phone": "918897170",
     "email": "presidencia@afalcala.org",
     "website": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
-    "explicit_specialisations": [
+    "explicit_specialisations": [],
+    "entity_declared_specialisations": [
       "neurodegenerative_diseases",
       "alzheimer"
     ],
@@ -2611,10 +2539,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "centre_id": "CAM-C6963",
         "service_name": "CENTROS DE DÍA (CENTROS DE DÍA: OTROS)",
         "service_type": "day_care",
-        "target_populations": [
-          "neurodegenerative_diseases",
-          "alzheimer"
-        ],
+        "target_populations": [],
         "allowed_life_stages": [
           "older_adult"
         ],
@@ -2631,11 +2556,11 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     ],
     "access_route": {
       "access_type": "unknown",
-      "competent_body": "Entidad titular autorizada (confirmación previa)",
-      "official_description": "Régimen registral oficial: PRIVADA + PEVS.",
+      "competent_body": "Entidad titular autorizada / Servicios Sociales",
+      "official_description": "Régimen registral oficial: PRIVADA + PEVS (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Debe confirmarse con el organismo competente o contactar directamente con el centro titular.",
+      "next_step_action": "Entidad privada autorizada; consulte condiciones directamente con el centro o en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -2655,8 +2580,8 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "accessibility_features": [],
     "provenance_records": [
       {
-        "attribute_name": "specialisation",
-        "value": "CENTRO DE DIA AFA ALCALA · ASOCIACION DE FAMILIARES DE ENFERMOS DE ALZHEIMER Y OTRAS ENFERMEDADES NEURODEGENERATIVAS ASOCIADAS A LA EDAD \"A.F.A. ALCALÁ\" (Personas mayores)",
+        "attribute_name": "entity_specialisation",
+        "value": "Entidad titular: ASOCIACION DE FAMILIARES DE ENFERMOS DE ALZHEIMER Y OTRAS ENFERMEDADES NEURODEGENERATIVAS ASOCIADAS A LA EDAD \"A.F.A. ALCALÁ\" (Denominación centro: CENTRO DE DIA AFA ALCALA)",
         "source_dataset": "Registro de Centros de Atención Social CAM (C6963)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "source_type": "official_registry",
@@ -2664,12 +2589,13 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "extraction_method": "structured",
         "reviewer": "Portal de Datos Abiertos Comunidad de Madrid (CSV oficial)",
         "reviewer_role": "data_steward",
-        "confidence": "explicit",
+        "confidence": "potential",
         "quality": "A"
       }
     ],
     "last_checked": "2026-11-15",
     "limitations": [
+      "La especialización proviene de la entidad titular (ASOCIACION DE FAMILIARES DE ENFERMOS DE ALZHEIMER Y OTRAS ENFERMEDADES NEURODEGENERATIVAS ASOCIADAS A LA EDAD \"A.F.A. ALCALÁ\"), no de la denominación individual del centro (CENTRO DE DIA AFA ALCALA).",
       "El registro regional de centros no publica detalle de accesibilidad física."
     ]
   },
@@ -2696,7 +2622,8 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "phone": "913553755",
     "email": "administracion@fundacionaucavi.org",
     "website": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=9ec8648cbfeb0710VgnVCM2000001f4a900aRCRD",
-    "explicit_specialisations": [
+    "explicit_specialisations": [],
+    "entity_declared_specialisations": [
       "autism"
     ],
     "related_services": [
@@ -2712,32 +2639,24 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "centre_id": "CAM-C7051",
         "service_name": "CENTROS DE DÍA (CENTROS DE DÍA: OTROS)",
         "service_type": "day_care",
-        "target_populations": [
-          "autism"
-        ],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
+        "target_populations": [],
+        "allowed_life_stages": [],
         "access_routes": [
-          "dependency_pia"
+          "unknown"
         ],
         "source_dataset": "Registro de Centros de Atención Social CAM (C7051)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "checked_at": "2026-11-15"
       }
     ],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
+    "allowed_life_stages": [],
     "access_route": {
-      "access_type": "dependency_pia",
-      "competent_body": "Consejería de Familia, Juventud y Asuntos Sociales (CAM) / Servicios Sociales",
-      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS + PEVS.",
+      "access_type": "unknown",
+      "competent_body": "Servicios Sociales municipales / Consejería de Familia (CAM)",
+      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS + PEVS (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Dispone de plazas concertadas (acceso por PIA/derivación oficial) o consulta directa con la entidad.",
+      "next_step_action": "Puede tener plazas públicas o concertadas; pregunte en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -2755,12 +2674,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "checked_at": "2026-11-15"
     },
     "accessibility_features": [
-      "Sin acreditación de accesibilidad adaptada confirmada en catálogo (Código 3 · datos.madrid.es)"
+      "Sin información (Código 3 · datos.madrid.es)"
     ],
     "provenance_records": [
       {
-        "attribute_name": "specialisation",
-        "value": "CENTRO DE DIA AUCAVI - HORTALEZA · FUNDACIÓN AUCAVI (AUTISMO CALIDAD DE VIDA) (Personas con discapacidad intelectual)",
+        "attribute_name": "entity_specialisation",
+        "value": "Entidad titular: FUNDACIÓN AUCAVI (AUTISMO CALIDAD DE VIDA) (Denominación centro: CENTRO DE DIA AUCAVI - HORTALEZA)",
         "source_dataset": "Registro de Centros de Atención Social CAM (C7051)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "source_type": "official_registry",
@@ -2768,7 +2687,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "extraction_method": "structured",
         "reviewer": "Portal de Datos Abiertos Comunidad de Madrid (CSV oficial)",
         "reviewer_role": "data_steward",
-        "confidence": "explicit",
+        "confidence": "potential",
         "quality": "A"
       },
       {
@@ -2786,7 +2705,10 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       }
     ],
     "last_checked": "2026-11-15",
-    "limitations": []
+    "limitations": [
+      "La especialización proviene de la entidad titular (FUNDACIÓN AUCAVI (AUTISMO CALIDAD DE VIDA)), no de la denominación individual del centro (CENTRO DE DIA AUCAVI - HORTALEZA).",
+      "Etapa vital o edad admitida no consta en el registro oficial (confirmar con el centro)."
+    ]
   },
   {
     "centre_id": "CAM-C8019",
@@ -2812,6 +2734,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "email": "administracion@lescer.es",
     "website": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=bad33fce7974d710VgnVCM1000001d4a900aRCRD",
     "explicit_specialisations": [],
+    "entity_declared_specialisations": [],
     "related_services": [
       "CENTROS DE RECUPERACIÓN",
       "rehabilitación"
@@ -2826,29 +2749,23 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "service_name": "CENTROS DE REHABILITACIÓN (CENTROS DE RECUPERACIÓN)",
         "service_type": "rehabilitation",
         "target_populations": [],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
+        "allowed_life_stages": [],
         "access_routes": [
-          "dependency_pia"
+          "unknown"
         ],
         "source_dataset": "Registro de Centros de Atención Social CAM (C8019)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "checked_at": "2026-11-15"
       }
     ],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
+    "allowed_life_stages": [],
     "access_route": {
-      "access_type": "dependency_pia",
-      "competent_body": "Consejería de Familia, Juventud y Asuntos Sociales (CAM) / Servicios Sociales",
-      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS + PEVS.",
+      "access_type": "unknown",
+      "competent_body": "Servicios Sociales municipales / Consejería de Familia (CAM)",
+      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS + PEVS (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Dispone de plazas concertadas (acceso por PIA/derivación oficial) o consulta directa con la entidad.",
+      "next_step_action": "Puede tener plazas públicas o concertadas; pregunte en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -2866,7 +2783,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "checked_at": "2026-11-15"
     },
     "accessibility_features": [
-      "Sin acreditación de accesibilidad adaptada confirmada en catálogo (Código 3 · datos.madrid.es)"
+      "Sin información (Código 3 · datos.madrid.es)"
     ],
     "provenance_records": [
       {
@@ -2898,7 +2815,8 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     ],
     "last_checked": "2026-11-15",
     "limitations": [
-      "El registro oficial declara sector \"Personas con discapacidad física\" y denominación \"LESCER, CENTRO DE REHABILITACION\", sin mencionar literalmente una patología específica."
+      "El registro oficial declara sector \"Personas con discapacidad física\" y denominación \"LESCER, CENTRO DE REHABILITACION\", sin mencionar literalmente una patología específica.",
+      "Etapa vital o edad admitida no consta en el registro oficial (confirmar con el centro)."
     ]
   },
   {
@@ -2927,6 +2845,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "explicit_specialisations": [
       "autism"
     ],
+    "entity_declared_specialisations": [],
     "related_services": [
       "CENTROS DE DÍA: OTROS",
       "atención diurna"
@@ -2943,29 +2862,23 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "target_populations": [
           "autism"
         ],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
+        "allowed_life_stages": [],
         "access_routes": [
-          "dependency_pia"
+          "unknown"
         ],
         "source_dataset": "Registro de Centros de Atención Social CAM (C8517)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "checked_at": "2026-11-15"
       }
     ],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
+    "allowed_life_stages": [],
     "access_route": {
-      "access_type": "dependency_pia",
-      "competent_body": "Consejería de Familia, Juventud y Asuntos Sociales (CAM) / Servicios Sociales",
-      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS.",
+      "access_type": "unknown",
+      "competent_body": "Servicios Sociales municipales / Consejería de Familia (CAM)",
+      "official_description": "Régimen registral oficial: PRIVADA CON PLAZAS CONCERTADAS (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Dispone de plazas concertadas (acceso por PIA/derivación oficial) o consulta directa con la entidad.",
+      "next_step_action": "Puede tener plazas públicas o concertadas; pregunte en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -2983,12 +2896,12 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "checked_at": "2026-11-15"
     },
     "accessibility_features": [
-      "Sin acreditación de accesibilidad adaptada confirmada en catálogo (Código 3 · datos.madrid.es)"
+      "Sin información (Código 3 · datos.madrid.es)"
     ],
     "provenance_records": [
       {
         "attribute_name": "specialisation",
-        "value": "CENTRO DE DIA ALEPH-TEA · ASOCIACIÓN LIBRE PARA LA EDUCACIÓN PERSONALIZADA Y HUMANA DE LOS TRASTORNOS DEL ESPECTRO AUTISTA: ALEPH-TEA (Personas con discapacidad intelectual)",
+        "value": "CENTRO DE DIA ALEPH-TEA · CENTROS DE DÍA: OTROS (Personas con discapacidad intelectual)",
         "source_dataset": "Registro de Centros de Atención Social CAM (C8517)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
         "source_type": "official_registry",
@@ -3014,7 +2927,9 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       }
     ],
     "last_checked": "2026-11-15",
-    "limitations": []
+    "limitations": [
+      "Etapa vital o edad admitida no consta en el registro oficial (confirmar con el centro)."
+    ]
   },
   {
     "centre_id": "CAM-C8927",
@@ -3040,6 +2955,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "email": "direccion@amafe.org.",
     "website": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=c924648cbfeb0710VgnVCM2000001f4a900aRCRD",
     "explicit_specialisations": [],
+    "entity_declared_specialisations": [],
     "related_services": [
       "CENTROS DE DÍA: OTROS",
       "atención diurna"
@@ -3054,10 +2970,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "service_name": "CENTROS DE DÍA (CENTROS DE DÍA: OTROS)",
         "service_type": "day_care",
         "target_populations": [],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
+        "allowed_life_stages": [],
         "access_routes": [
           "unknown"
         ],
@@ -3066,17 +2979,14 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "checked_at": "2026-11-15"
       }
     ],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
+    "allowed_life_stages": [],
     "access_route": {
       "access_type": "unknown",
-      "competent_body": "Entidad titular autorizada (confirmación previa)",
-      "official_description": "Régimen registral oficial: PRIVADA TOTAL.",
+      "competent_body": "Entidad titular autorizada / Servicios Sociales",
+      "official_description": "Régimen registral oficial: PRIVADA TOTAL (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_centros",
       "checked_at": "2026-11-15",
-      "next_step_action": "Debe confirmarse con el organismo competente o contactar directamente con el centro titular.",
+      "next_step_action": "Entidad privada autorizada; consulte condiciones directamente con el centro o en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -3094,7 +3004,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "checked_at": "2026-11-15"
     },
     "accessibility_features": [
-      "Sin acreditación de accesibilidad adaptada confirmada en catálogo (Código 3 · datos.madrid.es)"
+      "Sin información (Código 3 · datos.madrid.es)"
     ],
     "provenance_records": [
       {
@@ -3126,7 +3036,8 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     ],
     "last_checked": "2026-11-15",
     "limitations": [
-      "El registro oficial declara sector \"Personas con enfermedad mental crónica\" y denominación \"CENTRO DE DIA AMAFE GENERAL ARANAZ\", sin mencionar literalmente una patología específica."
+      "El registro oficial declara sector \"Personas con enfermedad mental crónica\" y denominación \"CENTRO DE DIA AMAFE GENERAL ARANAZ\", sin mencionar literalmente una patología específica.",
+      "Etapa vital o edad admitida no consta en el registro oficial (confirmar con el centro)."
     ]
   },
   {
@@ -3138,8 +3049,8 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "sector": "Servicio de Orientación e información. Oficina de accesibilidad. Formación y empleo. Rehabilitación domiciliaria. Atenci",
     "centre_type": "Centro de Atención Social (Madrid)",
     "subtype": "CentrosAtencionSocialPersonasDiscapacidad",
-    "public_private_status": "concertado",
-    "management_type": "Entidad en Catálogo Oficial datos.madrid.es",
+    "public_private_status": "no_especificado",
+    "management_type": "Titularidad no especificada en datos.madrid.es",
     "address": "CAMINO VALDERRIBAS 115",
     "postal_code": "28038",
     "municipality": "Madrid",
@@ -3155,8 +3066,11 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "explicit_specialisations": [
       "spinal_cord_injury"
     ],
+    "entity_declared_specialisations": [],
     "related_services": [
-      "Servicio de Orientación e información. Oficina de accesibilidad. Formación y empleo. Rehabilitación domiciliaria. Atención personal. Vida au"
+      "Servicio de Orientación e información. Oficina de accesibilidad. Formación y empleo. Rehabilitación domiciliaria. Atención personal. Vida au",
+      "rehabilitación",
+      "apoyo laboral"
     ],
     "supports": [
       "rehabilitation",
@@ -3171,12 +3085,9 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "target_populations": [
           "spinal_cord_injury"
         ],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
+        "allowed_life_stages": [],
         "access_routes": [
-          "dependency_pia"
+          "unknown"
         ],
         "source_dataset": "Catálogo de Centros de Atención Social (datos.madrid.es PK 6996740)",
         "source_url": "https://datos.madrid.es/dataset/212774-0-atencion-social",
@@ -3190,29 +3101,23 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "target_populations": [
           "spinal_cord_injury"
         ],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
+        "allowed_life_stages": [],
         "access_routes": [
-          "dependency_pia"
+          "unknown"
         ],
         "source_dataset": "Catálogo de Centros de Atención Social (datos.madrid.es PK 6996740)",
         "source_url": "https://datos.madrid.es/dataset/212774-0-atencion-social",
         "checked_at": "2026-11-15"
       }
     ],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
+    "allowed_life_stages": [],
     "access_route": {
-      "access_type": "dependency_pia",
+      "access_type": "unknown",
       "competent_body": "Entidad titular / Servicios Sociales",
       "official_description": "Registro municipal de centros de atención social.",
       "source_url": "https://datos.madrid.es/dataset/212774-0-atencion-social",
       "checked_at": "2026-11-15",
-      "next_step_action": "Dispone de plazas concertadas (acceso por PIA/derivación oficial) o consulta directa con la entidad.",
+      "next_step_action": "El catálogo municipal datos.madrid.es no detalla si este recurso es público, concertado o privado; confirme condiciones de acceso directamente con la entidad o en Servicios Sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -3230,7 +3135,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "checked_at": "2026-11-15"
     },
     "accessibility_features": [
-      "Accesible para movilidad reducida (Código 1 · datos.madrid.es)"
+      "Accesible (Código 1 · datos.madrid.es)"
     ],
     "provenance_records": [
       {
@@ -3249,170 +3154,9 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     ],
     "last_checked": "2026-11-15",
     "limitations": [
-      "El catálogo municipal datos.madrid.es no publica número de plazas autorizadas."
-    ]
-  },
-  {
-    "centre_id": "MAD-PK5416084",
-    "provider_id": "PROV-MAD-5416084",
-    "provider_name": "Residencia Municipal de Mayores con Alzheimer 'Jazmín'",
-    "official_name": "Residencia Municipal de Mayores con Alzheimer 'Jazmín'",
-    "resource_domain": "social",
-    "sector": "Asistencia médica y enfermería - Fisioterapia - Rehabilitación - Terapia ocupacional - Gerocultoras 24 horas. Comedor - ",
-    "centre_type": "Centro de Atención Social (Madrid)",
-    "subtype": "ResidenciasApartamentosMayores",
-    "public_private_status": "red_publica",
-    "management_type": "Público Municipal",
-    "address": "CALLE JAZMIN 48",
-    "postal_code": "28033",
-    "municipality": "Madrid",
-    "district": "CIUDAD LINEAL",
-    "coordinates": [
-      40.479835,
-      -3.66553
-    ],
-    "has_valid_coordinates": true,
-    "phone": "913 836 520",
-    "email": "",
-    "website": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=20c8d3e6b57b3210VgnVCM1000000b205a0aRCRD",
-    "explicit_specialisations": [
-      "alzheimer"
-    ],
-    "related_services": [
-      "Asistencia médica y enfermería - Fisioterapia - Rehabilitación - Terapia ocupacional - Gerocultoras 24 horas. Comedor - Gimnasio - Terraza a"
-    ],
-    "supports": [
-      "residential_care",
-      "rehabilitation",
-      "day_care",
-      "occupational_therapy"
-    ],
-    "services_offered": [
-      {
-        "service_id": "SRV-MAD-PK5416084-0",
-        "centre_id": "MAD-PK5416084",
-        "service_name": "Residencia Municipal de Mayores con Alzheimer 'Jazmín'",
-        "service_type": "residential_care",
-        "target_populations": [
-          "alzheimer"
-        ],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
-        "access_routes": [
-          "dependency_pia"
-        ],
-        "source_dataset": "Catálogo de Centros de Atención Social (datos.madrid.es PK 5416084)",
-        "source_url": "https://datos.madrid.es/dataset/212774-0-atencion-social",
-        "checked_at": "2026-11-15"
-      },
-      {
-        "service_id": "SRV-MAD-PK5416084-1",
-        "centre_id": "MAD-PK5416084",
-        "service_name": "Residencia Municipal de Mayores con Alzheimer 'Jazmín'",
-        "service_type": "rehabilitation",
-        "target_populations": [
-          "alzheimer"
-        ],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
-        "access_routes": [
-          "dependency_pia"
-        ],
-        "source_dataset": "Catálogo de Centros de Atención Social (datos.madrid.es PK 5416084)",
-        "source_url": "https://datos.madrid.es/dataset/212774-0-atencion-social",
-        "checked_at": "2026-11-15"
-      },
-      {
-        "service_id": "SRV-MAD-PK5416084-2",
-        "centre_id": "MAD-PK5416084",
-        "service_name": "Residencia Municipal de Mayores con Alzheimer 'Jazmín'",
-        "service_type": "day_care",
-        "target_populations": [
-          "alzheimer"
-        ],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
-        "access_routes": [
-          "dependency_pia"
-        ],
-        "source_dataset": "Catálogo de Centros de Atención Social (datos.madrid.es PK 5416084)",
-        "source_url": "https://datos.madrid.es/dataset/212774-0-atencion-social",
-        "checked_at": "2026-11-15"
-      },
-      {
-        "service_id": "SRV-MAD-PK5416084-3",
-        "centre_id": "MAD-PK5416084",
-        "service_name": "Residencia Municipal de Mayores con Alzheimer 'Jazmín'",
-        "service_type": "occupational_therapy",
-        "target_populations": [
-          "alzheimer"
-        ],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
-        "access_routes": [
-          "dependency_pia"
-        ],
-        "source_dataset": "Catálogo de Centros de Atención Social (datos.madrid.es PK 5416084)",
-        "source_url": "https://datos.madrid.es/dataset/212774-0-atencion-social",
-        "checked_at": "2026-11-15"
-      }
-    ],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
-    "access_route": {
-      "access_type": "dependency_pia",
-      "competent_body": "Ayuntamiento de Madrid / Servicios Sociales",
-      "official_description": "Registro municipal de centros de atención social.",
-      "source_url": "https://datos.madrid.es/dataset/212774-0-atencion-social",
-      "checked_at": "2026-11-15",
-      "next_step_action": "Recurso público municipal: consulte acceso mediante los Servicios Sociales de su distrito o trámite PIA.",
-      "availability_known": false,
-      "waiting_list_known": false
-    },
-    "availability": {
-      "status": "contact_required",
-      "authorised_places": null,
-      "vacancies_known": false,
-      "source_url": "https://datos.madrid.es/dataset/212774-0-atencion-social",
-      "checked_at": "2026-11-15",
-      "stale": false
-    },
-    "geographic_coverage": {
-      "type": "municipality",
-      "requires_residence": "unknown",
-      "checked_at": "2026-11-15"
-    },
-    "accessibility_features": [
-      "Accesible para movilidad reducida (Código 1 · datos.madrid.es)"
-    ],
-    "provenance_records": [
-      {
-        "attribute_name": "specialisation",
-        "value": "Residencia Municipal de Mayores con Alzheimer 'Jazmín' · Asistencia médica y enfermería - Fisioterapia - Rehabilitación - Terapia ocupacional - Gerocultoras 24 horas. Comedor - Gimnasio - Terraza ajardinada.",
-        "source_dataset": "Catálogo de Centros de Atención Social (datos.madrid.es PK 5416084)",
-        "source_url": "http://www.madrid.es/sites/v/index.jsp?vgnextchannel=bfa48ab43d6bb410VgnVCM100000171f5a0aRCRD&vgnextoid=20c8d3e6b57b3210VgnVCM1000000b205a0aRCRD",
-        "source_type": "official_registry",
-        "retrieved_at": "2026-11-15",
-        "extraction_method": "structured",
-        "reviewer": "Portal de Datos Abiertos Ayuntamiento de Madrid (CSV oficial)",
-        "reviewer_role": "data_steward",
-        "confidence": "explicit",
-        "quality": "A"
-      }
-    ],
-    "last_checked": "2026-11-15",
-    "limitations": [
-      "El catálogo municipal datos.madrid.es no publica número de plazas autorizadas."
+      "El catálogo municipal datos.madrid.es no publica número de plazas autorizadas.",
+      "El catálogo municipal datos.madrid.es no especifica si la entidad titular tiene plazas públicas concertadas o privadas.",
+      "Etapa vital o edad admitida no consta en el registro oficial (confirmar con el centro)."
     ]
   },
   {
@@ -3438,7 +3182,8 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "phone": "915614090 / 691798639",
     "email": "aspacemadrid@aspacemadrid.org",
     "website": "https://datos.comunidad.madrid/dataset/atencion_social_registro_servicios",
-    "explicit_specialisations": [
+    "explicit_specialisations": [],
+    "entity_declared_specialisations": [
       "cerebral_palsy"
     ],
     "related_services": [
@@ -3446,17 +3191,14 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     ],
     "supports": [],
     "services_offered": [],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
+    "allowed_life_stages": [],
     "access_route": {
       "access_type": "unknown",
-      "competent_body": "Entidad titular autorizada (confirmación previa)",
+      "competent_body": "Entidad titular autorizada / Servicios Sociales",
       "official_description": "Servicio autorizado en registro regional (PRIVADA TOTAL).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_servicios",
       "checked_at": "2026-11-15",
-      "next_step_action": "Debe confirmarse con el organismo competente o contactar directamente con el centro titular.",
+      "next_step_action": "Entidad privada autorizada; consulte condiciones directamente con el centro o en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -3476,7 +3218,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "accessibility_features": [],
     "provenance_records": [
       {
-        "attribute_name": "specialisation",
+        "attribute_name": "entity_specialisation",
         "value": "ASPACE, SERVICIO DE INFORMACION · ASOCIACION MADRILEÑA DE ORGANIZACIONES DE ATENCION A LAS PERSONAS CON PARALISIS CEREBRAL Y AFINES (ASPACE MADRID) (Personas con discapacidad física)",
         "source_dataset": "Registro de Servicios de Atención Social CAM (S2135)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_servicios",
@@ -3485,14 +3227,17 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "extraction_method": "structured",
         "reviewer": "Portal de Datos Abiertos Comunidad de Madrid (CSV oficial)",
         "reviewer_role": "data_steward",
-        "confidence": "explicit",
+        "confidence": "potential",
         "quality": "A"
       }
     ],
     "last_checked": "2026-11-15",
     "limitations": [
-      "El Registro de Servicios de la Comunidad de Madrid no publica número de plazas ni accesibilidad física."
-    ]
+      "El Registro de Servicios de la Comunidad de Madrid no publica número de plazas ni accesibilidad física.",
+      "La especialización proviene de la entidad titular (ASOCIACION MADRILEÑA DE ORGANIZACIONES DE ATENCION A LAS PERSONAS CON PARALISIS CEREBRAL Y AFINES (ASPACE MADRID)), no del nombre del servicio.",
+      "Etapa vital o edad admitida no consta en el registro oficial (confirmar con la entidad)."
+    ],
+    "is_individual_practitioner": false
   },
   {
     "centre_id": "CAM-SRV-S2450",
@@ -3520,22 +3265,20 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "explicit_specialisations": [
       "rare_diseases"
     ],
+    "entity_declared_specialisations": [],
     "related_services": [
       "SERVICIO DE INFORMACIÓN Y ORIENTACIÓN"
     ],
     "supports": [],
     "services_offered": [],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
+    "allowed_life_stages": [],
     "access_route": {
       "access_type": "unknown",
-      "competent_body": "Entidad titular autorizada (confirmación previa)",
+      "competent_body": "Entidad titular autorizada / Servicios Sociales",
       "official_description": "Servicio autorizado en registro regional (PRIVADA TOTAL).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_servicios",
       "checked_at": "2026-11-15",
-      "next_step_action": "Debe confirmarse con el organismo competente o contactar directamente con el centro titular.",
+      "next_step_action": "Entidad privada autorizada; consulte condiciones directamente con el centro o en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -3570,8 +3313,10 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     ],
     "last_checked": "2026-11-15",
     "limitations": [
-      "El Registro de Servicios de la Comunidad de Madrid no publica número de plazas ni accesibilidad física."
-    ]
+      "El Registro de Servicios de la Comunidad de Madrid no publica número de plazas ni accesibilidad física.",
+      "Etapa vital o edad admitida no consta en el registro oficial (confirmar con la entidad)."
+    ],
+    "is_individual_practitioner": false
   },
   {
     "centre_id": "CAM-SRV-S3502",
@@ -3600,23 +3345,21 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
       "hearing_disability",
       "visual_disability"
     ],
+    "entity_declared_specialisations": [],
     "related_services": [
       "OTRAS PRESTACIONES Y SERVICIOS",
       "OTROS"
     ],
     "supports": [],
     "services_offered": [],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
+    "allowed_life_stages": [],
     "access_route": {
       "access_type": "unknown",
-      "competent_body": "Entidad titular autorizada (confirmación previa)",
+      "competent_body": "Entidad titular autorizada / Servicios Sociales",
       "official_description": "Servicio autorizado en registro regional (PRIVADA TOTAL).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_servicios",
       "checked_at": "2026-11-15",
-      "next_step_action": "Debe confirmarse con el organismo competente o contactar directamente con el centro titular.",
+      "next_step_action": "Entidad privada autorizada; consulte condiciones directamente con el centro o en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -3651,8 +3394,10 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     ],
     "last_checked": "2026-11-15",
     "limitations": [
-      "El Registro de Servicios de la Comunidad de Madrid no publica número de plazas ni accesibilidad física."
-    ]
+      "El Registro de Servicios de la Comunidad de Madrid no publica número de plazas ni accesibilidad física.",
+      "Etapa vital o edad admitida no consta en el registro oficial (confirmar con la entidad)."
+    ],
+    "is_individual_practitioner": false
   },
   {
     "centre_id": "CAM-SRV-S3848",
@@ -3678,11 +3423,14 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "email": "fundacionbobath@fundacionbobath.org",
     "website": "https://datos.comunidad.madrid/dataset/atencion_social_registro_servicios",
     "explicit_specialisations": [
-      "acquired_brain_injury"
+      "acquired_brain_injury",
+      "cerebral_palsy"
     ],
+    "entity_declared_specialisations": [],
     "related_services": [
       "SERVICIO DE TRATAMIENTOS ESPECIALIZADOS",
-      "SERVICIO DE ATENCIÓN PSICO-SOCIAL"
+      "SERVICIO DE ATENCIÓN PSICO-SOCIAL",
+      "apoyo psicosocial"
     ],
     "supports": [
       "psychological_support"
@@ -3694,12 +3442,10 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "service_name": "BOBATH, SERVICIO DE ATENCION A PERSONAS CON PARALISIS O DAÑO CEREBRAL",
         "service_type": "psychological_support",
         "target_populations": [
-          "acquired_brain_injury"
+          "acquired_brain_injury",
+          "cerebral_palsy"
         ],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
+        "allowed_life_stages": [],
         "access_routes": [
           "unknown"
         ],
@@ -3708,17 +3454,14 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "checked_at": "2026-11-15"
       }
     ],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
+    "allowed_life_stages": [],
     "access_route": {
       "access_type": "unknown",
-      "competent_body": "Entidad titular autorizada (confirmación previa)",
+      "competent_body": "Entidad titular autorizada / Servicios Sociales",
       "official_description": "Servicio autorizado en registro regional (PRIVADA + PEVS).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_servicios",
       "checked_at": "2026-11-15",
-      "next_step_action": "Debe confirmarse con el organismo competente o contactar directamente con el centro titular.",
+      "next_step_action": "Entidad privada autorizada; consulte condiciones directamente con el centro o en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -3753,8 +3496,10 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     ],
     "last_checked": "2026-11-15",
     "limitations": [
-      "El Registro de Servicios de la Comunidad de Madrid no publica número de plazas ni accesibilidad física."
-    ]
+      "El Registro de Servicios de la Comunidad de Madrid no publica número de plazas ni accesibilidad física.",
+      "Etapa vital o edad admitida no consta en el registro oficial (confirmar con la entidad)."
+    ],
+    "is_individual_practitioner": false
   },
   {
     "centre_id": "CAM-SRV-S7386",
@@ -3779,12 +3524,14 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "phone": "664040279",
     "email": "asociacionaecum@gmail.com",
     "website": "https://datos.comunidad.madrid/dataset/atencion_social_registro_servicios",
-    "explicit_specialisations": [
+    "explicit_specialisations": [],
+    "entity_declared_specialisations": [
       "acquired_brain_injury"
     ],
     "related_services": [
       "SERVICIO DE TRATAMIENTOS ESPECIALIZADOS",
-      "SERVICIO DE REHABILITACIÓN MÉDICO-FUNCIONAL"
+      "SERVICIO DE REHABILITACIÓN MÉDICO-FUNCIONAL",
+      "rehabilitación"
     ],
     "supports": [
       "rehabilitation"
@@ -3795,9 +3542,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "centre_id": "CAM-SRV-S7386",
         "service_name": "AECUM, REHABILITACION MEDICO-FUNCIONAL",
         "service_type": "rehabilitation",
-        "target_populations": [
-          "acquired_brain_injury"
-        ],
+        "target_populations": [],
         "allowed_life_stages": [
           "older_adult"
         ],
@@ -3814,11 +3559,11 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     ],
     "access_route": {
       "access_type": "unknown",
-      "competent_body": "Entidad titular autorizada (confirmación previa)",
+      "competent_body": "Entidad titular autorizada / Servicios Sociales",
       "official_description": "Servicio autorizado en registro regional (PRIVADA + PEVS).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_servicios",
       "checked_at": "2026-11-15",
-      "next_step_action": "Debe confirmarse con el organismo competente o contactar directamente con el centro titular.",
+      "next_step_action": "Entidad privada autorizada; consulte condiciones directamente con el centro o en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -3838,7 +3583,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "accessibility_features": [],
     "provenance_records": [
       {
-        "attribute_name": "specialisation",
+        "attribute_name": "entity_specialisation",
         "value": "AECUM, REHABILITACION MEDICO-FUNCIONAL · ASOCIACION AECUM, EXPERTOS/AS Y FAMILIARES AL CUIDADO DEL MAYOR Y DE PERSONAS CON DAÑO CEREBRAL ADQUIRIDO (Personas mayores)",
         "source_dataset": "Registro de Servicios de Atención Social CAM (S7386)",
         "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_servicios",
@@ -3847,14 +3592,16 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "extraction_method": "structured",
         "reviewer": "Portal de Datos Abiertos Comunidad de Madrid (CSV oficial)",
         "reviewer_role": "data_steward",
-        "confidence": "explicit",
+        "confidence": "potential",
         "quality": "A"
       }
     ],
     "last_checked": "2026-11-15",
     "limitations": [
-      "El Registro de Servicios de la Comunidad de Madrid no publica número de plazas ni accesibilidad física."
-    ]
+      "El Registro de Servicios de la Comunidad de Madrid no publica número de plazas ni accesibilidad física.",
+      "La especialización proviene de la entidad titular (ASOCIACION AECUM, EXPERTOS/AS Y FAMILIARES AL CUIDADO DEL MAYOR Y DE PERSONAS CON DAÑO CEREBRAL ADQUIRIDO), no del nombre del servicio."
+    ],
+    "is_individual_practitioner": false
   },
   {
     "centre_id": "CAM-SRV-S7888",
@@ -3882,9 +3629,11 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "explicit_specialisations": [
       "acquired_brain_injury"
     ],
+    "entity_declared_specialisations": [],
     "related_services": [
       "SERVICIO DE TRATAMIENTOS ESPECIALIZADOS",
-      "SERVICIO DE REHABILITACIÓN MÉDICO-FUNCIONAL"
+      "SERVICIO DE REHABILITACIÓN MÉDICO-FUNCIONAL",
+      "rehabilitación"
     ],
     "supports": [
       "rehabilitation"
@@ -3898,10 +3647,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "target_populations": [
           "acquired_brain_injury"
         ],
-        "allowed_life_stages": [
-          "adult",
-          "older_adult"
-        ],
+        "allowed_life_stages": [],
         "access_routes": [
           "unknown"
         ],
@@ -3910,17 +3656,14 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
         "checked_at": "2026-11-15"
       }
     ],
-    "allowed_life_stages": [
-      "adult",
-      "older_adult"
-    ],
+    "allowed_life_stages": [],
     "access_route": {
       "access_type": "unknown",
-      "competent_body": "Entidad titular autorizada (confirmación previa)",
+      "competent_body": "Entidad titular autorizada / Servicios Sociales",
       "official_description": "Servicio autorizado en registro regional (PRIVADA + PEVS).",
       "source_url": "https://datos.comunidad.madrid/dataset/atencion_social_registro_servicios",
       "checked_at": "2026-11-15",
-      "next_step_action": "Debe confirmarse con el organismo competente o contactar directamente con el centro titular.",
+      "next_step_action": "Entidad privada autorizada; consulte condiciones directamente con el centro o en sus servicios sociales.",
       "availability_known": false,
       "waiting_list_known": false
     },
@@ -3955,8 +3698,10 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     ],
     "last_checked": "2026-11-15",
     "limitations": [
-      "El Registro de Servicios de la Comunidad de Madrid no publica número de plazas ni accesibilidad física."
-    ]
+      "El Registro de Servicios de la Comunidad de Madrid no publica número de plazas ni accesibilidad física.",
+      "Etapa vital o edad admitida no consta en el registro oficial (confirmar con la entidad)."
+    ],
+    "is_individual_practitioner": false
   }
 ];
 

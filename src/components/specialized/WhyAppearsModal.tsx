@@ -1,7 +1,7 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * Madrid Apoyo Especializado v1.7 - Modal «¿Por qué aparece este centro?»
+ * Madrid Apoyo Especializado v1.8 - Modal «¿Por qué aparece este centro?»
  * Explicabilidad completa, procedencia por atributo y matriz criterio por criterio (§14, §27.1, §71)
  */
 
@@ -41,7 +41,7 @@ export const WhyAppearsModal: React.FC<WhyAppearsModalProps> = ({ item, onClose 
 
   if (!item) return null;
 
-  const { centre, match_assessment, evidence_level, combination_status, combination_details, criterion_matrix } = item;
+  const { centre, match_assessment, evidence_level, evidence_sublevel, combination_status, combination_details, criterion_matrix } = item;
 
   return (
     <div 
@@ -81,18 +81,28 @@ export const WhyAppearsModal: React.FC<WhyAppearsModalProps> = ({ item, onClose 
         <div className="p-6 overflow-y-auto space-y-6 text-xs text-stone-700">
           {/* 1. Nivel de Evidencia y Razonamiento Literal (§27.1) */}
           <div className="p-4 rounded-xl border border-stone-200 bg-stone-50/70 space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="font-bold text-stone-900 text-sm">
-                Nivel de evidencia asignado: <span className="font-mono">{evidence_level}</span>
+                Nivel de evidencia asignado:{' '}
+                <span className="font-mono">
+                  {evidence_sublevel === 'A2_entity' ? 'A2 (entidad titular)' : evidence_level}
+                </span>
               </span>
               <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-stone-200 text-stone-800">
                 {evidence_level === 'A1' && 'Especialización y apoyo publicados'}
-                {evidence_level === 'A2' && 'Especialización publicada; confirme el apoyo'}
+                {evidence_level === 'A2' && evidence_sublevel === 'A2_entity' && 'Lo declara la entidad titular; confirmar en este centro'}
+                {evidence_level === 'A2' && evidence_sublevel !== 'A2_entity' && 'Especialización publicada; confirme el apoyo'}
                 {evidence_level === 'B1' && 'Servicios relacionados revisados'}
                 {evidence_level === 'B2' && 'Posible recurso; requiere confirmación'}
                 {evidence_level === 'C'  && 'Orientación general compatible'}
               </span>
             </div>
+
+            {centre.allowed_life_stages.length === 0 && (
+              <div className="px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-950 text-[11px] font-medium">
+                Edad o etapa vital: no consta en el registro oficial para este centro; confirmar directamente con la entidad si atiende su tramo de edad.
+              </div>
+            )}
 
             <div>
               <div className="font-semibold text-stone-800 mb-1">Motivos por los que se incluye en los resultados:</div>
@@ -152,7 +162,17 @@ export const WhyAppearsModal: React.FC<WhyAppearsModalProps> = ({ item, onClose 
                           )}
                         </td>
                         <td className="p-2.5 font-mono text-stone-500">{cd.checked_at}</td>
-                        <td className="p-2.5 text-stone-600">Registro oficial CAM</td>
+                        <td className="p-2.5 text-stone-600">
+                          {centre.centre_id.startsWith('MAD-PK')
+                            ? 'datos.madrid.es'
+                            : centre.centre_id.startsWith('CAM-SRV-')
+                            ? centre.provenance_records.some(p => p.source_dataset.includes('datos.madrid.es'))
+                              ? 'CAM Servicios / datos.madrid.es'
+                              : 'CAM Servicios'
+                            : centre.provenance_records.some(p => p.source_dataset.includes('datos.madrid.es'))
+                            ? 'CAM Centros / datos.madrid.es'
+                            : 'Registro oficial CAM'}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

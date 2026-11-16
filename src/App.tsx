@@ -1,42 +1,50 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * Madrid Apoyo Especializado v1.7 - Aplicación Principal
- * Buscador transversal de recursos sociales y sanitarios autorizados de la Comunidad de Madrid
+ * Madrid Apoyo Especializado v1.8 - Aplicación Principal
+ * Buscador transversal de centros y servicios de atención social autorizados de la Comunidad de Madrid
  * DATAMAD 2026 · Código abierto · Orientación, no diagnóstico
- * Cumple estrictamente con el Prompt Maestro v1.7 y la Universal Frontend Design Constitution
+ * Cumple estrictamente con el Prompt Maestro v1.8 y la Universal Frontend Design Constitution
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, Suspense, lazy } from 'react';
 import { 
   SpecializedCentre,
   SearchQueryState, 
-  EvaluatedCentreResult, 
-  SavedSearch, 
-  CitizenCorrection 
+  EvaluatedCentreResult 
 } from './types/specialized';
-import { SPECIALIZED_CENTRES } from './data/specializedCentresData';
 import { runSpecializedSearch, evaluateCentre } from './utils/specializedEngine';
 import { loadLiveSnapshotData, DynamicIngestionState } from './utils/liveSnapshotParser';
 import { resolveSearchOrigin, OriginReference } from './data/municipalitiesData';
 import { SpecializedHeader } from './components/specialized/SpecializedHeader';
 import { SpecializedSearchFilters } from './components/specialized/SpecializedSearchFilters';
 import { SpecializedResultsList } from './components/specialized/SpecializedResultsList';
-import { SpecializedMapView } from './components/specialized/SpecializedMapView';
-import { SpecializedComparatorView } from './components/specialized/SpecializedComparatorView';
 import { WhyAppearsModal } from './components/specialized/WhyAppearsModal';
 import { PrintableContactCardModal } from './components/specialized/PrintableContactCardModal';
 import { SavedSearchesModal } from './components/specialized/SavedSearchesModal';
-import { WhatChangedModal } from './components/specialized/WhatChangedModal';
 import { DisambiguationModal } from './components/specialized/DisambiguationModal';
 import { EasyReadGlossaryModal } from './components/specialized/EasyReadGlossaryModal';
-import { TaxonomyGovernanceView } from './components/specialized/TaxonomyGovernanceView';
-import { SpecializedTestsRunnerView } from './components/specialized/SpecializedTestsRunnerView';
 import { LifeStageTransitionBanner } from './components/specialized/LifeStageTransitionBanner';
+
+const SpecializedMapView = lazy(() =>
+  import('./components/specialized/SpecializedMapView').then(m => ({ default: m.SpecializedMapView }))
+);
+const SpecializedComparatorView = lazy(() =>
+  import('./components/specialized/SpecializedComparatorView').then(m => ({ default: m.SpecializedComparatorView }))
+);
+const TaxonomyGovernanceView = lazy(() =>
+  import('./components/specialized/TaxonomyGovernanceView').then(m => ({ default: m.TaxonomyGovernanceView }))
+);
+const SpecializedTestsRunnerView = lazy(() =>
+  import('./components/specialized/SpecializedTestsRunnerView').then(m => ({ default: m.SpecializedTestsRunnerView }))
+);
+const WhatChangedModal = lazy(() =>
+  import('./components/specialized/WhatChangedModal').then(m => ({ default: m.WhatChangedModal }))
+);
 
 import { AlertTriangle, RotateCcw } from 'lucide-react';
 import { CORE_PROFILES, EXPERIMENTAL_PROFILES, PENDING_PROFILES, LIFE_STAGES, SUPPORT_TYPES, FUNCTIONAL_NEEDS } from './data/specializedTaxonomy';
-import { MADRID_MUNICIPALITIES } from './data/municipalitiesData';
+import { findMunicipalityByName } from './data/municipalitiesData';
 import { ProfileId, SupportTypeId, FunctionalNeedId, LifeStage, NetworkPreference, CombinationMode } from './types/specialized';
 
 const DEFAULT_QUERY: SearchQueryState = {
@@ -86,7 +94,7 @@ function validateAndParseUrlParams(): { query: SearchQueryState; errors: string[
   const validNets = ['all', 'public_network', 'private_authorised'];
   const validCombs = ['any_support', 'all_supports_same_centre'];
   const validLocs = ['all', 'municipality', 'browser'];
-  const validAccess = ['wheelchair_access', 'magnetic_loops', 'braille_signage'];
+  const validAccess = ['wheelchair_access', 'sign_language', 'tactile_signage', 'braille_signage', 'magnetic_loops'];
 
   let profile: ProfileId | null = null;
   if (rawProfile !== null && rawProfile !== '') {
@@ -99,9 +107,7 @@ function validateAndParseUrlParams(): { query: SearchQueryState; errors: string[
 
   let municipality: string | null = null;
   if (rawMuni !== null && rawMuni !== '') {
-    const matchedMuni = MADRID_MUNICIPALITIES.find(
-      m => m.name.toLowerCase() === rawMuni.trim().toLowerCase()
-    );
+    const matchedMuni = findMunicipalityByName(rawMuni);
     if (matchedMuni) {
       municipality = matchedMuni.name;
     } else {
@@ -211,8 +217,16 @@ function validateAndParseUrlParams(): { query: SearchQueryState; errors: string[
 }
 
 export default function App() {
+  const initialTab = useMemo(() => {
+    if (typeof window === 'undefined' || !window.location.search) return 'search';
+    const p = new URLSearchParams(window.location.search);
+    const t = p.get('tab');
+    const validTabs = ['search', 'map', 'comparator', 'what_changed', 'governance', 'tests'];
+    return validTabs.includes(t || '') ? t! : 'search';
+  }, []);
+
   // Pestañas de Madrid Apoyo Especializado: 'search' | 'map' | 'comparator' | 'what_changed' | 'governance' | 'tests'
-  const [activeTab, setActiveTab] = useState<string>('search');
+  const [activeTab, setActiveTab] = useState<string>(initialTab);
 
   // Estado accesible
   const [easyReadMode, setEasyReadMode] = useState<boolean>(false);
@@ -235,6 +249,7 @@ export default function App() {
     setIsUrlBlocked(false);
     setUrlValidationErrors([]);
     setQuery(DEFAULT_QUERY);
+    setActiveTab('search');
     setDismissedTransition(false);
     if (typeof window !== 'undefined') {
       window.history.replaceState({}, '', window.location.pathname);
@@ -246,6 +261,7 @@ export default function App() {
     if (isUrlBlocked) return;
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams();
+      if (activeTab !== 'search') params.set('tab', activeTab);
       if (query.profile) params.set('profile', query.profile);
       if (query.municipality) params.set('municipality', query.municipality);
       if (query.radius_km !== 50) params.set('radius', query.radius_km.toString());
@@ -263,6 +279,7 @@ export default function App() {
     }
   }, [
     isUrlBlocked,
+    activeTab,
     query.profile, 
     query.municipality, 
     query.radius_km, 
@@ -275,15 +292,26 @@ export default function App() {
     query.location_mode
   ]);
 
-  // Carga de captura CSV en vivo en tiempo real desde snapshot-latest.csv
-  const [activeCentres, setActiveCentres] = useState<SpecializedCentre[]>(SPECIALIZED_CENTRES);
+  // Carga del catálogo pre-clasificado (cacheado offline PWA) o CSVs en vivo (#6, #7, #12)
+  const [activeCentres, setActiveCentres] = useState<SpecializedCentre[]>([]);
+  const [isCatalogLoading, setIsCatalogLoading] = useState<boolean>(true);
   const [dynamicState, setDynamicState] = useState<DynamicIngestionState | null>(null);
 
   useEffect(() => {
-    loadLiveSnapshotData(SPECIALIZED_CENTRES).then(({ centres: liveCentres, state }) => {
-      setActiveCentres(liveCentres);
-      setDynamicState(state);
-    });
+    let active = true;
+    loadLiveSnapshotData()
+      .then(({ centres: liveCentres, state }) => {
+        if (!active) return;
+        setActiveCentres(liveCentres);
+        setDynamicState(state);
+        setIsCatalogLoading(false);
+      })
+      .catch(() => {
+        if (active) setIsCatalogLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   // Seleccion de centros para comparar (hasta 3 centros §15)
@@ -300,11 +328,13 @@ export default function App() {
   const [isGlossaryOpen, setIsGlossaryOpen] = useState(false);
   const [dismissedTransition, setDismissedTransition] = useState(false);
 
-  // Contador de búsquedas guardadas
+  // Contador de búsquedas guardadas (v1.8 con lectura retrocompatible de v1.7)
   const [savedCount, setSavedCount] = useState(0);
   useEffect(() => {
     try {
-      const raw = localStorage.getItem('madrid_apoyo_saved_searches_v17');
+      const raw =
+        localStorage.getItem('madrid_apoyo_saved_searches_v18') ||
+        localStorage.getItem('madrid_apoyo_saved_searches_v17');
       if (raw) setSavedCount(JSON.parse(raw).length);
     } catch (e) {}
   }, [isSavedSearchesOpen]);
@@ -370,6 +400,7 @@ export default function App() {
         savedSearchesCount={savedCount}
         openSavedSearches={() => setIsSavedSearchesOpen(true)}
         openGlossary={() => setIsGlossaryOpen(true)}
+        onOpenWhatChanged={() => setActiveTab('what_changed')}
       />
 
       {/* Alerta de validación de URL cuando hay parámetros rechazados */}
@@ -445,11 +476,35 @@ export default function App() {
               query={query}
               setQuery={handleSetQuery}
               totalResults={isUrlBlocked ? 0 : searchOutput.total_results}
+              centres={activeCentres}
               onOpenDisambiguation={(term) => setIsDisambiguationOpen(term)}
               onResetFilters={resetAllFilters}
             />
 
-            {/* Estado bloqueado o Lista de resultados */}
+            {(dynamicState?.used_fallback || dynamicState?.error) && (
+              <div className="mb-4 p-3.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-950 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-start gap-2.5">
+                  <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" aria-hidden="true" />
+                  <div>
+                    <strong className="text-stone-900">
+                      Aviso de catálogo de reserva ({activeCentres.length} centros):
+                    </strong>{' '}
+                    <span>
+                      No se pudo cargar el catálogo oficial completo ({dynamicState.error || 'error de red o ruta'}). Se muestran únicamente los centros canónicos de respaldo mientras se restablece el acceso a los ficheros oficiales.
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('what_changed')}
+                  className="px-2.5 py-1 rounded bg-stone-900 text-white font-semibold hover:bg-stone-800 shrink-0 self-end sm:self-center cursor-pointer"
+                >
+                  Ver detalle técnico
+                </button>
+              </div>
+            )}
+
+            {/* Estado bloqueado, carga inicial o Lista de resultados */}
             {isUrlBlocked ? (
               <div className="bg-white rounded-xl border border-amber-200 p-8 shadow-xs text-center max-w-xl mx-auto my-8 space-y-4">
                 <div className="w-12 h-12 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto text-amber-700">
@@ -480,6 +535,10 @@ export default function App() {
                     <span>Restablecer y ver todos los recursos oficiales</span>
                   </button>
                 </div>
+              </div>
+            ) : isCatalogLoading && activeCentres.length === 0 ? (
+              <div className="bg-white rounded-xl border border-stone-200 p-8 text-center text-xs text-stone-600">
+                Cargando catálogo oficial verificado de la Comunidad de Madrid...
               </div>
             ) : (
               <SpecializedResultsList
@@ -518,27 +577,31 @@ export default function App() {
               </button>
             </div>
 
-            <SpecializedMapView
-              results={searchOutput.results}
-              selectedCentreId={selectedMapCentreId}
-              onSelectCentre={(id) => setSelectedMapCentreId(id)}
-              onWhyAppears={(item) => setWhyAppearsItem(item)}
-              originCoords={resolvedOrigin.coordinates}
-              originName={resolvedOrigin.name}
-              radiusKm={query.radius_km}
-            />
+            <Suspense fallback={<div className="p-8 text-center text-xs text-stone-500">Cargando mapa territorial...</div>}>
+              <SpecializedMapView
+                results={searchOutput.results}
+                selectedCentreId={selectedMapCentreId}
+                onSelectCentre={(id) => setSelectedMapCentreId(id)}
+                onWhyAppears={(item) => setWhyAppearsItem(item)}
+                originCoords={resolvedOrigin.coordinates}
+                originName={resolvedOrigin.name}
+                radiusKm={query.radius_km}
+              />
+            </Suspense>
           </div>
         )}
 
         {/* PESTAÑA: COMPARADOR CIUDADANO (§15) */}
         {activeTab === 'comparator' && (
-          <SpecializedComparatorView
-            comparedCentres={comparedCentres}
-            onRemoveFromCompare={toggleCompare}
-            onClearCompare={() => setComparedCentreIds([])}
-            onGoToSearch={() => setActiveTab('search')}
-            onWhyAppears={(item) => setWhyAppearsItem(item)}
-          />
+          <Suspense fallback={<div className="p-8 text-center text-xs text-stone-500">Cargando comparador...</div>}>
+            <SpecializedComparatorView
+              comparedCentres={comparedCentres}
+              onRemoveFromCompare={toggleCompare}
+              onClearCompare={() => setComparedCentreIds([])}
+              onGoToSearch={() => setActiveTab('search')}
+              onWhyAppears={(item) => setWhyAppearsItem(item)}
+            />
+          </Suspense>
         )}
 
         {/* PESTAÑA: QUÉ HA CAMBIADO (§84) */}
@@ -560,23 +623,29 @@ export default function App() {
                 Ir al buscador
               </button>
             </div>
-            <WhatChangedModal
-              isOpen={true}
-              inline={true}
-              onClose={() => setActiveTab('search')}
-              dynamicState={dynamicState}
-            />
+            <Suspense fallback={<div className="p-8 text-center text-xs text-stone-500">Cargando histórico de cambios...</div>}>
+              <WhatChangedModal
+                isOpen={true}
+                inline={true}
+                onClose={() => setActiveTab('search')}
+                dynamicState={dynamicState}
+              />
+            </Suspense>
           </div>
         )}
 
         {/* PESTAÑA: GOBERNANZA TAXONÓMICA Y UTILIDAD ADMINISTRATIVA (§33, §58) */}
         {activeTab === 'governance' && (
-          <TaxonomyGovernanceView />
+          <Suspense fallback={<div className="p-8 text-center text-xs text-stone-500">Cargando gobernanza taxonómica...</div>}>
+            <TaxonomyGovernanceView centres={activeCentres} />
+          </Suspense>
         )}
 
         {/* PESTAÑA: PRUEBAS CANÓNICAS EN VIVO (§31, §44, §79, §90) */}
         {activeTab === 'tests' && (
-          <SpecializedTestsRunnerView />
+          <Suspense fallback={<div className="p-8 text-center text-xs text-stone-500">Cargando suite canónica de validación...</div>}>
+            <SpecializedTestsRunnerView />
+          </Suspense>
         )}
       </main>
 
@@ -599,6 +668,7 @@ export default function App() {
         isOpen={isSavedSearchesOpen}
         onClose={() => setIsSavedSearchesOpen(false)}
         currentQuery={query}
+        datasetSnapshot={dynamicState?.timestamp?.slice(0, 10)}
         onLoadSearch={(filters) => {
           setQuery(prev => ({
             ...prev,
@@ -614,11 +684,15 @@ export default function App() {
         }}
       />
 
-      <WhatChangedModal
-        isOpen={isWhatChangedOpen}
-        onClose={() => setIsWhatChangedOpen(false)}
-        dynamicState={dynamicState}
-      />
+      {isWhatChangedOpen && (
+        <Suspense fallback={null}>
+          <WhatChangedModal
+            isOpen={isWhatChangedOpen}
+            onClose={() => setIsWhatChangedOpen(false)}
+            dynamicState={dynamicState}
+          />
+        </Suspense>
+      )}
 
       <DisambiguationModal
         term={isDisambiguationOpen}
@@ -636,10 +710,10 @@ export default function App() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-1">
             <div className="font-bold text-stone-900 text-sm">
-              Madrid Apoyo Especializado v1.7 · DATAMAD 2026
+              Madrid Apoyo Especializado v1.8 · DATAMAD 2026
             </div>
             <p className="text-stone-500 max-w-2xl leading-relaxed">
-              DATAMAD 2026: Buscador independiente basado en registros oficiales de la Comunidad de Madrid. Orientación verificable (sin finalidad diagnóstica). Código abierto bajo licencia Apache-2.0. Sin cookies de seguimiento ni almacenamiento de datos de salud.
+              DATAMAD 2026: Buscador independiente basado en los registros oficiales de Atención Social del Ayuntamiento de Madrid y la Comunidad de Madrid. Orientación verificable (sin finalidad diagnóstica). Código abierto bajo licencia Apache-2.0. Sin telemetría ni almacenamiento de datos de salud.
             </p>
           </div>
 
@@ -663,10 +737,10 @@ export default function App() {
             <button
               type="button"
               onClick={() => setActiveTab('tests')}
-              aria-label="Ver suite canónica de 23 pruebas oficiales"
+              aria-label="Ver suite canónica de 28 pruebas oficiales"
               className="hover:text-stone-950 underline underline-offset-2 font-mono cursor-pointer"
             >
-              Suite Canónica (23 tests)
+              Suite Canónica (28 tests)
             </button>
           </div>
         </div>

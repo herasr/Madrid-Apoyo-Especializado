@@ -1,7 +1,7 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * Madrid Apoyo Especializado v1.7 - Función «Qué ha cambiado»
+ * Madrid Apoyo Especializado v1.8 - Función «Qué ha cambiado»
  * Detección de cambios reales entre snapshots del registro oficial (§84, §110)
  */
 
@@ -69,11 +69,14 @@ export const WhatChangedModal: React.FC<WhatChangedModalProps> = ({
             <div className="text-[11px] text-stone-500 font-mono">
               {dynamicState?.loaded ? (
                 <span className="text-emerald-700 font-bold">
-                  ✓ Evaluado en vivo desde 3 CSV oficiales ({dynamicState.total_csv_records} filas · {dynamicState.active_centres_count} recursos activos · {formattedTimestamp})
+                  ✓ {dynamicState.load_source === 'preclassified_json'
+                    ? 'Catálogo oficial pre-clasificado en caché offline'
+                    : 'Evaluado en vivo desde 3 CSV oficiales'}{' '}
+                  ({dynamicState.total_csv_records} filas registrales · {dynamicState.active_centres_count} recursos activos · {formattedTimestamp})
                 </span>
-              ) : dynamicState?.error ? (
-                <span className="text-rose-700 font-bold">
-                  Error de lectura CSV: {dynamicState.error}
+              ) : dynamicState?.used_fallback || dynamicState?.error ? (
+                <span className="text-amber-800 font-bold">
+                  Catálogo de reserva activo ({dynamicState.active_centres_count} recursos): {dynamicState.error || 'snapshot oficial no accesible'}
                 </span>
               ) : (
                 'Cargando verificación SHA-256 de snapshots oficiales...'

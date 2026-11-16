@@ -1,12 +1,10 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * Madrid Apoyo Especializado v1.7 - Live Multi-Source CSV Snapshot Parser
- * Descarga e integra dinámicamente en tiempo real los 3 CSV oficiales descargados:
- *   - /data/snapshots/snapshot-latest.csv (Ayuntamiento de Madrid · Latin-1)
- *   - /data/snapshots/cam-centros-latest.csv (Comunidad de Madrid Centros · UTF-8)
- *   - /data/snapshots/cam-servicios-latest.csv (Comunidad de Madrid Servicios · UTF-8)
- * Sincroniza igualmente snapshot-metadata.json y snapshot-diffs.json calculados en ingesta.
+ * Madrid Apoyo Especializado v1.8 - Live Snapshot & Preclassified Offline Catalog Loader
+ * Prioriza el catálogo pre-clasificado cacheado offline (catalog-classified.json, ~1.079 recursos)
+ * usando import.meta.env.BASE_URL (compatible con GitHub Pages subpath), con fallback directo
+ * a los 3 CSV oficiales en vivo y carga perezosa del catálogo de reserva en caso de fallo (#6, #7).
  */
 
 import { SpecializedCentre, SnapshotDifference } from '../types/specialized';
@@ -23,6 +21,8 @@ import {
 
 export interface DynamicIngestionState {
   loaded: boolean;
+  load_source?: 'preclassified_json' | 'csv_runtime' | 'reserve_fallback';
+  used_fallback?: boolean;
   timestamp: string;
   previous_timestamp: string | null;
   sha256_hash: string;
@@ -36,21 +36,44 @@ export interface DynamicIngestionState {
 
 export const parseCSVClient = parseSemicolonCSV;
 
+export function resolvePublicAssetUrl(relativePath: string): string {
+  const rawBase =
+    (typeof import.meta !== 'undefined' &&
+      (import.meta as unknown as { env?: { BASE_URL?: string } }).env?.BASE_URL) ||
+    '/';
+  const baseWithSlash = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+  const cleanRel = relativePath.startsWith('/') ? relativePath.slice(1) : relativePath;
+  return `${baseWithSlash}${cleanRel}`;
+}
+
 export async function loadLiveSnapshotData(
-  baseCentres: SpecializedCentre[]
+  baseCentresProvider?: SpecializedCentre[] | (() => Promise<SpecializedCentre[]>)
 ): Promise<{
   centres: SpecializedCentre[];
   state: DynamicIngestionState;
   metadata: SnapshotMetadataSummary | null;
   lookupIndex: Map<string, SnapshotCentreRecord>;
 }> {
+  const resolveFallbackCentres = async (): Promise<SpecializedCentre[]> => {
+    if (typeof baseCentresProvider === 'function') {
+      return baseCentresProvider();
+    }
+    if (Array.isArray(baseCentresProvider)) {
+      return baseCentresProvider;
+    }
+    const mod = await import('../data/specializedCentresData');
+    return mod.SPECIALIZED_CENTRES;
+  };
+
   const state: DynamicIngestionState = {
     loaded: false,
+    load_source: undefined,
+    used_fallback: false,
     timestamp: new Date().toISOString(),
     previous_timestamp: null,
     sha256_hash: '',
     total_csv_records: 0,
-    active_centres_count: baseCentres.length,
+    active_centres_count: Array.isArray(baseCentresProvider) ? baseCentresProvider.length : 0,
     updated_centres_count: 0,
     sources: [],
     diffs: [],
@@ -60,10 +83,11 @@ export async function loadLiveSnapshotData(
   let metaJson: SnapshotMetadataSummary | null = null;
 
   try {
-    // 1. Obtener metadatos multi-fuente e historial real de diferencias
-    const [metaRes, diffsRes] = await Promise.all([
-      fetch('/data/snapshots/snapshot-metadata.json'),
-      fetch('/data/snapshots/snapshot-diffs.json').catch(() => null)
+    // 1. Obtener metadatos multi-fuente, diferencias reales y catálogo pre-clasificado JSON (#6, #7)
+    const [metaRes, diffsRes, catalogRes] = await Promise.all([
+      fetch(resolvePublicAssetUrl('data/snapshots/snapshot-metadata.json')),
+      fetch(resolvePublicAssetUrl('data/snapshots/snapshot-diffs.json')).catch(() => null),
+      fetch(resolvePublicAssetUrl('data/snapshots/catalog-classified.json')).catch(() => null)
     ]);
 
     if (metaRes.ok) {
@@ -84,11 +108,41 @@ export async function loadLiveSnapshotData(
       }
     }
 
-    // 2. Descargar en vivo los 3 ficheros CSV oficiales en sus codificaciones exactas
+    // Ruta rápida y cacheable offline (Workbox PWA): JSON pre-clasificado con los ~1.079 recursos
+    if (catalogRes && catalogRes.ok) {
+      try {
+        const catalogJson = await catalogRes.json();
+        if (Array.isArray(catalogJson?.centres) && catalogJson.centres.length > 0) {
+          const lookupIndex = new Map<string, SnapshotCentreRecord>(
+            Array.isArray(catalogJson.lookup_records) ? catalogJson.lookup_records : []
+          );
+          setSnapshotVerificationContext(metaJson, lookupIndex);
+
+          state.loaded = true;
+          state.load_source = 'preclassified_json';
+          state.used_fallback = false;
+          state.active_centres_count = catalogJson.centres.length;
+          if (state.total_csv_records === 0) {
+            state.total_csv_records = catalogJson.total_records || lookupIndex.size;
+          }
+
+          return {
+            centres: catalogJson.centres as SpecializedCentre[],
+            state,
+            metadata: metaJson,
+            lookupIndex
+          };
+        }
+      } catch {
+        // Si fallase la lectura del JSON pre-clasificado, continúa con los CSV en vivo
+      }
+    }
+
+    // 2. Ruta alternativa en vivo: descargar los 3 ficheros CSV oficiales en sus codificaciones exactas
     const [madRes, camCentrosRes, camServiciosRes] = await Promise.all([
-      fetch('/data/snapshots/snapshot-latest.csv'),
-      fetch('/data/snapshots/cam-centros-latest.csv'),
-      fetch('/data/snapshots/cam-servicios-latest.csv')
+      fetch(resolvePublicAssetUrl('data/snapshots/snapshot-latest.csv')),
+      fetch(resolvePublicAssetUrl('data/snapshots/cam-centros-latest.csv')),
+      fetch(resolvePublicAssetUrl('data/snapshots/cam-servicios-latest.csv'))
     ]);
 
     let madridCsvText: string | null = null;
@@ -110,7 +164,7 @@ export async function loadLiveSnapshotData(
     }
 
     if (!madridCsvText && !camCentrosCsvText && !camServiciosCsvText) {
-      throw new Error('No se pudo cargar ninguno de los ficheros CSV oficiales desde /data/snapshots/.');
+      throw new Error('No se pudo cargar ninguno de los ficheros oficiales desde data/snapshots/.');
     }
 
     const { centres, lookupIndex } = buildCentresFromOfficialCSVs({
@@ -124,19 +178,26 @@ export async function loadLiveSnapshotData(
       throw new Error('Los ficheros CSV cargados no devolvieron registros válidos.');
     }
 
-    // 3. Registrar el contexto real para auditoría en specializedEngine.ts
     setSnapshotVerificationContext(metaJson, lookupIndex);
 
     state.loaded = true;
+    state.load_source = 'csv_runtime';
+    state.used_fallback = false;
     state.active_centres_count = centres.length;
     if (state.total_csv_records === 0) {
       state.total_csv_records = lookupIndex.size;
     }
 
     return { centres, state, metadata: metaJson, lookupIndex };
-  } catch (err: any) {
-    console.warn('Error al cargar dinámicamente los snapshots CSV oficiales:', err);
-    state.error = err?.message || 'Fallo de lectura de los archivos de captura oficial';
-    return { centres: baseCentres, state, metadata: metaJson, lookupIndex: new Map() };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Fallo de lectura de los archivos de captura oficial';
+    console.warn('Error al cargar dinámicamente los snapshots oficiales:', err);
+    const fallbackCentres = await resolveFallbackCentres();
+    state.loaded = false;
+    state.load_source = 'reserve_fallback';
+    state.used_fallback = true;
+    state.error = message;
+    state.active_centres_count = fallbackCentres.length;
+    return { centres: fallbackCentres, state, metadata: metaJson, lookupIndex: new Map() };
   }
 }

@@ -1,7 +1,7 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * Madrid Apoyo Especializado v1.7 - Synchronized Interactive Map View
+ * Madrid Apoyo Especializado v1.8 - Synchronized Interactive Map View
  * Mapa profesional interactivo con teselas oficiales de OpenStreetMap (§63, §67).
  * Marcadores HTML personalizados por nivel de evidencia (A1, A2, B1, B2, C),
  * círculo de radio geográfico y panel lateral sincronizado sin filtros redundantes.
@@ -31,6 +31,15 @@ interface MapViewProps {
   radiusKm: number;
 }
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export const SpecializedMapView: React.FC<MapViewProps> = ({
   results,
   selectedCentreId,
@@ -47,6 +56,8 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
   const tileLayerRef = useRef<L.TileLayer | null>(null);
 
   const [searchFilterText, setSearchFilterText] = useState('');
+  const [showUngeocoded, setShowUngeocoded] = useState(false);
+  const [offlineTileError, setOfflineTileError] = useState(false);
 
   // Separar los que tienen coordenadas de los que no las tienen (§63, GEO-001/002)
   const geocodedResults = useMemo(() => {
@@ -97,7 +108,11 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
     const osmLayer = L.tileLayer(osmUrl, {
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors'
-    }).addTo(map);
+    });
+    osmLayer.on('tileerror', () => {
+      setOfflineTileError(true);
+    });
+    osmLayer.addTo(map);
 
     tileLayerRef.current = osmLayer;
 
@@ -142,8 +157,9 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
       iconAnchor: [14, 14]
     });
 
+    const safeOriginName = escapeHtml(originName);
     const originMarker = L.marker(originCoords, { icon: originIcon, zIndexOffset: 500 });
-    originMarker.bindTooltip(`<strong>Origen:</strong> ${originName}`, {
+    originMarker.bindTooltip(`<strong>Origen:</strong> ${safeOriginName}`, {
       direction: 'top',
       offset: [0, -10],
       className: 'leaflet-origin-tooltip'
@@ -159,7 +175,7 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
         fillColor: '#3b82f6',
         fillOpacity: 0.05
       });
-      radiusCircle.bindTooltip(`Radio de búsqueda: ${radiusKm} km desde ${originName}`, {
+      radiusCircle.bindTooltip(`Radio de búsqueda: ${radiusKm} km desde ${safeOriginName}`, {
         sticky: true
       });
       originGroup.addLayer(radiusCircle);
@@ -220,14 +236,27 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
         zIndexOffset: isSelected ? 1000 : 100
       });
 
+      const safeName = escapeHtml(item.centre.official_name);
+      const safeMunicipality = escapeHtml(item.centre.municipality);
+      const safeDistrict = item.centre.district ? escapeHtml(item.centre.district) : '';
+      const safeType = escapeHtml(item.centre.subtype || item.centre.centre_type);
+      const safeDistLabel = escapeHtml(item.distance_label);
+      const ownershipLabel =
+        item.centre.public_private_status === 'red_publica'
+          ? 'Red Pública'
+          : item.centre.public_private_status === 'concertado'
+          ? 'Centro Concertado'
+          : item.centre.public_private_status === 'no_especificado'
+          ? 'Titularidad no especificada'
+          : 'Privado Autorizado';
+
       marker.bindTooltip(`
         <div style="font-size: 11px; padding: 4px; line-height: 1.4;">
-          <strong style="display: block; font-size: 12px; margin-bottom: 2px;">${item.centre.official_name}</strong>
+          <strong style="display: block; font-size: 12px; margin-bottom: 2px;">${safeName}</strong>
           <div style="color: #44403c; font-weight: 600;">
-            ${item.centre.public_private_status === 'red_publica' ? 'Red Pública' : 
-              item.centre.public_private_status === 'concertado' ? 'Centro Concertado' : 'Privado Autorizado'}
+            ${ownershipLabel}
           </div>
-          <div style="color: #78716c;">${item.distance_label} desde origen</div>
+          <div style="color: #78716c;">${safeDistLabel} desde origen</div>
         </div>
       `, { direction: 'top', offset: [0, -25] });
 
@@ -240,17 +269,17 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
         <div style="margin-bottom: 6px;">
           <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
             <span style="background: ${col.bg}; color: #ffffff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; font-family: monospace;">
-              NIVEL ${item.evidence_level}
+              NIVEL ${escapeHtml(item.evidence_level)}
             </span>
             <span style="font-size: 11px; font-weight: 700; color: #0f172a; font-family: monospace;">
-              ${item.distance_label}
+              ${safeDistLabel}
             </span>
           </div>
           <h4 style="font-size: 13px; font-weight: 700; margin-top: 6px; margin-bottom: 2px; line-height: 1.3; color: #1c1917;">
-            ${item.centre.official_name}
+            ${safeName}
           </h4>
           <p style="font-size: 11px; color: #57534e; margin: 0; line-height: 1.3;">
-            ${item.centre.municipality}${item.centre.district ? ` (Distrito ${item.centre.district})` : ''} · ${item.centre.subtype || item.centre.centre_type}
+            ${safeMunicipality}${safeDistrict ? ` (Distrito ${safeDistrict})` : ''} · ${safeType}
           </p>
         </div>
       `;
@@ -297,7 +326,7 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
     }, 100);
   }, [displayedCentres, selectedCentreId]);
 
-  // Ajustar la vista automáticamente SOLO cuando cambian los resultados de centros
+  // Ajustar la vista automáticamente cuando cambian los resultados, el punto de origen o el radio
   useEffect(() => {
     const timer = setTimeout(() => {
       if (mapInstanceRef.current) {
@@ -306,7 +335,7 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
       }
     }, 150);
     return () => clearTimeout(timer);
-  }, [displayedCentres]);
+  }, [displayedCentres, originCoords[0], originCoords[1], radiusKm]);
 
   const handleFitAll = () => {
     if (!mapInstanceRef.current) return;
@@ -412,6 +441,13 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
               Radio: <span className="font-mono font-bold text-stone-900">{radiusKm} km</span>
             </div>
           </div>
+
+          {offlineTileError && (
+            <div className="absolute top-14 left-3 z-[400] bg-amber-50 border border-amber-300 text-amber-950 rounded-lg px-3 py-2 text-xs shadow-md max-w-sm flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0" />
+              <span>Modo sin conexión: No se pueden cargar las teselas del mapa base. Use la lista lateral de recursos.</span>
+            </div>
+          )}
         </div>
 
         {/* Panel lateral de centros en el mapa (sin filtros por nivel de evidencia) */}
@@ -502,12 +538,43 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
       </div>
 
       {withoutCoordinates.length > 0 && (
-        <div className="px-5 py-3 bg-stone-50 border-t border-stone-200 text-xs text-stone-700 flex items-start gap-2.5">
-          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <strong>Recursos sin coordenadas geográficas ({withoutCoordinates.length}):</strong>{' '}
-            {withoutCoordinates.map(c => c.centre.official_name).join(', ')}. Permanecen en la lista principal pero no en el mapa.
+        <div className="px-5 py-3 bg-stone-50 border-t border-stone-200 text-xs text-stone-700 space-y-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" aria-hidden="true" />
+              <span>
+                <strong>{withoutCoordinates.length} recursos sin coordenadas geográficas:</strong> permanecen en la lista principal de resultados pero no pueden situarse como marcador en el mapa.
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowUngeocoded(prev => !prev)}
+              aria-expanded={showUngeocoded}
+              className="px-2.5 py-1 rounded-md border border-stone-300 bg-white hover:bg-stone-100 text-stone-800 font-semibold text-[11px] inline-flex items-center gap-1 cursor-pointer shrink-0"
+            >
+              <span>{showUngeocoded ? 'Ocultar relación' : `Ver relación (${withoutCoordinates.length})`}</span>
+              <ChevronRight className={`w-3.5 h-3.5 transition-transform ${showUngeocoded ? 'rotate-90' : ''}`} aria-hidden="true" />
+            </button>
           </div>
+          {showUngeocoded && (
+            <ul className="max-h-48 overflow-y-auto divide-y divide-stone-200 border border-stone-200 rounded-lg bg-white">
+              {withoutCoordinates.map(c => (
+                <li key={c.centre.centre_id} className="px-3 py-1.5 flex items-center justify-between gap-2 text-[11px]">
+                  <div className="min-w-0">
+                    <span className="font-semibold text-stone-900">{c.centre.official_name}</span>
+                    <span className="text-stone-500"> · {c.centre.municipality}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onWhyAppears(c)}
+                    className="text-stone-800 font-semibold underline hover:text-stone-950 shrink-0 cursor-pointer"
+                  >
+                    Ver ficha
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
     </div>

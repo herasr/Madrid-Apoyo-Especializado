@@ -1,3 +1,9 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ * Madrid Apoyo Especializado v1.8 - Focus Trap Hook with WCAG 2.4.3 activeElement restoration
+ */
+
 import { useEffect, RefObject } from 'react';
 
 export const useFocusTrap = (containerRef: RefObject<HTMLElement | null>, isOpen: boolean) => {
@@ -5,6 +11,7 @@ export const useFocusTrap = (containerRef: RefObject<HTMLElement | null>, isOpen
     if (!isOpen || !containerRef.current) return;
 
     const modal = containerRef.current;
+    const previouslyActiveElement = document.activeElement as HTMLElement | null;
     
     // Find all focusable elements
     const focusableElements = modal.querySelectorAll(
@@ -36,6 +43,11 @@ export const useFocusTrap = (containerRef: RefObject<HTMLElement | null>, isOpen
     };
 
     modal.addEventListener('keydown', handleKeyDown);
-    return () => modal.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      modal.removeEventListener('keydown', handleKeyDown);
+      if (previouslyActiveElement && typeof previouslyActiveElement.focus === 'function') {
+        previouslyActiveElement.focus();
+      }
+    };
   }, [isOpen, containerRef]);
 };

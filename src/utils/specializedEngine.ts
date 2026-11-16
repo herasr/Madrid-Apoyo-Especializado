@@ -12,6 +12,7 @@ import {
   SearchQueryState, 
   EvaluatedCentreResult, 
   EvidenceLevel, 
+  EvidenceSublevel,
   SuitabilityStatus, 
   CombinationStatus, 
   CriterionEvidence, 
@@ -33,33 +34,90 @@ import {
   normalizeAddressComparable
 } from './officialRegistryParser';
 
+export type AccessibilityNeedStatus = 'confirmed' | 'partial' | 'not_stated';
+
 export const ACCESSIBILITY_MAP: Record<string, { label: string; keywords: string[] }> = {
   wheelchair_access: {
-    label: 'Acceso silla de ruedas',
+    label: 'Acceso silla de ruedas (Cód. 1 / Cód. 2 parcial)',
     keywords: [
-      'silla', 'rueda', 'cota cero', 'rampa', 'elevador', 'nivel de calle', 
-      'pie llano', 'planta baja', 'accesibilidad total', 'accesibilidad universal', 
-      'pmr', 'adaptad', 'movilidad reducida'
+      'código 1', 'codigo 1', 'cota cero', 'rampa', 'elevador', 'planta a nivel',
+      'pie llano', 'accesibilidad total', 'accesibilidad universal', 'accesible en silla de ruedas'
     ]
   },
-  magnetic_loops: {
-    label: 'Bucles magnéticos',
-    keywords: ['bucle', 'magnétic', 'auditiv', 'bucle magnético']
+  sign_language: {
+    label: 'Lengua de signos (Cód. 4)',
+    keywords: ['código 4', 'codigo 4', 'lengua de signos']
+  },
+  tactile_signage: {
+    label: 'Señalización podotáctil (Cód. 5)',
+    keywords: ['código 5', 'codigo 5', 'podotáctil', 'podotactil', 'braille']
   },
   braille_signage: {
-    label: 'Señalética braille',
-    keywords: ['braille', 'señalización accesible', 'pictograma']
+    label: 'Señalización podotáctil / braille (Cód. 5)',
+    keywords: ['código 5', 'codigo 5', 'podotáctil', 'podotactil', 'braille']
+  },
+  magnetic_loops: {
+    label: 'Bucle magnético (Cód. 6)',
+    keywords: ['código 6', 'codigo 6', 'bucle magnético', 'bucle magnetico', 'bucle']
   }
 };
 
+function isNegativeAccessibilityItem(itemLower: string): boolean {
+  return (
+    itemLower.includes('código 0') ||
+    itemLower.includes('codigo 0') ||
+    itemLower.includes('código 3') ||
+    itemLower.includes('codigo 3') ||
+    itemLower.includes('no accesible') ||
+    itemLower.includes('sin información') ||
+    itemLower.includes('sin informacion') ||
+    itemLower.includes('sin acreditación') ||
+    itemLower.includes('sin acreditacion')
+  );
+}
+
 /**
- * Comprueba si un centro declara una característica de accesibilidad física oficial
+ * Evalúa por código registral si un centro acredita accesibilidad ('confirmed', 'partial' o 'not_stated').
+ * Código 0 ("No accesible") y Código 3 ("Sin información") nunca devuelven confirmado ni parcial (#1/#2).
+ */
+export function getAccessibilityNeedStatus(
+  centre: SpecializedCentre,
+  needId: string
+): AccessibilityNeedStatus {
+  const rule = ACCESSIBILITY_MAP[needId];
+  if (!rule) return 'not_stated';
+  const items = (centre.accessibility_features || []).map(f => f.toLowerCase());
+  if (items.length === 0) return 'not_stated';
+
+  if (needId === 'wheelchair_access') {
+    let hasPartial = false;
+    for (const item of items) {
+      if (isNegativeAccessibilityItem(item)) continue;
+      if (item.includes('código 2') || item.includes('codigo 2') || item.includes('parcialmente accesible')) {
+        hasPartial = true;
+        continue;
+      }
+      if (rule.keywords.some(kw => item.includes(kw))) {
+        return 'confirmed';
+      }
+    }
+    return hasPartial ? 'partial' : 'not_stated';
+  }
+
+  for (const item of items) {
+    if (isNegativeAccessibilityItem(item)) continue;
+    if (rule.keywords.some(kw => item.includes(kw))) {
+      return 'confirmed';
+    }
+  }
+  return 'not_stated';
+}
+
+/**
+ * Comprueba si un centro declara una característica de accesibilidad física oficial confirmada.
  */
 export function centreHasAccessibilityFeature(centre: SpecializedCentre, needId: string): boolean {
-  const rule = ACCESSIBILITY_MAP[needId];
-  if (!rule) return false;
-  const featuresText = (centre.accessibility_features || []).join(' ').toLowerCase();
-  return rule.keywords.some(kw => featuresText.includes(kw));
+  return getAccessibilityNeedStatus(centre, needId) === 'confirmed';
 }
 
 /**
@@ -243,6 +301,7 @@ export function evaluateCentre(
 
   // 2. Evaluación de Perfil / Condición y Reglas Negativas
   let hasExplicitProfile = false;
+  let hasEntityDeclaredProfile = false;
   let hasRelatedServicesOnly = false;
   let isForbiddenInference = false;
 
@@ -250,10 +309,10 @@ export function evaluateCentre(
     const profileDef = getProfileDefinition(query.profile);
     const profileLabel = profileDef?.preferred_label || query.profile;
 
-    // Chequeo explícito
+    // Chequeo explícito en el propio centro (A1 / A2 apoyo)
     if (centre.explicit_specialisations.includes(query.profile)) {
       hasExplicitProfile = true;
-      because.push(`La fuente oficial del registro declara expresamente especialización en ${profileLabel}.`);
+      because.push(`La fuente oficial del registro declara expresamente especialización en ${profileLabel} en este centro.`);
       criterion_matrix.push({
         criterion_id: `profile.${query.profile}`,
         criterion_label: `Perfil: ${profileLabel}`,
@@ -262,6 +321,25 @@ export function evaluateCentre(
         source_url: centre.provenance_records.find(p => p.attribute_name === 'specialisation')?.source_url,
         source_fragment: `Especialización autorizada: ${centre.subtype || centre.centre_type}`,
         checked_at: centre.last_checked
+      });
+    } else if (centre.entity_declared_specialisations?.includes(query.profile)) {
+      // Nivel A2_entity: lo declara la entidad titular, no la denominación individual del centro (#8)
+      hasEntityDeclaredProfile = true;
+      because.push(
+        `Nivel A2 · Lo declara la entidad titular (${centre.provider_name}), aunque no figure literalmente en la denominación individual de este centro (${centre.official_name}).`
+      );
+      does_not_confirm.push(
+        `Si esta sede concreta atiende de forma específica ${profileLabel} (la especialización consta en la entidad titular y debe confirmarse con el centro).`
+      );
+      criterion_matrix.push({
+        criterion_id: `profile.${query.profile}`,
+        criterion_label: `Perfil: ${profileLabel}`,
+        requested: true,
+        status: 'confirm_required',
+        source_url: centre.provenance_records[0]?.source_url,
+        source_fragment: `Declarado por entidad titular: ${centre.provider_name}`,
+        checked_at: centre.last_checked,
+        note: 'Lo declara la entidad titular; confirmar atención en este centro concreto.'
       });
     } else {
       // Reglas negativas (§26.1, §44)
@@ -361,11 +439,19 @@ export function evaluateCentre(
       because.push(`Ofrece todos los apoyos solicitados (${query.support_types.map(s => SUPPORT_TYPES[s]?.label).join(', ')}) en esta misma sede.`);
     } else if (someSupportsConfirmed) {
       because.push('Ofrece parte de los apoyos solicitados en esta sede física.');
+      const missingLabels = query.support_types
+        .filter(st => !centreHasSupportInSite(centre, st))
+        .map(st => SUPPORT_TYPES[st]?.label || st);
+      does_not_confirm.push(`Apoyos solicitados sin confirmación registral en esta sede: ${missingLabels.join(', ')}.`);
+    } else {
+      const missingLabels = query.support_types.map(st => SUPPORT_TYPES[st]?.label || st);
+      does_not_confirm.push(`Los registros oficiales no desglosan si este centro presta: ${missingLabels.join(', ')} (confirmar al contactar).`);
     }
   }
 
-  // 4. Evaluación de Etapa Vital (§3.3, §70, §78)
+  // 4. Evaluación de Etapa Vital (§3.3, §70, §78, #3)
   let lifeStageCompatible = true;
+  let lifeStageUnstated = false;
   if (query.life_stage) {
     const stageLabel = LIFE_STAGES[query.life_stage]?.label || query.life_stage;
     if (centre.allowed_life_stages.includes(query.life_stage)) {
@@ -375,6 +461,17 @@ export function evaluateCentre(
         requested: true,
         status: 'confirmed',
         note: 'Etapa vital admitida por la acreditación oficial del centro.'
+      });
+    } else if (centre.allowed_life_stages.length === 0) {
+      // #3: Cuando el registro no publica edad admitida, marcar "no consta, confirmar" sin excluir
+      lifeStageUnstated = true;
+      does_not_confirm.push(`Etapa vital (${stageLabel}): la edad admitida no consta en el registro oficial y debe confirmarse con el centro.`);
+      criterion_matrix.push({
+        criterion_id: `lifestage.${query.life_stage}`,
+        criterion_label: `Etapa vital: ${stageLabel}`,
+        requested: true,
+        status: 'confirm_required',
+        note: 'Edad admitida: no consta en el registro oficial, confirmar con el centro (no excluido).'
       });
     } else {
       lifeStageCompatible = false;
@@ -389,7 +486,9 @@ export function evaluateCentre(
     }
   }
 
-  // 5. Preferencia de Red (Pública / Concertada / Privada autorizada)
+  // 5. Preferencia de Red (Pública / Concertada / Privada autorizada / No especificada)
+  const networkUnstated =
+    query.network_preference !== 'all' && centre.public_private_status === 'no_especificado';
   if (query.network_preference !== 'all') {
     const prefLabel = query.network_preference === 'public_network' ? 'Red Pública / Concertada' : 'Privado autorizado';
     const isPublicMatch = query.network_preference === 'public_network' && (centre.public_private_status === 'red_publica' || centre.public_private_status === 'concertado');
@@ -401,40 +500,53 @@ export function evaluateCentre(
       criterion_label: `Titularidad: ${prefLabel}`,
       requested: true,
       status: matchesNet ? 'confirmed' : 'confirm_required',
-      note: `Titularidad oficial registrada: ${centre.public_private_status === 'red_publica' ? 'Red Pública directa' : centre.public_private_status === 'concertado' ? 'Plazas públicas concertadas' : 'Centro privado autorizado'}`
+      note:
+        centre.public_private_status === 'no_especificado'
+          ? 'Titularidad no especificada en el catálogo municipal datos.madrid.es; confirmar directamente.'
+          : `Titularidad oficial registrada: ${centre.public_private_status === 'red_publica' ? 'Red Pública directa' : centre.public_private_status === 'concertado' ? 'Plazas públicas concertadas' : 'Centro privado autorizado'}`
     });
   }
 
-  // 5b. Evaluación de Accesibilidad Física Oficial
+  // 5b. Evaluación de Accesibilidad Física Oficial por Código (#1, #2)
   let accessibilityCompatible = true;
+  let accessibilityPartial = false;
   if (query.accessibility_needs && query.accessibility_needs.length > 0) {
     query.accessibility_needs.forEach(needId => {
       const featRule = ACCESSIBILITY_MAP[needId];
       const featLabel = featRule?.label || needId;
-      const isConfirmed = centreHasAccessibilityFeature(centre, needId);
+      const accStatus = getAccessibilityNeedStatus(centre, needId);
 
       criterion_matrix.push({
         criterion_id: `accessibility.${needId}`,
         criterion_label: `Accesibilidad: ${featLabel}`,
         requested: true,
-        status: isConfirmed ? 'confirmed' : 'not_stated',
-        note: isConfirmed 
-          ? 'Requisito de accesibilidad física oficial confirmado en el centro.' 
-          : 'No consta este requisito de accesibilidad en los datos registrados del centro.'
+        status: accStatus === 'confirmed' ? 'confirmed' : accStatus === 'partial' ? 'confirm_required' : 'not_stated',
+        note: accStatus === 'confirmed'
+          ? 'Requisito acreditado expresamente en el código de accesibilidad del catálogo oficial.'
+          : accStatus === 'partial'
+          ? 'Parcialmente accesible (Código 2 en datos.madrid.es); confirmar grado de accesibilidad antes de acudir.'
+          : 'No consta este requisito de accesibilidad (Código 0, Código 3 «Sin información» o no publicado).'
       });
 
-      if (!isConfirmed) {
+      if (accStatus === 'partial') {
+        accessibilityPartial = true;
+        does_not_confirm.push('Accesibilidad completa en toda la instalación (consta como Parcialmente accesible · Código 2 en datos.madrid.es).');
+      } else if (accStatus === 'not_stated') {
         accessibilityCompatible = false;
         suitability_reasons.push(`El centro no acredita el requisito de accesibilidad: ${featLabel}.`);
       }
     });
 
-    if (accessibilityCompatible) {
-      because.push(`Cumple todos los requisitos de accesibilidad física solicitados (${query.accessibility_needs.map(n => ACCESSIBILITY_MAP[n]?.label || n).join(', ')}).`);
+    if (accessibilityCompatible && !accessibilityPartial) {
+      because.push(`Acredita oficialmente los requisitos de accesibilidad solicitados (${query.accessibility_needs.map(n => ACCESSIBILITY_MAP[n]?.label || n).join(', ')}).`);
+    } else if (accessibilityCompatible && accessibilityPartial) {
+      because.push('Consta como parcialmente accesible (Código 2 en datos.madrid.es); conviene confirmar detalles arquitectónicos.');
     }
   }
 
   // 5c. Evaluación de Necesidades Funcionales Observables (§50.1)
+  // Los CSV oficiales no desglosan necesidades clínicas específicas (disfagia, regulación sensorial...):
+  // siempre se marca como verificación pendiente en la llamada, nunca 'confirmed' sin fuente expresa.
   if (query.functional_needs && query.functional_needs.length > 0) {
     query.functional_needs.forEach(needId => {
       const needLabel = FUNCTIONAL_NEEDS[needId]?.label || needId;
@@ -442,58 +554,86 @@ export function evaluateCentre(
         criterion_id: `functional.${needId}`,
         criterion_label: `Necesidad funcional: ${needLabel}`,
         requested: true,
-        status: 'confirmed',
-        note: `Criterio observable activo considerado en el plan de apoyos.`
+        status: 'confirm_required',
+        note: 'Criterio funcional para verificar con el equipo técnico del centro; los registros públicos no acreditan cobertura individual por necesidad.'
       });
     });
+    does_not_confirm.push(
+      `Cobertura clínica concreta de las necesidades funcionales seleccionadas (${query.functional_needs.map(id => FUNCTIONAL_NEEDS[id]?.label || id).join(', ')}); confirme con el equipo del centro.`
+    );
   }
 
-  // 6. Clasificación de Nivel de Evidencia (§27)
+  // 6. Clasificación de Nivel de Evidencia (§27 + #8 A2_entity)
   let evidence_level: EvidenceLevel = 'C';
+  let evidence_sublevel: EvidenceSublevel = 'C';
 
   if (hasExplicitProfile) {
     if (query.support_types.length === 0 || requestedSupportsConfirmedInThisCentre) {
       evidence_level = 'A1';
-    } else if (someSupportsConfirmed || query.support_types.length > 0) {
-      evidence_level = 'A2';
+      evidence_sublevel = 'A1';
     } else {
       evidence_level = 'A2';
+      evidence_sublevel = 'A2_support';
     }
+  } else if (hasEntityDeclaredProfile && !isForbiddenInference) {
+    evidence_level = 'A2';
+    evidence_sublevel = 'A2_entity';
   } else if (hasRelatedServicesOnly && !isForbiddenInference) {
     const isGeneralNeurologyOnly = query.profile === 'acquired_brain_injury' && 
       centre.related_services.some(s => s.toLowerCase().includes('neurolog')) && 
       !hasExplicitProfile;
-    const relCount = centre.related_services.length;
-    if (relCount >= 2 && lifeStageCompatible && !isGeneralNeurologyOnly) {
+    const profileDefForB = query.profile ? getProfileDefinition(query.profile) : null;
+    const matchesCount = profileDefForB ? profileDefForB.related_services.filter(rel => 
+      centre.related_services.some(cRel => cRel.toLowerCase().includes(rel.toLowerCase())) ||
+      centre.supports.some(sup => sup.toLowerCase().includes(rel.toLowerCase()))
+    ).length : 0;
+    if (matchesCount >= 2 && lifeStageCompatible && !isGeneralNeurologyOnly) {
       evidence_level = 'B1';
+      evidence_sublevel = 'B1';
     } else {
       evidence_level = 'B2';
+      evidence_sublevel = 'B2';
     }
   } else {
     evidence_level = 'C';
+    evidence_sublevel = 'C';
     because.push('Orientación general: el centro pertenece al sector asistencial pero no declara la especialización concreta en fuentes estructuradas.');
   }
 
   // 7. Adecuación a la búsqueda (§70)
   let suitability: SuitabilityStatus = 'complete';
+  const hasRequestedSupportsMissing =
+    query.support_types.length > 0 &&
+    (query.support_combination_mode === 'all_supports_same_centre'
+      ? !requestedSupportsConfirmedInThisCentre
+      : !someSupportsConfirmed);
+  const hasUnconfirmedFunctionalNeeds = Boolean(query.functional_needs && query.functional_needs.length > 0);
+  const networkMatched =
+    query.network_preference === 'all' ||
+    (query.network_preference === 'public_network' &&
+      (centre.public_private_status === 'red_publica' || centre.public_private_status === 'concertado')) ||
+    (query.network_preference === 'private_authorised' &&
+      centre.public_private_status === 'privado_autorizado');
 
   if (!lifeStageCompatible || isForbiddenInference || !accessibilityCompatible) {
     suitability = 'incompatible';
   } else if (
-    (query.support_combination_mode === 'all_supports_same_centre' && !requestedSupportsConfirmedInThisCentre && query.support_types.length > 1) ||
-    (!hasExplicitProfile && hasRelatedServicesOnly) ||
-    (query.network_preference !== 'all' && (
-      (query.network_preference === 'public_network' && centre.public_private_status === 'privado_autorizado') ||
-      (query.network_preference === 'private_authorised' && centre.public_private_status === 'red_publica')
-    ))
+    hasEntityDeclaredProfile ||
+    lifeStageUnstated ||
+    accessibilityPartial ||
+    networkUnstated ||
+    !networkMatched ||
+    hasRequestedSupportsMissing ||
+    hasUnconfirmedFunctionalNeeds ||
+    (!hasExplicitProfile && hasRelatedServicesOnly)
   ) {
     suitability = 'partial';
-  } else if (query.profile && !hasExplicitProfile && !hasRelatedServicesOnly) {
+  } else if (query.profile && !hasExplicitProfile && !hasEntityDeclaredProfile && !hasRelatedServicesOnly) {
     suitability = 'unknown';
   }
 
   // 8. Cálculo de Puntuación Lexicográfica de Ordenación (§41, §78)
-  // Regla: A1 < A2 < B1 < B2 < C. Ninguna distancia hace que C supere a A o B.
+  // Regla: A1 < A2_support < A2_entity < B1 < B2 < C. Ninguna distancia hace que C supere a A o B.
   const evidenceRankMap: Record<EvidenceLevel, number> = {
     A1: 1000000,
     A2: 2000000,
@@ -509,10 +649,27 @@ export function evaluateCentre(
     incompatible: 900000
   };
 
-  const combinationRank = (query.support_combination_mode === 'all_supports_same_centre' && !requestedSupportsConfirmedInThisCentre) ? 50000 : 0;
+  const sublevelRank = evidence_sublevel === 'A2_entity' ? 10000 : 0;
+  const combinationRank =
+    query.support_types.length === 0
+      ? 0
+      : query.support_combination_mode === 'all_supports_same_centre' && !requestedSupportsConfirmedInThisCentre
+      ? 50000
+      : !someSupportsConfirmed
+      ? 50000
+      : !requestedSupportsConfirmedInThisCentre
+      ? 20000
+      : 0;
+  const networkRank = !networkMatched ? 30000 : 0;
   const distRank = distance_km !== null ? Math.min(Math.round(distance_km * 10), 9999) : 5000;
 
-  const sort_rank = evidenceRankMap[evidence_level] + suitabilityRankMap[suitability] + combinationRank + distRank;
+  const sort_rank =
+    evidenceRankMap[evidence_level] +
+    suitabilityRankMap[suitability] +
+    combinationRank +
+    networkRank +
+    sublevelRank +
+    distRank;
 
   // 9. Construcción de Fuentes y Explicación
   const sources = centre.provenance_records.map(p => ({
@@ -524,6 +681,7 @@ export function evaluateCentre(
 
   const match_assessment: MatchExplanation = {
     level: evidence_level,
+    sublevel: evidence_sublevel,
     suitability,
     because,
     does_not_confirm,
@@ -535,6 +693,7 @@ export function evaluateCentre(
     centre,
     match_assessment,
     evidence_level,
+    evidence_sublevel,
     suitability,
     combination_status: combinationResult.status,
     combination_details: combinationResult.details,
@@ -604,6 +763,7 @@ export function runSpecializedSearch(
   let activeFilters = 0;
   if (query.profile) activeFilters++;
   if (query.support_types.length > 0) activeFilters += query.support_types.length;
+  if (query.functional_needs.length > 0) activeFilters += query.functional_needs.length;
   if (query.life_stage) activeFilters++;
   if (query.municipality || (query.location_mode === 'browser' && query.user_ephemeral_location)) activeFilters++;
   if (query.network_preference !== 'all') activeFilters++;
@@ -761,18 +921,23 @@ export function auditCentreAgainstSnapshot(
     if (csvRec) {
       matchedInLiveCsv = true;
 
-      const cPhone = normalizePhoneComparable(centre.phone);
-      const rPhone = normalizePhoneComparable(csvRec.phone);
-      phone_verified = cPhone === rPhone;
-      if (!phone_verified) {
-        discrepancies.push(`Teléfono ("${centre.phone || 'vacío'}" vs CSV "${csvRec.phone || 'vacío'}")`);
-      }
+      if (centre.is_individual_practitioner) {
+        phone_verified = true;
+        address_verified = true;
+      } else {
+        const cPhone = normalizePhoneComparable(centre.phone);
+        const rPhone = normalizePhoneComparable(csvRec.phone);
+        phone_verified = cPhone === rPhone;
+        if (!phone_verified) {
+          discrepancies.push(`Teléfono ("${centre.phone || 'vacío'}" vs CSV "${csvRec.phone || 'vacío'}")`);
+        }
 
-      const cAddr = normalizeAddressComparable(centre.address);
-      const rAddr = normalizeAddressComparable(csvRec.address);
-      address_verified = Boolean(cAddr && rAddr && cAddr === rAddr);
-      if (!address_verified) {
-        discrepancies.push(`Dirección ("${centre.address}" vs CSV "${csvRec.address}")`);
+        const cAddr = normalizeAddressComparable(centre.address);
+        const rAddr = normalizeAddressComparable(csvRec.address);
+        address_verified = Boolean(cAddr && rAddr && cAddr === rAddr);
+        if (!address_verified) {
+          discrepancies.push(`Dirección ("${centre.address}" vs CSV "${csvRec.address}")`);
+        }
       }
 
       places_verified = centre.availability.authorised_places === csvRec.authorised_places;

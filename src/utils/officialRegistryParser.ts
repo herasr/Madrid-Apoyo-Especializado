@@ -156,9 +156,30 @@ export function normalizePhoneComparable(phone: string): string {
   return digits.length >= 9 ? digits.slice(0, 9) : digits;
 }
 
+export function decodeHtmlEntities(text: string): string {
+  if (!text || !text.includes('&')) return text || '';
+  return text
+    .replace(/&amp;/gi, '&')
+    .replace(/&ntilde;/g, 'ñ')
+    .replace(/&Ntilde;/g, 'Ñ')
+    .replace(/&aacute;/g, 'á')
+    .replace(/&Aacute;/g, 'Á')
+    .replace(/&eacute;/g, 'é')
+    .replace(/&Eacute;/g, 'É')
+    .replace(/&iacute;/g, 'í')
+    .replace(/&Iacute;/g, 'Í')
+    .replace(/&oacute;/g, 'ó')
+    .replace(/&Oacute;/g, 'Ó')
+    .replace(/&uacute;/g, 'ú')
+    .replace(/&Uacute;/g, 'Ú')
+    .replace(/&uuml;/g, 'ü')
+    .replace(/&Uuml;/g, 'Ü')
+    .replace(/&quot;/g, '"');
+}
+
 export function normalizeAddressComparable(address: string): string {
-  return normalizeStrict(address)
-    .replace(/^(calle|c|avda|avenida|plaza|pza|paseo|pso|cmno|camino|ronda|rda|bulevar|bulv|bulev|ctra|carretera|glorieta|gta|trva|travesia)\s+/g, '')
+  return normalizeStrict(decodeHtmlEntities(address))
+    .replace(/^(calle|cl|c|avda|av|avenida|plaza|pl|pza|paseo|ps|pso|cmno|cam|camino|ronda|rda|bulevar|bulv|bulev|ctra|carretera|glorieta|gta|trva|travesia|cstan|costanilla|pque|parque)\s+/g, '')
     .replace(/\b(de la|del|de los|de las|de|la|el|los|las)\b/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -177,7 +198,7 @@ export function classifyExplicitSpecialisations(parts: {
 }): ProfileId[] {
   const combinedRaw = [parts.name, parts.subtype, parts.sector, parts.entity || ''].join(' ');
   const norm = normalizeStrict(combinedRaw)
-    // Evitar falso positivo por "San Juan Bautista" conteniendo "autis" si no hubiera fronteras
+    // Evitar falso positivo por "San Juan Bautista"
     .replace(/\bbautista\b/g, ' ');
 
   const matched: ProfileId[] = [];
@@ -186,11 +207,11 @@ export function classifyExplicitSpecialisations(parts: {
     matched.push('autism');
   }
 
-  if (/\b(dano cerebral adquirido|dano cerebral sobrevenido|dano cerebral|dca|ictus|traumatismo craneoencefalico|rehabictus|paralisis y el dano cerebrales)\b/.test(norm)) {
+  if (/\b(dano cerebral adquirido|dano cerebral sobrevenido|dano cerebral|dca|ictus|traumatismo craneoencefalico|rehabictus|paralisis\s+[yo]\s+(?:el\s+)?dano\s+cerebral(?:es)?)\b/.test(norm)) {
     matched.push('acquired_brain_injury');
   }
 
-  if (/\b(paralisis cerebral|paraliticos? cerebrales?|paralisis y el dano cerebrales)\b/.test(norm)) {
+  if (/\b(paralisis cerebral|paraliticos? cerebrales?|paralisis\s+[yo]\s+(?:el\s+)?dano\s+cerebral(?:es)?)\b/.test(norm)) {
     matched.push('cerebral_palsy');
   }
 
@@ -237,34 +258,48 @@ export function classifyExplicitSpecialisations(parts: {
   return matched;
 }
 
-function mapCamMunicipalityName(raw: string): string {
+export function mapCamMunicipalityName(raw: string): string {
   const s = (raw || '').trim();
   if (!s || s.toUpperCase() === 'RESERVADO') return 'Madrid (ubicación reservada)';
-  if (s === 'Rozas de Madrid, Las') return 'Las Rozas de Madrid';
-  if (s === 'Álamo, El') return 'El Álamo';
-  if (s === 'Escorial, El') return 'El Escorial';
-  if (s === 'Molinos, Los') return 'Los Molinos';
-  if (s === 'Vellon, El' || s === 'Vellón, El') return 'El Vellón';
-  if (s === 'Molar, El') return 'El Molar';
+  const articleMatch = s.match(/^(.+?),\s*(El|La|Los|Las)$/i);
+  if (articleMatch) {
+    const base = articleMatch[1].trim();
+    const rawArticle = articleMatch[2].toLowerCase();
+    const article = rawArticle.charAt(0).toUpperCase() + rawArticle.slice(1);
+    const normalizedBase =
+      base === 'Vellon' ? 'Vellón' : base === 'Alamo' ? 'Álamo' : base;
+    return `${article} ${normalizedBase}`;
+  }
   return s;
 }
 
-function inferSupportsFromOfficialFields(tipo: string, subtipo: string, denom: string): SupportTypeId[] {
+function inferSupportsFromOfficialFields(
+  tipo: string,
+  subtipo: string,
+  denom: string
+): { supports: SupportTypeId[]; extraRelated: string[] } {
   const norm = normalizeStrict(`${tipo} ${subtipo} ${denom}`);
   const supports = new Set<SupportTypeId>();
+  const extraRelated = new Set<string>();
 
   if (/\b(centro de dia|centros de dia|atencion diurna)\b/.test(norm)) {
     supports.add('day_care');
   }
+  if (/\b(ocupacional|centro ocupacional|centros ocupacionales)\b/.test(norm)) {
+    supports.add('day_care');
+    extraRelated.add('centro ocupacional (relacionado; confirmar si dispone de terapia ocupacional clínica)');
+  }
+  if (/\bterapia ocupacional\b/.test(norm) && !/\b(centro ocupacional|centros ocupacionales)\b/.test(norm)) {
+    supports.add('occupational_therapy');
+  }
   if (/\b(residencia|residencias|residencial|piso tutelado|pisos tutelados|vivienda comunitaria|viviendas comunitarias|hogar)\b/.test(norm)) {
     supports.add('residential_care');
   }
-  if (/\b(rehabilitacion|atencion temprana|recuperacion)\b/.test(norm)) {
+  if (/\b(rehabilitacion|recuperacion|fisioterapia)\b/.test(norm)) {
     supports.add('rehabilitation');
   }
-  if (/\b(ocupacional|centro ocupacional|centros ocupacionales)\b/.test(norm)) {
-    supports.add('day_care');
-    supports.add('occupational_therapy');
+  if (/\b(atencion temprana)\b/.test(norm)) {
+    extraRelated.add('atención temprana (relacionado; confirmar servicios clínicos concretos)');
   }
   if (/\b(insercion laboral|empleo|rehabilitacion laboral|laboral)\b/.test(norm)) {
     supports.add('employment_support');
@@ -275,7 +310,7 @@ function inferSupportsFromOfficialFields(tipo: string, subtipo: string, denom: s
   if (/\b(logopedia|comunicacion)\b/.test(norm)) {
     supports.add('speech_therapy');
   }
-  return Array.from(supports);
+  return { supports: Array.from(supports), extraRelated: Array.from(extraRelated) };
 }
 
 function inferLifeStagesFromOfficialFields(sector: string, denom: string, tipo: string): LifeStage[] {
@@ -291,68 +326,139 @@ function inferLifeStagesFromOfficialFields(sector: string, denom: string, tipo: 
   if (/\b(adult[oa]s?|ocupacional|laboral|insercion)\b/.test(norm)) stages.add('adult');
   if (/\b(mayores?|alzheimer|parkinson|demencia)\b/.test(norm)) stages.add('older_adult');
 
-  if (stages.size === 0) {
-    return ['adult', 'older_adult'];
-  }
+  // Si no hay indicación explícita de edad, devolver [] (no consta; no excluir búsquedas por edad)
   return Array.from(stages);
 }
 
-function mapPublicPrivateStatus(gest: string, isMunicipalPublic: boolean): {
-  status: 'red_publica' | 'concertado' | 'privado_autorizado';
+function mapPublicPrivateStatus(
+  gest: string,
+  isDirectPublic: boolean,
+  isUnstatedMunicipal = false
+): {
+  status: 'red_publica' | 'concertado' | 'privado_autorizado' | 'no_especificado';
   accessType: AccessRouteType;
   nextStep: string;
 } {
-  if (isMunicipalPublic) {
+  if (isDirectPublic) {
     return {
       status: 'red_publica',
-      accessType: 'dependency_pia',
-      nextStep: 'Recurso público municipal: consulte acceso mediante los Servicios Sociales de su distrito o trámite PIA.'
+      accessType: 'unknown',
+      nextStep: 'Centro de titularidad pública directa; pregunte en su Centro de Servicios Sociales o Centro Base cómo solicitar acceso.'
+    };
+  }
+  if (isUnstatedMunicipal) {
+    return {
+      status: 'no_especificado',
+      accessType: 'unknown',
+      nextStep: 'El catálogo municipal datos.madrid.es no detalla si este recurso es público, concertado o privado; confirme condiciones de acceso directamente con la entidad o en Servicios Sociales.'
     };
   }
   const g = normalizeStrict(gest);
   if (g.includes('propia') || g.includes('publica directa')) {
     return {
       status: 'red_publica',
-      accessType: 'dependency_pia',
-      nextStep: 'Centro de titularidad pública de la Comunidad de Madrid: acceso mediante dictamen o resolución PIA.'
+      accessType: 'unknown',
+      nextStep: 'Puede tener plazas públicas; pregunte en sus servicios sociales cómo solicitar acceso.'
     };
   }
   if (g.includes('concertada')) {
     return {
       status: 'concertado',
-      accessType: 'dependency_pia',
-      nextStep: 'Dispone de plazas concertadas (acceso por PIA/derivación oficial) o consulta directa con la entidad.'
+      accessType: 'unknown',
+      nextStep: 'Puede tener plazas públicas o concertadas; pregunte en sus servicios sociales.'
     };
   }
   return {
     status: 'privado_autorizado',
     accessType: 'unknown',
-    nextStep: 'Debe confirmarse con el organismo competente o contactar directamente con el centro titular.'
+    nextStep: 'Entidad privada autorizada; consulte condiciones directamente con el centro o en sus servicios sociales.'
   };
 }
 
+/**
+ * Traducción literal según ficha de estructura oficial de datos.madrid.es (Catálogo 212774-0):
+ * 0 = No accesible | 1 = Accesible | 2 = Parcialmente accesible | 3 = Sin información
+ * 4 = Lengua de signos | 5 = Señalización podotáctil | 6 = Bucle magnético
+ */
 function mapAccessibilityFromCode(rawCode: string): string[] {
   const code = (rawCode || '').trim();
   if (!code) return [];
   const tokens = code.split(',').map(t => t.trim());
   const features: string[] = [];
   if (tokens.includes('1')) {
-    features.push('Accesible para movilidad reducida (Código 1 · datos.madrid.es)');
+    features.push('Accesible (Código 1 · datos.madrid.es)');
   } else if (tokens.includes('2')) {
     features.push('Parcialmente accesible (Código 2 · datos.madrid.es)');
   } else if (tokens.includes('3')) {
-    features.push('Sin acreditación de accesibilidad adaptada confirmada en catálogo (Código 3 · datos.madrid.es)');
+    features.push('Sin información (Código 3 · datos.madrid.es)');
   } else if (tokens.includes('0')) {
-    features.push('No accesible para movilidad reducida (Código 0 · datos.madrid.es)');
+    features.push('No accesible (Código 0 · datos.madrid.es)');
   }
-  if (tokens.includes('4')) features.push('Adaptación visual básica declarada (Código 4 · datos.madrid.es)');
-  if (tokens.includes('5')) features.push('Adaptación auditiva básica declarada (Código 5 · datos.madrid.es)');
-  if (tokens.includes('6')) features.push('Accesibilidad cognitiva básica declarada (Código 6 · datos.madrid.es)');
+  if (tokens.includes('4')) features.push('Lengua de signos (Código 4 · datos.madrid.es)');
+  if (tokens.includes('5')) features.push('Señalización podotáctil (Código 5 · datos.madrid.es)');
+  if (tokens.includes('6')) features.push('Bucle magnético (Código 6 · datos.madrid.es)');
   return features;
 }
 
-function isRelevantCamRow(sector: string, tipo: string, subtipo: string, denom: string, entity: string, explicitSpecs: ProfileId[]): boolean {
-  if (explicitSpecs.length > 0) return true;
+function isLegalOrganizationName(name: string): boolean {
+  const n = normalizeStrict(name);
+  return /\b(asociacion|fundacion|s l|sl|s a|sa|sociedad|cooperativa|federacion|confederacion|ayuntamiento|comunidad|centro|instituto|cruz roja|caritas|hermanas|congregacion|congregacion|orden|obra social|mutua|empresa|grupo|clinica|hospital|residencia|entidad)\b/.test(n);
+}
+
+function sanitizePersonalPractitionerRecord(params: {
+  regId: string;
+  nif: string;
+  entity: string;
+  denom: string;
+  subtipo: string;
+  tipo: string;
+  explicitSpecs: ProfileId[];
+  entitySpecs: ProfileId[];
+}): {
+  officialName: string;
+  providerName: string;
+  isIndividualPractitioner: boolean;
+} {
+  const { nif, entity, denom, subtipo, tipo, explicitSpecs, entitySpecs } = params;
+  const cleanNif = nif.trim();
+  const looksLikePersonEntity =
+    !cleanNif && Boolean(entity.trim()) && !isLegalOrganizationName(entity) && entity.trim().split(/\s+/).length >= 2;
+
+  if (!looksLikePersonEntity) {
+    return {
+      officialName: denom,
+      providerName: entity || denom,
+      isIndividualPractitioner: false
+    };
+  }
+
+  const serviceLabel = subtipo || tipo || 'Servicio de Atención Social autorizado';
+  const hasAls = explicitSpecs.includes('als') || entitySpecs.includes('als') || /\bela\b/.test(normalizeStrict(denom));
+  const condTag = hasAls ? ' (ELA)' : '';
+  const prettyType = serviceLabel
+    .toLocaleLowerCase('es-ES')
+    .replace(/(^|[\s\-/])(\p{L})/gu, (_match, sep, ch) => `${sep}${ch.toLocaleUpperCase('es-ES')}`)
+    .replace(/\bDe\b/g, 'de')
+    .replace(/\bA\b/g, 'a')
+    .replace(/\bEn\b/g, 'en')
+    .replace(/\bY\b/g, 'y');
+
+  return {
+    officialName: `${prettyType}${condTag} · Profesional individual autorizado`,
+    providerName: 'Profesional autónomo acreditado en Registro CAM (nombre omitido por privacidad)',
+    isIndividualPractitioner: true
+  };
+}
+
+function isRelevantCamRow(
+  sector: string,
+  tipo: string,
+  subtipo: string,
+  denom: string,
+  entity: string,
+  allSpecs: ProfileId[]
+): boolean {
+  if (allSpecs.length > 0) return true;
   const norm = normalizeStrict(`${sector} ${tipo} ${subtipo} ${denom} ${entity}`);
   return (
     norm.includes('discapacidad') ||
@@ -378,6 +484,24 @@ export interface OfficialCatalogBuildResult {
   lookupIndex: Map<string, SnapshotCentreRecord>;
 }
 
+function formatSupportRelatedNames(supports: SupportTypeId[]): string[] {
+  return supports.map(s =>
+    s === 'day_care'
+      ? 'atención diurna'
+      : s === 'residential_care'
+      ? 'residencia'
+      : s === 'rehabilitation'
+      ? 'rehabilitación'
+      : s === 'occupational_therapy'
+      ? 'terapia ocupacional'
+      : s === 'employment_support'
+      ? 'apoyo laboral'
+      : s === 'psychological_support'
+      ? 'apoyo psicosocial'
+      : 'logopedia'
+  );
+}
+
 export function buildCentresFromOfficialCSVs(params: {
   madridCsvText?: string | null;
   camCentrosCsvText?: string | null;
@@ -388,7 +512,6 @@ export function buildCentresFromOfficialCSVs(params: {
   const lookupIndex = new Map<string, SnapshotCentreRecord>();
   const centres: SpecializedCentre[] = [];
 
-  // Índice auxiliar para vincular filas de datos.madrid.es con CAM Centros físicos
   interface MadridParsedRow {
     pk: string;
     name: string;
@@ -408,7 +531,7 @@ export function buildCentresFromOfficialCSVs(params: {
 
   const madridRows: MadridParsedRow[] = [];
   const madridByPhone = new Map<string, MadridParsedRow[]>();
-  const madridByAddr = new Map<string, MadridParsedRow[]>();
+  const madridByNormAddr = new Map<string, MadridParsedRow[]>();
 
   if (params.madridCsvText) {
     const rows = parseSemicolonCSV(params.madridCsvText);
@@ -420,13 +543,13 @@ export function buildCentresFromOfficialCSVs(params: {
         const r = rows[i];
         const pk = r[col('PK')]?.trim();
         if (!pk) continue;
-        const name = r[col('NOMBRE')] || `Centro Municipal PK ${pk}`;
-        const clase = r[col('CLASE-VIAL')] || '';
-        const via = r[col('NOMBRE-VIA')] || '';
-        const num = r[col('NUM')] || '';
+        const name = decodeHtmlEntities(r[col('NOMBRE')] || `Centro Municipal PK ${pk}`);
+        const clase = decodeHtmlEntities(r[col('CLASE-VIAL')] || '');
+        const via = decodeHtmlEntities(r[col('NOMBRE-VIA')] || '');
+        const num = decodeHtmlEntities(r[col('NUM')] || '');
         const address = [clase, via, num].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
         const postalCode = (r[col('CODIGO-POSTAL')] || '').trim();
-        const district = (r[col('DISTRITO')] || '').trim();
+        const district = decodeHtmlEntities((r[col('DISTRITO')] || '').trim());
         const lat = parseFloat(r[col('LATITUD')] || '');
         const lon = parseFloat(r[col('LONGITUD')] || '');
         const coords: [number, number] | null =
@@ -437,8 +560,8 @@ export function buildCentresFromOfficialCSVs(params: {
         const email = (r[col('EMAIL')] || '').trim();
         const accCode = (r[col('ACCESIBILIDAD')] || '').trim();
         const contentUrl = (r[col('CONTENT-URL')] || '').trim();
-        const equipamiento = (r[col('EQUIPAMIENTO')] || '').trim();
-        const transporte = (r[col('TRANSPORTE')] || '').trim();
+        const equipamiento = decodeHtmlEntities((r[col('EQUIPAMIENTO')] || '').trim());
+        const transporte = decodeHtmlEntities((r[col('TRANSPORTE')] || '').trim());
         const tipoPath = (r[col('TIPO')] || '').trim();
 
         const key = `MAD-PK${pk}`;
@@ -478,11 +601,11 @@ export function buildCentresFromOfficialCSVs(params: {
           list.push(parsed);
           madridByPhone.set(normPhone, list);
         }
-        const normAddr = `${normalizeAddressComparable(address)}|${postalCode}`;
-        if (normAddr !== '|') {
-          const list = madridByAddr.get(normAddr) || [];
+        const normAddrOnly = normalizeAddressComparable(address);
+        if (normAddrOnly) {
+          const list = madridByNormAddr.get(normAddrOnly) || [];
           list.push(parsed);
-          madridByAddr.set(normAddr, list);
+          madridByNormAddr.set(normAddrOnly, list);
         }
       }
     }
@@ -544,48 +667,110 @@ export function buildCentresFromOfficialCSVs(params: {
           authorised_places: placesNum
         });
 
-        const explicitSpecs = classifyExplicitSpecialisations({
+        // Evidencia separada: centro (denominacion/subtipo/sector) vs entidad titular (#8)
+        const centreExplicitSpecs = classifyExplicitSpecialisations({
           name: denom,
           subtype: subtipo || tipo,
-          sector,
-          entity
+          sector
         });
+        const entityOnlyAllSpecs = entity
+          ? classifyExplicitSpecialisations({ name: '', subtype: '', sector: '', entity })
+          : [];
+        const entityDeclaredSpecs = entityOnlyAllSpecs.filter(s => !centreExplicitSpecs.includes(s));
+        const allMatchedSpecs = Array.from(new Set([...centreExplicitSpecs, ...entityDeclaredSpecs]));
 
-        if (!isRelevantCamRow(sector, tipo, subtipo, denom, entity, explicitSpecs)) {
+        if (!isRelevantCamRow(sector, tipo, subtipo, denom, entity, allMatchedSpecs)) {
           continue;
         }
 
-        // Intentar enlazar con el catálogo municipal de Madrid si está en Madrid capital y coincide dirección o teléfono+nombre
+        // Enlace robusto multi-catálogo CAM <-> datos.madrid.es (#10)
+        // Prefiere candidatos aún no enlazados (usedByCam === false) con mayor coincidencia de tipo/nombre y dirección/teléfono
         let linkedMadrid: MadridParsedRow | null = null;
-        if (municipality === 'Madrid') {
-          const normAddr = `${normalizeAddressComparable(address)}|${postalCode}`;
-          const addrCandidates = madridByAddr.get(normAddr) || [];
-          const normCamName = normalizeStrict(denom);
-          linkedMadrid =
-            addrCandidates.find(m => normalizeStrict(m.name) === normCamName) ||
-            addrCandidates.find(m => {
-              const mTokens = normalizeStrict(m.name).split(' ').filter(w => w.length > 3);
-              return mTokens.some(t => normCamName.includes(t));
-            }) ||
-            null;
+        const normCamAddr = normalizeAddressComparable(address);
+        const normCamName = normalizeStrict(denom);
+        const normCamAll = normalizeStrict(`${denom} ${subtipo} ${tipo} ${entity}`);
+        const camPhone = normalizePhoneComparable(phone);
 
-          if (!linkedMadrid) {
-            const pNorm = normalizePhoneComparable(phone);
-            const phoneCandidates = pNorm ? madridByPhone.get(pNorm) || [] : [];
-            linkedMadrid =
-              phoneCandidates.find(m => {
-                const mTokens = normalizeStrict(m.name).split(' ').filter(w => w.length > 3);
-                return mTokens.some(t => normCamName.includes(t));
-              }) || null;
+        const stripStreetNum = (normAddr: string) => normAddr.replace(/\s+\d+[a-z]*$/i, '').trim();
+        const camStreetStem = stripStreetNum(normCamAddr);
+
+        const scoreMadridCandidate = (m: MadridParsedRow, requireStreetMatch: boolean): number => {
+          const mAddr = normalizeAddressComparable(m.address);
+          const mStreetStem = stripStreetNum(mAddr);
+          const exactAddr = Boolean(normCamAddr && mAddr && normCamAddr === mAddr);
+          const partialAddr = Boolean(normCamAddr && mAddr && (normCamAddr.includes(mAddr) || mAddr.includes(normCamAddr)));
+          const sameStem = Boolean(camStreetStem && mStreetStem && camStreetStem === mStreetStem);
+          if (requireStreetMatch && !exactAddr && !partialAddr && !sameStem) return -1;
+
+          let score = 0;
+          if (!m.usedByCam) score += 20;
+          if (exactAddr) score += 12;
+          else if (partialAddr) score += 6;
+          else if (sameStem) score += 4;
+          if (camPhone && normalizePhoneComparable(m.phone) === camPhone) score += 10;
+          if (postalCode && m.postalCode === postalCode) score += 3;
+
+          const mNormName = normalizeStrict(m.name);
+          if (mNormName === normCamName) score += 15;
+          const stopWords = new Set(['centro', 'centros', 'personas', 'discapacidad', 'madrid', 'fundacion', 'asociacion', 'para', 'social', 'atencion']);
+          const mTokens = mNormName.split(' ').filter(w => w.length > 3 && !stopWords.has(w));
+          for (const tok of mTokens) {
+            if (normCamName.includes(tok)) score += 6;
+            else if (normCamAll.includes(tok)) score += 3;
           }
+          // Preferir coincidencia de tipología exacta (Residencia <-> Residencia, Día <-> Día, Ocupacional <-> Ocupacional)
+          if (normCamName.includes('residencia') && mNormName.includes('residencia')) score += 8;
+          if (normCamName.includes('ocupacional') && mNormName.includes('ocupacional')) score += 8;
+          if ((normCamName.includes('dia') || normCamName.includes('diurna')) && mNormName.includes('dia')) score += 8;
+          if (normCamName.includes('temprana') && mNormName.includes('temprana')) score += 8;
+          return score;
+        };
 
-          if (linkedMadrid) {
-            linkedMadrid.usedByCam = true;
+        const addrCandidates = normCamAddr ? madridByNormAddr.get(normCamAddr) || [] : [];
+        if (addrCandidates.length > 0) {
+          const ranked = addrCandidates
+            .map(m => ({ m, score: scoreMadridCandidate(m, false) }))
+            .filter(x => x.score >= 12)
+            .sort((a, b) => b.score - a.score);
+          linkedMadrid = ranked[0]?.m || null;
+        }
+
+        if (!linkedMadrid && camPhone) {
+          const phoneCandidates = madridByPhone.get(camPhone) || [];
+          const ranked = phoneCandidates
+            .map(m => ({ m, score: scoreMadridCandidate(m, true) }))
+            .filter(x => x.score >= 16)
+            .sort((a, b) => b.score - a.score);
+          linkedMadrid = ranked[0]?.m || null;
+        }
+
+        if (linkedMadrid) {
+          linkedMadrid.usedByCam = true;
+          // Absorber posibles duplicados internos en datos.madrid.es que comparten exactamente misma dirección y teléfono
+          if (camPhone) {
+            const samePhonePeers = madridByPhone.get(camPhone) || [];
+            for (const peer of samePhonePeers) {
+              if (peer === linkedMadrid || peer.usedByCam) continue;
+              const pAddr = normalizeAddressComparable(peer.address);
+              const pStem = stripStreetNum(pAddr);
+              if (
+                (normCamAddr && pAddr === normCamAddr) ||
+                (camStreetStem && pStem === camStreetStem && scoreMadridCandidate(peer, true) >= 16)
+              ) {
+                // Solo fusionar si no hay otra ficha CAM distinta en la misma dirección que lo represente mejor
+                const peerTokens = normalizeStrict(peer.name).split(' ').filter(w => w.length > 3);
+                const matchesThisCam = peerTokens.some(t => normCamAll.includes(t));
+                if (matchesThisCam) {
+                  peer.usedByCam = true;
+                }
+              }
+            }
           }
         }
 
         const finalCoords = coords || linkedMadrid?.coords || null;
-        const supports = inferSupportsFromOfficialFields(tipo, subtipo, denom);
+        const supportResult = inferSupportsFromOfficialFields(tipo, subtipo, denom);
+        const supports = supportResult.supports;
         const lifeStages = inferLifeStagesFromOfficialFields(sector, denom, tipo);
         const isMunicipalPublic = Boolean(
           linkedMadrid &&
@@ -595,9 +780,11 @@ export function buildCentresFromOfficialCSVs(params: {
         const netInfo = mapPublicPrivateStatus(gest, isMunicipalPublic);
         const provenance: AttributeProvenance[] = [
           {
-            attribute_name: explicitSpecs.length > 0 ? 'specialisation' : 'sector',
-            value: explicitSpecs.length > 0
-              ? `${denom} · ${entity} (${sector})`
+            attribute_name: centreExplicitSpecs.length > 0 ? 'specialisation' : entityDeclaredSpecs.length > 0 ? 'entity_specialisation' : 'sector',
+            value: centreExplicitSpecs.length > 0
+              ? `${denom} · ${subtipo || tipo} (${sector})`
+              : entityDeclaredSpecs.length > 0
+              ? `Entidad titular: ${entity} (Denominación centro: ${denom})`
               : `${sector} · ${subtipo || tipo}`,
             source_dataset: `Registro de Centros de Atención Social CAM (${regId})`,
             source_url: OFFICIAL_DATASET_URLS.cam_centros,
@@ -606,7 +793,7 @@ export function buildCentresFromOfficialCSVs(params: {
             extraction_method: 'structured',
             reviewer: 'Portal de Datos Abiertos Comunidad de Madrid (CSV oficial)',
             reviewer_role: 'data_steward',
-            confidence: explicitSpecs.length > 0 ? 'explicit' : 'potential',
+            confidence: centreExplicitSpecs.length > 0 ? 'explicit' : 'potential',
             quality: 'A'
           }
         ];
@@ -629,10 +816,17 @@ export function buildCentresFromOfficialCSVs(params: {
 
         const accFeatures = linkedMadrid ? mapAccessibilityFromCode(linkedMadrid.accCode) : [];
         const limitations: string[] = [];
-        if (explicitSpecs.length === 0) {
+        if (centreExplicitSpecs.length === 0 && entityDeclaredSpecs.length > 0) {
+          limitations.push(
+            `La especialización proviene de la entidad titular (${entity}), no de la denominación individual del centro (${denom}).`
+          );
+        } else if (centreExplicitSpecs.length === 0) {
           limitations.push(
             `El registro oficial declara sector "${sector}" y denominación "${denom}", sin mencionar literalmente una patología específica.`
           );
+        }
+        if (lifeStages.length === 0) {
+          limitations.push('Etapa vital o edad admitida no consta en el registro oficial (confirmar con el centro).');
         }
         if (!finalCoords) {
           limitations.push('Centro sin coordenadas válidas en el registro oficial (GEO-001/002).');
@@ -643,21 +837,8 @@ export function buildCentresFromOfficialCSVs(params: {
 
         const relatedServices = [
           subtipo || tipo,
-          ...supports.map(s =>
-            s === 'day_care'
-              ? 'atención diurna'
-              : s === 'residential_care'
-              ? 'residencia'
-              : s === 'rehabilitation'
-              ? 'rehabilitación'
-              : s === 'occupational_therapy'
-              ? 'terapia ocupacional'
-              : s === 'employment_support'
-              ? 'apoyo laboral'
-              : s === 'psychological_support'
-              ? 'apoyo psicosocial'
-              : 'logopedia'
-          )
+          ...formatSupportRelatedNames(supports),
+          ...supportResult.extraRelated
         ].filter(Boolean);
 
         centres.push({
@@ -680,7 +861,8 @@ export function buildCentresFromOfficialCSVs(params: {
           phone: phone || linkedMadrid?.phone || '',
           email: email || linkedMadrid?.email || '',
           website: linkedMadrid?.contentUrl || OFFICIAL_DATASET_URLS.cam_centros,
-          explicit_specialisations: explicitSpecs,
+          explicit_specialisations: centreExplicitSpecs,
+          entity_declared_specialisations: entityDeclaredSpecs,
           related_services: Array.from(new Set(relatedServices)),
           supports,
           services_offered: supports.map((sup, idx) => ({
@@ -688,7 +870,7 @@ export function buildCentresFromOfficialCSVs(params: {
             centre_id: key,
             service_name: `${tipo || 'Servicio'} (${subtipo || sector})`,
             service_type: sup,
-            target_populations: explicitSpecs,
+            target_populations: centreExplicitSpecs,
             allowed_life_stages: lifeStages,
             access_routes: [netInfo.accessType],
             source_dataset: `Registro de Centros de Atención Social CAM (${regId})`,
@@ -699,10 +881,10 @@ export function buildCentresFromOfficialCSVs(params: {
           access_route: {
             access_type: netInfo.accessType,
             competent_body:
-              netInfo.accessType === 'dependency_pia'
-                ? 'Consejería de Familia, Juventud y Asuntos Sociales (CAM) / Servicios Sociales'
-                : 'Entidad titular autorizada (confirmación previa)',
-            official_description: `Régimen registral oficial: ${gest || 'no especificado'}.`,
+              netInfo.status === 'privado_autorizado'
+                ? 'Entidad titular autorizada / Servicios Sociales'
+                : 'Servicios Sociales municipales / Consejería de Familia (CAM)',
+            official_description: `Régimen registral oficial: ${gest || 'no especificado'} (la gestión pública/concertada no especifica por sí sola el procedimiento individual de acceso).`,
             source_url: OFFICIAL_DATASET_URLS.cam_centros,
             checked_at: checkDate,
             next_step_action: netInfo.nextStep,
@@ -742,10 +924,35 @@ export function buildCentresFromOfficialCSVs(params: {
     if (!isRelevantMadridRow(m.name, m.equipamiento, m.tipoPath, explicitSpecs)) continue;
 
     const key = `MAD-PK${m.pk}`;
-    const supports = inferSupportsFromOfficialFields(m.tipoPath, m.equipamiento, m.name);
+    const supportResult = inferSupportsFromOfficialFields(m.tipoPath, m.equipamiento, m.name);
+    const supports = supportResult.supports;
     const lifeStages = inferLifeStagesFromOfficialFields(m.equipamiento, m.name, m.tipoPath);
-    const isPublic = normalizeStrict(m.name).includes('municipal');
-    const netInfo = mapPublicPrivateStatus(isPublic ? 'PUBLICA' : 'PRIVADA CON PLAZAS CONCERTADAS', isPublic);
+    const normMadOnlyName = normalizeStrict(m.name);
+    const isDirectPublic =
+      /\bmunicipal\b/.test(normMadOnlyName) ||
+      normMadOnlyName.startsWith('centro base') ||
+      normMadOnlyName.startsWith('centro de servicios sociales') ||
+      normMadOnlyName.startsWith('ayuntamiento de madrid');
+    const netInfo = mapPublicPrivateStatus(
+      isDirectPublic ? 'PUBLICA DIRECTA' : '',
+      isDirectPublic,
+      !isDirectPublic
+    );
+
+    const limitations: string[] = [
+      'El catálogo municipal datos.madrid.es no publica número de plazas autorizadas.'
+    ];
+    if (!isDirectPublic) {
+      limitations.push(
+        'El catálogo municipal datos.madrid.es no especifica si la entidad titular tiene plazas públicas concertadas o privadas.'
+      );
+    }
+    if (explicitSpecs.length === 0) {
+      limitations.push(`La ficha municipal no menciona literalmente patología concreta (${m.equipamiento || m.name}).`);
+    }
+    if (lifeStages.length === 0) {
+      limitations.push('Etapa vital o edad admitida no consta en el registro oficial (confirmar con el centro).');
+    }
 
     centres.push({
       centre_id: key,
@@ -757,7 +964,9 @@ export function buildCentresFromOfficialCSVs(params: {
       centre_type: 'Centro de Atención Social (Madrid)',
       subtype: m.tipoPath.split('/').pop() || 'Centro registrado',
       public_private_status: netInfo.status,
-      management_type: isPublic ? 'Público Municipal' : 'Entidad en Catálogo Oficial datos.madrid.es',
+      management_type: isDirectPublic
+        ? 'Público Directo (Ayuntamiento / Comunidad de Madrid)'
+        : 'Titularidad no especificada en datos.madrid.es',
       address: m.address,
       postal_code: m.postalCode,
       municipality: 'Madrid',
@@ -768,7 +977,14 @@ export function buildCentresFromOfficialCSVs(params: {
       email: m.email,
       website: m.contentUrl || OFFICIAL_DATASET_URLS.madrid_municipal,
       explicit_specialisations: explicitSpecs,
-      related_services: m.equipamiento ? [m.equipamiento.slice(0, 140)] : ['atención social'],
+      entity_declared_specialisations: [],
+      related_services: Array.from(
+        new Set([
+          ...(m.equipamiento ? [m.equipamiento.slice(0, 140)] : ['atención social']),
+          ...formatSupportRelatedNames(supports),
+          ...supportResult.extraRelated
+        ])
+      ),
       supports,
       services_offered: supports.map((sup, idx) => ({
         service_id: `SRV-${key}-${idx}`,
@@ -785,7 +1001,7 @@ export function buildCentresFromOfficialCSVs(params: {
       allowed_life_stages: lifeStages,
       access_route: {
         access_type: netInfo.accessType,
-        competent_body: isPublic ? 'Ayuntamiento de Madrid / Servicios Sociales' : 'Entidad titular / Servicios Sociales',
+        competent_body: isDirectPublic ? 'Ayuntamiento / Comunidad de Madrid · Servicios Sociales' : 'Entidad titular / Servicios Sociales',
         official_description: 'Registro municipal de centros de atención social.',
         source_url: OFFICIAL_DATASET_URLS.madrid_municipal,
         checked_at: checkDate,
@@ -823,12 +1039,7 @@ export function buildCentresFromOfficialCSVs(params: {
         }
       ],
       last_checked: checkDate,
-      limitations: [
-        'El catálogo municipal datos.madrid.es no publica número de plazas autorizadas.',
-        ...(explicitSpecs.length === 0
-          ? [`La ficha municipal no menciona literalmente patología concreta (${m.equipamiento || m.name}).`]
-          : [])
-      ]
+      limitations
     });
   }
 
@@ -866,66 +1077,113 @@ export function buildCentresFromOfficialCSVs(params: {
         const phone = rawPhone.toUpperCase() === 'RESERVADO' ? '' : rawPhone;
         const email = (r[col('contacto_correo')] || '').trim().split(';')[0]?.trim() || '';
         const entity = (r[col('entidad_denominacion')] || '').trim();
+        const nif = (r[col('entidad_nif')] || '').trim();
         const gest = (r[col('tipo_gestion')] || '').trim();
 
-        const key = `CAM-SRV-${regId}`;
-        lookupIndex.set(key, {
-          registry_key: key,
-          source_id: 'cam_servicios',
-          official_name: denom,
-          phone,
-          address,
-          municipality,
-          postal_code: postalCode,
-          authorised_places: null
-        });
-
-        const explicitSpecs = classifyExplicitSpecialisations({
+        const serviceExplicitSpecs = classifyExplicitSpecialisations({
           name: denom,
           subtype: subtipo || tipo,
-          sector,
-          entity
+          sector
         });
+        const entityOnlyAllSpecs = entity
+          ? classifyExplicitSpecialisations({ name: '', subtype: '', sector: '', entity })
+          : [];
+        const entityDeclaredSpecs = entityOnlyAllSpecs.filter(s => !serviceExplicitSpecs.includes(s));
+        const allSpecs = Array.from(new Set([...serviceExplicitSpecs, ...entityDeclaredSpecs]));
 
         const lowAll = normalizeStrict(`${denom} ${entity}`);
         const matchesTrackedEntity = Array.from(trackedEntities).some(t => lowAll.includes(t));
 
         // Incluir servicios con especialización literal declarada o de entidades clave monitorizadas
-        if (explicitSpecs.length === 0 && !matchesTrackedEntity) continue;
+        if (allSpecs.length === 0 && !matchesTrackedEntity) continue;
 
-        const supports = inferSupportsFromOfficialFields(tipo, subtipo, denom);
+        const sanitized = sanitizePersonalPractitionerRecord({
+          regId,
+          nif,
+          entity,
+          denom,
+          subtipo,
+          tipo,
+          explicitSpecs: serviceExplicitSpecs,
+          entitySpecs: entityDeclaredSpecs
+        });
+
+        const safeAddress = sanitized.isIndividualPractitioner
+          ? 'Dirección particular omitida por privacidad (RGPD · Registro CAM)'
+          : address;
+        const safePhone = sanitized.isIndividualPractitioner ? '' : phone;
+
+        const key = `CAM-SRV-${regId}`;
+        lookupIndex.set(key, {
+          registry_key: key,
+          source_id: 'cam_servicios',
+          official_name: sanitized.officialName,
+          phone: safePhone,
+          address: safeAddress,
+          municipality,
+          postal_code: sanitized.isIndividualPractitioner ? '' : postalCode,
+          authorised_places: null
+        });
+
+        const supportResult = inferSupportsFromOfficialFields(tipo, subtipo, denom);
+        const supports = supportResult.supports;
         const lifeStages = inferLifeStagesFromOfficialFields(sector, denom, tipo);
         const netInfo = mapPublicPrivateStatus(gest, false);
 
+        const limitations: string[] = [
+          'El Registro de Servicios de la Comunidad de Madrid no publica número de plazas ni accesibilidad física.'
+        ];
+        if (sanitized.isIndividualPractitioner) {
+          limitations.push(
+            `Titular persona física (RGPD): nombre, teléfono personal, dirección exacta y coordenadas omitidos por privacidad; consulte el expediente oficial ${regId} en el Portal CAM.`
+          );
+        }
+        if (serviceExplicitSpecs.length === 0 && entityDeclaredSpecs.length > 0) {
+          limitations.push(
+            `La especialización proviene de la entidad titular (${sanitized.providerName}), no del nombre del servicio.`
+          );
+        } else if (serviceExplicitSpecs.length === 0) {
+          limitations.push(`El servicio declara "${sanitized.officialName}" bajo sector "${sector}" sin mención literal de patología.`);
+        }
+        if (lifeStages.length === 0) {
+          limitations.push('Etapa vital o edad admitida no consta en el registro oficial (confirmar con la entidad).');
+        }
+
+        const safeCoords = sanitized.isIndividualPractitioner ? null : coords;
+        const safeEmail = sanitized.isIndividualPractitioner ? '' : email;
+
         centres.push({
           centre_id: key,
-          provider_id: `PROV-${normalizeStrict(r[col('entidad_nif')] || entity || regId).replace(/\s+/g, '-').slice(0, 28)}`,
-          provider_name: entity || denom,
-          official_name: denom,
+          provider_id: `PROV-${normalizeStrict(nif || (sanitized.isIndividualPractitioner ? regId : entity) || regId).replace(/\s+/g, '-').slice(0, 28)}`,
+          provider_name: sanitized.providerName,
+          official_name: sanitized.officialName,
           resource_domain: 'social',
           sector: sector || 'Servicios Sociales CAM',
           centre_type: tipo || 'Servicio Especializado',
           subtype: subtipo || tipo || 'Servicio autorizado',
           public_private_status: netInfo.status,
           management_type: gest || 'Servicio autorizado en Registro CAM',
-          address,
-          postal_code: postalCode,
+          address: safeAddress,
+          postal_code: sanitized.isIndividualPractitioner ? '' : postalCode,
           municipality,
           district: district || undefined,
-          coordinates: coords,
-          has_valid_coordinates: Boolean(coords),
-          phone,
-          email,
+          coordinates: safeCoords,
+          has_valid_coordinates: Boolean(safeCoords),
+          phone: safePhone,
+          email: safeEmail,
           website: OFFICIAL_DATASET_URLS.cam_servicios,
-          explicit_specialisations: explicitSpecs,
-          related_services: [tipo, subtipo].filter(Boolean),
+          explicit_specialisations: serviceExplicitSpecs,
+          entity_declared_specialisations: entityDeclaredSpecs,
+          related_services: Array.from(
+            new Set([tipo, subtipo, ...formatSupportRelatedNames(supports), ...supportResult.extraRelated].filter(Boolean))
+          ),
           supports,
           services_offered: supports.map((sup, idx) => ({
             service_id: `SRV-${key}-${idx}`,
             centre_id: key,
-            service_name: denom,
+            service_name: sanitized.officialName,
             service_type: sup,
-            target_populations: explicitSpecs,
+            target_populations: serviceExplicitSpecs,
             allowed_life_stages: lifeStages,
             access_routes: [netInfo.accessType],
             source_dataset: `Registro de Servicios de Atención Social CAM (${regId})`,
@@ -936,9 +1194,9 @@ export function buildCentresFromOfficialCSVs(params: {
           access_route: {
             access_type: netInfo.accessType,
             competent_body:
-              netInfo.accessType === 'dependency_pia'
-                ? 'Consejería de Familia, Juventud y Asuntos Sociales (CAM)'
-                : 'Entidad titular autorizada (confirmación previa)',
+              netInfo.status === 'privado_autorizado'
+                ? 'Entidad titular autorizada / Servicios Sociales'
+                : 'Servicios Sociales municipales / Consejería de Familia (CAM)',
             official_description: `Servicio autorizado en registro regional (${gest || 'CAM'}).`,
             source_url: OFFICIAL_DATASET_URLS.cam_servicios,
             checked_at: checkDate,
@@ -962,8 +1220,8 @@ export function buildCentresFromOfficialCSVs(params: {
           accessibility_features: [],
           provenance_records: [
             {
-              attribute_name: explicitSpecs.length > 0 ? 'specialisation' : 'sector',
-              value: `${denom} · ${entity} (${sector})`,
+              attribute_name: serviceExplicitSpecs.length > 0 ? 'specialisation' : entityDeclaredSpecs.length > 0 ? 'entity_specialisation' : 'sector',
+              value: `${sanitized.officialName} · ${sanitized.providerName} (${sector})`,
               source_dataset: `Registro de Servicios de Atención Social CAM (${regId})`,
               source_url: OFFICIAL_DATASET_URLS.cam_servicios,
               source_type: 'official_registry',
@@ -971,17 +1229,13 @@ export function buildCentresFromOfficialCSVs(params: {
               extraction_method: 'structured',
               reviewer: 'Portal de Datos Abiertos Comunidad de Madrid (CSV oficial)',
               reviewer_role: 'data_steward',
-              confidence: explicitSpecs.length > 0 ? 'explicit' : 'potential',
+              confidence: serviceExplicitSpecs.length > 0 ? 'explicit' : 'potential',
               quality: 'A'
             }
           ],
           last_checked: checkDate,
-          limitations: [
-            'El Registro de Servicios de la Comunidad de Madrid no publica número de plazas ni accesibilidad física.',
-            ...(explicitSpecs.length === 0
-              ? [`El servicio declara "${denom}" bajo sector "${sector}" sin mención literal de patología.`]
-              : [])
-          ]
+          limitations,
+          is_individual_practitioner: sanitized.isIndividualPractitioner
         });
       }
     }
@@ -989,3 +1243,4 @@ export function buildCentresFromOfficialCSVs(params: {
 
   return { centres, lookupIndex };
 }
+

@@ -1,24 +1,36 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * Madrid Apoyo Especializado v1.7 - Glosario en Lectura Fácil
+ * Madrid Apoyo Especializado v1.8 - Glosario en Lectura Fácil
  * Definiciones breves y claras de conceptos administrativos y sociosanitarios (§30)
  */
 
 import React, { useState, useRef } from 'react';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
-import { X, BookOpen, Search } from 'lucide-react';
+import { X, BookOpen, Search, ExternalLink } from 'lucide-react';
 
 interface EasyReadGlossaryModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const GLOSSARY_TERMS = [
+interface GlossaryEntry {
+  term: string;
+  simple: string;
+  technical: string;
+  links?: { label: string; url: string }[];
+}
+
+const GLOSSARY_TERMS: GlossaryEntry[] = [
   {
     term: 'Nivel A1 (Evidencia oficial completa)',
     simple: 'El centro tiene publicado en los registros de la Comunidad de Madrid que atiende exactamente su condición y dispone del servicio concreto que busca.',
     technical: 'Coincidencia explícita literal en condición y oferta asistencial en fuente estructurada oficial.'
+  },
+  {
+    term: 'Nivel A2 · Lo declara la entidad titular',
+    simple: 'La asociación o fundación dueña del centro sí está especializada en esa condición (por ejemplo TEA), pero el nombre individual del centro no lo especifica. Conviene llamar para confirmar esa sede concreta.',
+    technical: 'Especialización declarada en el campo registral entidad_denominacion y diferenciada del nivel A1 del centro concreto (#8).'
   },
   {
     term: 'Nivel A2 (Especialización publicada, apoyo a confirmar)',
@@ -27,8 +39,23 @@ const GLOSSARY_TERMS = [
   },
   {
     term: 'Nivel B1 (Servicios relacionados)',
-    simple: 'El centro no menciona el nombre exacto de la enfermedad, pero tiene servicios que ayudan (como rehabilitación o logopedia) y acepta a personas de su edad.',
-    technical: 'Dos o más servicios funcionalmente relacionados con etapa vital compatible.'
+    simple: 'El centro no menciona el nombre exacto de la enfermedad, pero tiene servicios que ayudan (como rehabilitación o logopedia) y no consta incompatibilidad de edad.',
+    technical: 'Dos o más servicios funcionalmente relacionados sin exclusión explícita de etapa vital.'
+  },
+  {
+    term: 'Códigos oficiales de accesibilidad (0 a 6 · datos.madrid.es)',
+    simple: 'Significado literal oficial en el Ayuntamiento de Madrid: 0 = No accesible · 1 = Accesible · 2 = Parcialmente accesible · 3 = Sin información · 4 = Lengua de signos · 5 = Señalización podotáctil · 6 = Bucle magnético. El código 3 nunca se interpreta como accesible.',
+    technical: 'Codificación literal del campo ACCESIBILIDAD según la ficha de estructura oficial del catálogo 212774-0 del Ayuntamiento de Madrid.',
+    links: [
+      {
+        label: 'Ficha de estructura oficial (PDF · datos.madrid.es)',
+        url: 'https://datos.madrid.es/egob/catalogo/212774-0-atencion-social.pdf'
+      },
+      {
+        label: 'Conjunto de datos 212774-0 (datos.madrid.es)',
+        url: 'https://datos.madrid.es/dataset/212774-0-atencion-social'
+      }
+    ]
   },
   {
     term: 'PIA (Programa Individual de Atención)',
@@ -61,9 +88,14 @@ const GLOSSARY_TERMS = [
     technical: 'Identificador físico unívoco de establecimiento, diferenciado de la entidad gestora o proveedor.'
   },
   {
-    term: 'REGCESS',
-    simple: 'El registro oficial donde están apuntados todos los hospitales, clínicas y consultas de salud autorizadas por los inspectores.',
-    technical: 'Registro General de Centros, Servicios y Establecimientos Sanitarios.'
+    term: 'Titularidad no especificada (datos.madrid.es)',
+    simple: 'Cuando un centro solo aparece en el catálogo municipal del Ayuntamiento sin ficha enlazada en la Comunidad de Madrid, la fuente no dice si tiene plazas públicas concertadas o si es privado. La app lo indica claramente para que lo confirme al llamar.',
+    technical: 'Estado public_private_status = no_especificado para evitar atribuir concierto o titularidad sin respaldo registral.'
+  },
+  {
+    term: 'REGCESS (futuro interoperable)',
+    simple: 'El registro oficial sanitario donde constan clínicas y hospitales autorizados. Esta versión v1.8 consulta los 3 registros oficiales de Atención Social; la integración sanitaria REGCESS queda prevista para la siguiente fase.',
+    technical: 'Registro General de Centros, Servicios y Establecimientos Sanitarios (ámbito sanitario no incluido aún en los 3 CSV sociales).'
   }
 ];
 
@@ -85,7 +117,8 @@ export const EasyReadGlossaryModal: React.FC<EasyReadGlossaryModalProps> = ({ is
 
   const filtered = GLOSSARY_TERMS.filter(t => 
     t.term.toLowerCase().includes(filter.toLowerCase()) ||
-    t.simple.toLowerCase().includes(filter.toLowerCase())
+    t.simple.toLowerCase().includes(filter.toLowerCase()) ||
+    t.technical.toLowerCase().includes(filter.toLowerCase())
   );
 
   return (
@@ -125,7 +158,7 @@ export const EasyReadGlossaryModal: React.FC<EasyReadGlossaryModalProps> = ({ is
               type="text"
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              placeholder="Buscar término o sigla (ej. PIA, Vacantes, Nivel A1)..."
+              placeholder="Buscar término, sigla o código (ej. bucle, 0 a 6, PIA, entidad titular)..."
               className="w-full pl-9 pr-4 py-2 text-xs border border-stone-300 rounded-lg bg-white focus:outline-none focus:border-stone-900"
             />
           </div>
@@ -144,6 +177,22 @@ export const EasyReadGlossaryModal: React.FC<EasyReadGlossaryModalProps> = ({ is
               <div className="text-[11px] text-stone-500 pt-1">
                 <strong>Definición administrativa:</strong> {item.technical}
               </div>
+              {item.links && item.links.length > 0 && (
+                <div className="flex flex-wrap gap-3 pt-1">
+                  {item.links.map((lk) => (
+                    <a
+                      key={lk.url}
+                      href={lk.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-stone-800 underline hover:text-stone-950"
+                    >
+                      <span>{lk.label}</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>

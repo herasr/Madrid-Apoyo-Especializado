@@ -1,7 +1,7 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * Madrid Apoyo Especializado v1.7 - Ficha para Preparar el Contacto
+ * Madrid Apoyo Especializado v1.8 - Ficha para Preparar el Contacto
  * Documento imprimible con preguntas clave, vía de acceso y advertencias (§32.1, §81.1)
  */
 
@@ -92,7 +92,7 @@ export const PrintableContactCardModal: React.FC<PrintableContactCardProps> = ({
           <div className="border-b border-stone-300 pb-3 flex items-start justify-between">
             <div>
               <div className="text-[11px] font-mono uppercase tracking-wider text-stone-500">
-                Madrid Apoyo Especializado v1.7 · DATAMAD 2026
+                Madrid Apoyo Especializado v1.8 · DATAMAD 2026
               </div>
               <h1 className="text-lg font-bold text-stone-900 mt-1">
                 {centre.official_name}
@@ -138,10 +138,20 @@ export const PrintableContactCardModal: React.FC<PrintableContactCardProps> = ({
                 <li key={i}>{b}</li>
               ))}
               <li>
-                Titularidad y gestión: {centre.management_type} ({centre.public_private_status === 'red_publica' ? 'Pública directa' : centre.public_private_status === 'concertado' ? 'Plazas públicas concertadas' : 'Privado autorizado'}).
+                Titularidad y gestión: {centre.management_type} ({
+                  centre.public_private_status === 'red_publica'
+                    ? 'Pública directa'
+                    : centre.public_private_status === 'concertado'
+                    ? 'Plazas públicas concertadas'
+                    : centre.public_private_status === 'no_especificado'
+                    ? 'Titularidad no especificada en registro municipal'
+                    : 'Privado autorizado'
+                }).
               </li>
               <li>
-                Etapas vitales autorizadas: {centre.allowed_life_stages.map(s => LIFE_STAGES[s]?.label).join(', ')}.
+                Etapas vitales autorizadas: {centre.allowed_life_stages.length > 0
+                  ? centre.allowed_life_stages.map(s => LIFE_STAGES[s]?.label || s).join(', ')
+                  : 'No consta en el registro oficial (confirmar con el centro)'}.
               </li>
             </ul>
           </div>
@@ -167,13 +177,19 @@ export const PrintableContactCardModal: React.FC<PrintableContactCardProps> = ({
             </h3>
             <ul className="list-disc list-inside space-y-0.5 text-stone-700 pl-1 text-[11px]">
               <li>
-                <strong>Plazas disponibles:</strong> El centro cuenta con {centre.availability.authorised_places || 'capacidad no fijada'} plazas autorizadas, pero este dato NO significa que existan plazas libres de ingreso inmediato.
+                <strong>Plazas disponibles:</strong>{' '}
+                {typeof centre.availability.authorised_places === 'number'
+                  ? `El centro cuenta con ${centre.availability.authorised_places} plazas autorizadas, pero este dato NO significa que existan plazas libres de ingreso inmediato.`
+                  : 'El registro oficial no publica cupo de plazas autorizadas para este recurso; confirme la disponibilidad actual directamente.'}
               </li>
               <li>
                 <strong>Adecuación al caso concreto:</strong> Confirme si el servicio específico requerido tiene disponibilidad horaria y equipo especializado disponible.
               </li>
               <li>
-                <strong>Condiciones de admisión:</strong> Si es plaza pública concertada, requiere resolución de PIA o derivación del SERMAS. Si es plaza privada, consulte tarifas vigentes.
+                <strong>Condiciones de admisión:</strong>{' '}
+                {centre.resource_domain === 'healthcare'
+                  ? 'Si es plaza concertada o sanitaria, requiere derivación del SERMAS o valoración clínica. Si es plaza privada, consulte tarifas vigentes.'
+                  : 'Si es plaza pública o concertada, puede requerir resolución de PIA o valoración de Servicios Sociales. Si es plaza privada, consulte tarifas vigentes.'}
               </li>
             </ul>
           </div>

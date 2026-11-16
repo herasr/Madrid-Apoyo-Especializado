@@ -13,6 +13,7 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import { buildCentresFromOfficialCSVs } from '../src/utils/officialRegistryParser';
 
 export interface OfficialSourceSpec {
   source_id: 'madrid_municipal' | 'cam_centros' | 'cam_servicios';
@@ -344,7 +345,7 @@ export async function runIngestionProcess() {
     console.log(`Descargando [${spec.source_id}]: ${spec.source_url}`);
     const response = await fetch(spec.source_url, {
       headers: {
-        'User-Agent': 'MadridApoyoEspecializadoBot/1.7 (DataMad 2026 Audit; +https://datos.madrid.es)'
+        'User-Agent': 'MadridApoyoEspecializadoBot/1.8 (DataMad 2026 Audit; +https://datos.madrid.es)'
       }
     });
 
@@ -370,6 +371,24 @@ export async function runIngestionProcess() {
     downloaded.push({ spec, buffer, sha256, rows, prevRows });
   }
 
+  // Fase 1.5: Verificación idempotente. Si todos los hashes SHA-256 coinciden con los ficheros en disco y catalog-classified.json existe, omitir ingesta.
+  const classifiedPath = path.join(snapshotsDir, 'catalog-classified.json');
+  const allHashesMatchExisting = downloaded.every(item => {
+    const latestPath = path.join(snapshotsDir, item.spec.latest_file);
+    if (!fs.existsSync(latestPath)) return false;
+    const existingBuf = fs.readFileSync(latestPath);
+    const existingHash = crypto.createHash('sha256').update(existingBuf).digest('hex');
+    return existingHash === item.sha256;
+  });
+
+  if (allHashesMatchExisting && fs.existsSync(classifiedPath) && fs.existsSync(metadataPath)) {
+    console.log('✓ Registros oficiales sin cambios (SHA-256 idéntico en todas las fuentes). Ingesta omitida de forma idempotente.');
+    try {
+      const existingMeta = JSON.parse(fs.readFileSync(metadataPath, 'utf-8'));
+      return existingMeta;
+    } catch {}
+  }
+
   // Fase 2: Guardar buffers crudos exactos sin re-codificación y comprobar hash en disco
   const allDiffs: RealSnapshotDiff[] = [];
   const prevDateLabel = prevTimestamp ? prevTimestamp.slice(0, 10) : dateStr;
@@ -377,10 +396,6 @@ export async function runIngestionProcess() {
   for (const item of downloaded) {
     const latestPath = path.join(snapshotsDir, item.spec.latest_file);
     fs.writeFileSync(latestPath, item.buffer);
-
-    if (item.spec.source_id === 'madrid_municipal') {
-      fs.writeFileSync(path.join(snapshotsDir, `snapshot-${dateStr}.csv`), item.buffer);
-    }
 
     // Verificación estricta de que el SHA-256 del archivo en disco coincide byte a byte
     const diskHash = crypto.createHash('sha256').update(fs.readFileSync(latestPath)).digest('hex');
@@ -392,15 +407,26 @@ export async function runIngestionProcess() {
     allDiffs.push(...sourceDiffs);
   }
 
-  // Fase 3: Guardar diferencias reales en snapshot-diffs.json
+  // Fase 3: Guardar diferencias reales en snapshot-diffs.json (preservando histórico si no hay cambios nuevos)
+  const diffsPath = path.join(snapshotsDir, 'snapshot-diffs.json');
+  let finalDiffs = allDiffs;
+  if (allDiffs.length === 0 && fs.existsSync(diffsPath)) {
+    try {
+      const existingDiffs = JSON.parse(fs.readFileSync(diffsPath, 'utf-8'));
+      if (Array.isArray(existingDiffs?.diffs) && existingDiffs.diffs.length > 0) {
+        finalDiffs = existingDiffs.diffs;
+      }
+    } catch {}
+  }
+
   const diffsPayload = {
     generated_at: timestamp,
     previous_snapshot: prevDateLabel,
     current_snapshot: dateStr,
-    total_changes: allDiffs.length,
-    diffs: allDiffs
+    total_changes: finalDiffs.length,
+    diffs: finalDiffs
   };
-  fs.writeFileSync(path.join(snapshotsDir, 'snapshot-diffs.json'), JSON.stringify(diffsPayload, null, 2), 'utf-8');
+  fs.writeFileSync(diffsPath, JSON.stringify(diffsPayload, null, 2), 'utf-8');
 
   // Fase 4: Guardar metadatos de auditoría multi-fuente
   const primary = downloaded.find(d => d.spec.source_id === 'madrid_municipal')!;
@@ -434,10 +460,97 @@ export async function runIngestionProcess() {
 
   fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2), 'utf-8');
 
+  // Fase 5: Generar catálogo pre-clasificado JSON para carga instantánea y soporte offline PWA (#7)
+  const classifiedPayload = generatePreclassifiedCatalogFile({
+    snapshotsDir,
+    timestamp,
+    totalRecords: totalCombined
+  });
+
   console.log('=== INGESTA REAL FINALIZADA CON ÉXITO ===');
   console.log(`Total registros oficiales verificados (3 CSVs): ${totalCombined}`);
+  console.log(`Recursos clasificados en catalog-classified.json: ${classifiedPayload.active_centres_count}`);
   console.log(`Diferencias detectadas frente al snapshot anterior: ${allDiffs.length}`);
   return metadata;
+}
+
+export function generatePreclassifiedCatalogFile(params: {
+  snapshotsDir: string;
+  timestamp?: string;
+  totalRecords?: number;
+}) {
+  const { snapshotsDir } = params;
+  const metaPath = path.join(snapshotsDir, 'snapshot-metadata.json');
+  let metaTimestamp = params.timestamp;
+  let metaTotal = params.totalRecords;
+  if ((!metaTimestamp || !metaTotal) && fs.existsSync(metaPath)) {
+    try {
+      const m = JSON.parse(fs.readFileSync(metaPath, 'utf-8'));
+      metaTimestamp = metaTimestamp || m.timestamp;
+      metaTotal = metaTotal || m.total_combined_records || m.extracted_records_count;
+    } catch {
+      // noop
+    }
+  }
+
+  const timestamp = metaTimestamp || new Date().toISOString();
+  const dateStr = timestamp.slice(0, 10);
+
+  const madridPath = path.join(snapshotsDir, 'snapshot-latest.csv');
+  const camCentrosPath = path.join(snapshotsDir, 'cam-centros-latest.csv');
+  const camServiciosPath = path.join(snapshotsDir, 'cam-servicios-latest.csv');
+
+  const madridCsvText = fs.existsSync(madridPath)
+    ? new TextDecoder('latin1').decode(fs.readFileSync(madridPath))
+    : null;
+  const camCentrosCsvText = fs.existsSync(camCentrosPath)
+    ? new TextDecoder('utf-8').decode(fs.readFileSync(camCentrosPath))
+    : null;
+  const camServiciosCsvText = fs.existsSync(camServiciosPath)
+    ? new TextDecoder('utf-8').decode(fs.readFileSync(camServiciosPath))
+    : null;
+
+  const built = buildCentresFromOfficialCSVs({
+    madridCsvText,
+    camCentrosCsvText,
+    camServiciosCsvText,
+    snapshotDate: dateStr
+  });
+
+  const neededLookupKeys = new Set<string>();
+  for (const c of built.centres) {
+    neededLookupKeys.add(c.centre_id);
+    for (const prov of c.provenance_records) {
+      const pkMatch = prov.source_dataset.match(/PK\s+(\d+)/);
+      if (pkMatch) neededLookupKeys.add(`MAD-PK${pkMatch[1]}`);
+      const camMatch = prov.source_dataset.match(/\(([CS]\d+)\)/);
+      if (camMatch) {
+        const key = camMatch[1].startsWith('S') ? `CAM-SRV-${camMatch[1]}` : `CAM-${camMatch[1]}`;
+        neededLookupKeys.add(key);
+      }
+    }
+  }
+
+  const slimLookupRecords = Array.from(built.lookupIndex.entries()).filter(([key]) =>
+    neededLookupKeys.has(key)
+  );
+
+  const payload = {
+    version: '1.8',
+    generated_at: timestamp,
+    snapshot_date: dateStr,
+    total_records: metaTotal || built.lookupIndex.size,
+    active_centres_count: built.centres.length,
+    lookup_records: slimLookupRecords,
+    centres: built.centres
+  };
+
+  fs.writeFileSync(
+    path.join(snapshotsDir, 'catalog-classified.json'),
+    JSON.stringify(payload),
+    'utf-8'
+  );
+  return payload;
 }
 
 const isDirectExecution = process.argv[1] && path.resolve(process.argv[1]).endsWith('ingest.ts');

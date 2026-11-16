@@ -1,14 +1,15 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * Madrid Apoyo Especializado v1.7 - Search & Cumulative Taxonomy Filters
+ * Madrid Apoyo Especializado v1.8 - Search & Cumulative Taxonomy Filters
  * Principio v1.4: perfil + necesidad funcional + apoyo + etapa vital + ubicación + red
  * se aplican conjuntamente mediante lógica AND entre dimensiones y OR controlado dentro de una misma dimensión (§62.1).
- * Novedad v1.7: Búsqueda de combinaciones de apoyos en una misma sede (§82).
+ * Novedad v1.8: Filtros de accesibilidad literales por código datos.madrid.es y rutas relativas compatibles con BASE_URL.
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
+  SpecializedCentre,
   SearchQueryState, 
   ProfileId, 
   SupportTypeId, 
@@ -25,12 +26,6 @@ import {
   FUNCTIONAL_NEEDS, 
   LIFE_STAGES 
 } from '../../data/specializedTaxonomy';
-
-const ACCESSIBILITY_FEATURES = [
-  { id: 'wheelchair_access', label: 'Acceso silla de ruedas', icon: Accessibility },
-  { id: 'magnetic_loops', label: 'Bucles magnéticos', icon: Ear },
-  { id: 'braille_signage', label: 'Señalética braille', icon: Type }
-];
 import { getProfileDefinition } from '../../utils/specializedEngine';
 import { 
   MapPin, 
@@ -44,8 +39,16 @@ import {
   Building2,
   Accessibility,
   Ear,
-  Type
+  Type,
+  MessageCircle
 } from 'lucide-react';
+
+const ACCESSIBILITY_FEATURES = [
+  { id: 'wheelchair_access', label: 'Acceso silla de ruedas (Cód. 1 / 2)', icon: Accessibility },
+  { id: 'sign_language', label: 'Lengua de signos (Cód. 4)', icon: MessageCircle },
+  { id: 'tactile_signage', label: 'Señalización podotáctil (Cód. 5)', icon: Type },
+  { id: 'magnetic_loops', label: 'Bucle magnético (Cód. 6)', icon: Ear }
+];
 
 import { MADRID_MUNICIPALITIES, findMunicipalityByName, resolveSearchOrigin } from '../../data/municipalitiesData';
 
@@ -61,6 +64,7 @@ interface SearchFiltersProps {
   query: SearchQueryState;
   setQuery: React.Dispatch<React.SetStateAction<SearchQueryState>>;
   totalResults: number;
+  centres?: SpecializedCentre[];
   onOpenDisambiguation: (term: 'neurodivergent' | 'psychomotor') => void;
   onResetFilters: () => void;
 }
@@ -69,6 +73,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
   query,
   setQuery,
   totalResults,
+  centres,
   onOpenDisambiguation,
   onResetFilters
 }) => {
@@ -78,7 +83,9 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
 
   // Carga del catálogo oficial de municipios de la Comunidad de Madrid
   useEffect(() => {
-    fetch('/data/municipalities.json')
+    const baseUrl = import.meta.env.BASE_URL || '/';
+    const muniUrl = `${baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`}data/municipalities.json`;
+    fetch(muniUrl)
       .then(res => res.json())
       .then((data: MunicipalityOption[]) => {
         if (Array.isArray(data) && data.length > 0) {
@@ -93,39 +100,38 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
     }
   }, []);
 
-  // Geolocalización efímera del navegador (§67) - con requisito de asignación de municipio alternativa para desactivar
+  // Geolocalización efímera del navegador (§67): sin suplantación si el usuario deniega o falla el GPS
   const requestBrowserLocation = () => {
-    // Si ya está activo, informamos o reactivamos GPS; la única forma de cambiar es mediante el desplegable de municipios
-    setGeoStatus('requesting');
-    setQuery(prev => ({
-      ...prev,
-      municipality: null,
-      location_mode: 'browser'
-    }));
-
-    if (!navigator.geolocation) {
-      setGeoStatus('granted');
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      setGeoStatus('denied');
       setQuery(prev => ({
         ...prev,
         municipality: null,
-        user_ephemeral_location: [40.4168, -3.7038],
-        location_mode: 'browser'
+        user_ephemeral_location: null,
+        location_mode: 'all'
       }));
       return;
     }
 
+    setGeoStatus('requesting');
+    let settled = false;
+
     const timer = setTimeout(() => {
-      setGeoStatus('granted');
+      if (settled) return;
+      settled = true;
+      setGeoStatus('timeout');
       setQuery(prev => ({
         ...prev,
         municipality: null,
-        user_ephemeral_location: prev.user_ephemeral_location || [40.4168, -3.7038],
-        location_mode: 'browser'
+        user_ephemeral_location: null,
+        location_mode: 'all'
       }));
-    }, 2500);
+    }, 5000);
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        if (settled) return;
+        settled = true;
         clearTimeout(timer);
         setGeoStatus('granted');
         setQuery(prev => ({
@@ -135,17 +141,19 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
           municipality: null
         }));
       },
-      () => {
+      (err) => {
+        if (settled) return;
+        settled = true;
         clearTimeout(timer);
-        setGeoStatus('granted');
+        setGeoStatus(err?.code === 3 ? 'timeout' : 'denied');
         setQuery(prev => ({
           ...prev,
-          user_ephemeral_location: [40.4168, -3.7038],
-          location_mode: 'browser',
+          user_ephemeral_location: null,
+          location_mode: 'all',
           municipality: null
         }));
       },
-      { timeout: 2500, maximumAge: 60000, enableHighAccuracy: false }
+      { timeout: 5000, maximumAge: 60000, enableHighAccuracy: false }
     );
   };
 
@@ -201,6 +209,41 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
     if (!query.profile) return null;
     return getProfileDefinition(query.profile);
   }, [query.profile]);
+
+  // Conteo real en catálogo de apoyos y perfiles para transparencia previa al filtrado
+  const supportCounts = useMemo(() => {
+    const counts: Partial<Record<SupportTypeId, number>> = {};
+    for (const id of Object.keys(SUPPORT_TYPES) as SupportTypeId[]) {
+      counts[id] = 0;
+    }
+    if (centres && centres.length > 0) {
+      for (const c of centres) {
+        for (const sup of c.supports || []) {
+          counts[sup] = (counts[sup] || 0) + 1;
+        }
+      }
+    }
+    return counts;
+  }, [centres]);
+
+  const profileCounts = useMemo(() => {
+    const counts: Record<string, { a1: number; a2: number; total: number }> = {};
+    if (centres && centres.length > 0) {
+      for (const c of centres) {
+        for (const p of c.explicit_specialisations || []) {
+          if (!counts[p]) counts[p] = { a1: 0, a2: 0, total: 0 };
+          counts[p].a1 += 1;
+          counts[p].total += 1;
+        }
+        for (const p of c.entity_declared_specialisations || []) {
+          if (!counts[p]) counts[p] = { a1: 0, a2: 0, total: 0 };
+          counts[p].a2 += 1;
+          counts[p].total += 1;
+        }
+      }
+    }
+    return counts;
+  }, [centres]);
 
   // Tipos de apoyo dinámicos adaptados a la taxonomía seleccionada
   const displayedSupportTypes = useMemo(() => {
@@ -265,13 +308,12 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
         }
       }
 
-      if (!changed && prev.accessibility_needs.length === 0) return prev;
+      if (!changed) return prev;
       return {
         ...prev,
         support_types: nextSupports,
         functional_needs: nextNeeds,
-        life_stage: nextStage,
-        accessibility_needs: []
+        life_stage: nextStage
       };
     });
   }, [query.profile, activeProfileDef]);
@@ -290,6 +332,14 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
           {[...Object.values(CORE_PROFILES), ...Object.values(EXPERIMENTAL_PROFILES), ...Object.values(PENDING_PROFILES)].map((prof) => {
             const isSelected = query.profile === prof.id;
+            const statusText =
+              prof.status === 'approved'
+                ? 'Núcleo aprobado'
+                : prof.status === 'experimental'
+                ? 'Experimental'
+                : 'En revisión';
+            const hasCatalog = Boolean(centres && centres.length > 0);
+            const profCov = profileCounts[prof.id] || { a1: 0, a2: 0, total: 0 };
             return (
               <button
                 key={prof.id}
@@ -300,34 +350,58 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                   const newProfile = isSelected ? null : prof.id;
                   setQuery(prev => {
                     if (!newProfile) {
-                      return { ...prev, profile: null, support_types: [], functional_needs: [], accessibility_needs: [] };
+                      return { ...prev, profile: null, support_types: [], functional_needs: [] };
                     }
                     const def = getProfileDefinition(newProfile);
                     const allowedStages = def?.allowed_life_stages || [];
                     const nextStage = prev.life_stage && !allowedStages.includes(prev.life_stage) ? null : prev.life_stage;
+                    const allowedSupports = def?.typical_supports || [];
+                    const allowedNeeds = def?.typical_needs || [];
+                    const nextSupports = allowedSupports.length > 0 
+                      ? prev.support_types.filter(s => allowedSupports.includes(s))
+                      : prev.support_types;
+                    const nextNeeds = allowedNeeds.length > 0
+                      ? prev.functional_needs.filter(n => allowedNeeds.includes(n))
+                      : prev.functional_needs;
                     return {
                       ...prev,
                       profile: newProfile,
                       life_stage: nextStage,
-                      support_types: [],
-                      functional_needs: [],
-                      accessibility_needs: []
+                      support_types: nextSupports,
+                      functional_needs: nextNeeds
                     };
                   });
                 }}
-                className={`p-3 rounded-lg border text-left transition-all cursor-pointer ${
+                className={`p-3 rounded-lg border text-left transition-all cursor-pointer flex flex-col justify-between gap-1 ${
                   isSelected
                     ? 'border-stone-900 bg-stone-900 text-white shadow-xs'
                     : 'border-stone-200 bg-white hover:bg-stone-50 text-stone-900'
                 }`}
               >
-                <div className="text-xs font-bold">
+                <div className="text-xs font-bold leading-snug">
                   {prof.preferred_label.replace(' (Reserva/Experimental)', '').replace(' (Experimental)', '')}
+                </div>
+                <div className={`text-[10px] font-mono flex items-center justify-between gap-1 ${isSelected ? 'text-stone-300' : 'text-stone-500'}`}>
+                  <span>{statusText}</span>
+                  {hasCatalog && (
+                    <span className={isSelected ? 'text-stone-300' : profCov.total === 0 ? 'text-amber-700' : 'text-stone-500'}>
+                      {profCov.total === 0 ? '0 A en CSV' : `${profCov.a1} A1 · ${profCov.a2} A2`}
+                    </span>
+                  )}
                 </div>
               </button>
             );
           })}
         </div>
+
+        {centres && centres.length > 0 && query.profile && (profileCounts[query.profile]?.total || 0) === 0 && (
+          <div className="mt-2 text-xs bg-amber-50 border border-amber-200 rounded-lg p-2.5 text-amber-950 flex items-center gap-2">
+            <Info className="w-4 h-4 text-amber-700 shrink-0" aria-hidden="true" />
+            <span>
+              <strong>Sin mención expresa en los CSV oficiales actuales:</strong> Ningún centro o servicio declara literalmente «{activeProfileDef?.preferred_label || query.profile}» en los ficheros vigentes; se muestran únicamente recursos relacionados u orientación general pendiente de confirmación telefónica.
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="h-px bg-stone-100" />
@@ -378,6 +452,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
           {displayedSupportTypes.map((st) => {
             const isChecked = query.support_types.includes(st.id);
+            const countInCatalog = centres && centres.length > 0 ? (supportCounts[st.id] ?? 0) : null;
             return (
               <button
                 key={st.id}
@@ -385,13 +460,18 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                 aria-pressed={isChecked}
                 aria-label={`Filtrar por tipo de apoyo: ${st.label}`}
                 onClick={() => toggleSupport(st.id)}
-                className={`p-2.5 rounded-lg border text-left transition-colors cursor-pointer flex flex-col justify-between ${
+                className={`p-2.5 rounded-lg border text-left transition-colors cursor-pointer flex flex-col justify-between gap-1 ${
                   isChecked
                     ? 'border-stone-900 bg-stone-900 text-white font-semibold shadow-xs'
                     : 'border-stone-200 hover:bg-stone-50 text-stone-700'
                 }`}
               >
                 <span className="text-xs leading-snug">{st.label}</span>
+                {countInCatalog !== null && (
+                  <span className={`text-[10px] font-mono ${isChecked ? 'text-stone-300' : countInCatalog === 0 ? 'text-amber-700' : 'text-stone-500'}`}>
+                    {countInCatalog === 0 ? '0 en CSV · confirmar' : `${countInCatalog} en CSV`}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -405,6 +485,22 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
             </span>
           </div>
         )}
+
+        {centres &&
+          centres.length > 0 &&
+          query.support_types.some(s => (supportCounts[s] || 0) === 0) && (
+            <div className="mt-2 text-xs bg-amber-50 border border-amber-200 rounded-lg p-2.5 text-amber-950 flex items-center gap-2">
+              <Info className="w-4 h-4 text-amber-700 shrink-0" aria-hidden="true" />
+              <span>
+                <strong>Desglose ausente en CSV:</strong> Los ficheros sociales oficiales actuales no detallan servicios de{' '}
+                {query.support_types
+                  .filter(s => (supportCounts[s] || 0) === 0)
+                  .map(s => SUPPORT_TYPES[s]?.label || s)
+                  .join(' ni ')}
+                . Los centros compatibles se muestran como «Coincidencia parcial» para que pueda confirmarlo al llamar.
+              </span>
+            </div>
+          )}
       </div>
 
       <div className="h-px bg-stone-100" />
@@ -499,7 +595,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
               onClick={requestBrowserLocation}
               disabled={geoStatus === 'requesting'}
               className={`w-full py-2 px-3 text-xs font-medium rounded-lg border flex items-center justify-center gap-2 transition-colors ${
-                query.location_mode === 'browser'
+                query.location_mode === 'browser' && query.user_ephemeral_location
                   ? 'border-emerald-600 bg-emerald-50 text-emerald-900 font-semibold shadow-xs'
                   : 'border-stone-300 bg-white text-stone-700 hover:bg-stone-50'
               }`}
@@ -508,11 +604,19 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
               <span>
                 {geoStatus === 'requesting'
                   ? 'Obteniendo posición...'
-                  : query.location_mode === 'browser'
+                  : query.location_mode === 'browser' && query.user_ephemeral_location
                   ? '✓ Usando tu ubicación actual (GPS)'
                   : 'Usar mi ubicación'}
               </span>
             </button>
+
+            {(geoStatus === 'denied' || geoStatus === 'timeout') && (
+              <div className="text-[11px] text-amber-950 bg-amber-50 border border-amber-200 rounded-lg p-2 leading-snug">
+                {geoStatus === 'timeout'
+                  ? 'Tiempo de espera agotado al obtener tu GPS. Selecciona un municipio en el desplegable inferior para fijar el origen.'
+                  : 'No se pudo acceder a la ubicación GPS del navegador. Selecciona tu municipio en el desplegable inferior para ordenar por distancia.'}
+              </div>
+            )}
 
             {/* Selector de municipio alternativo (§67.1) */}
             <div>
@@ -568,12 +672,12 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
         </div>
       </div>
 
-      {/* 5. Accesibilidad física */}
+      {/* 5. Accesibilidad física oficial por códigos */}
       <div>
         <label className="text-xs font-bold uppercase tracking-wider text-stone-700 block mb-2.5">
-          Accesibilidad física
+          Accesibilidad oficial (Ayuntamiento de Madrid)
         </label>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
           {ACCESSIBILITY_FEATURES.map((feat) => {
             const isChecked = query.accessibility_needs.includes(feat.id);
             return (

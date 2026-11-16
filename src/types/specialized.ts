@@ -1,8 +1,8 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * Madrid Apoyo Especializado v1.7 - Type Definitions
- * Buscador transversal de recursos sociales y sanitarios autorizados de la Comunidad de Madrid
+ * Madrid Apoyo Especializado v1.8 - Type Definitions
+ * Buscador transversal de recursos de atención social autorizados de la Comunidad de Madrid
  * DATAMAD 2026 · Código abierto · Orientación, no diagnóstico
  */
 
@@ -35,8 +35,8 @@ export type SupportTypeId =
   | 'occupational_therapy' 
   | 'speech_therapy' 
   | 'residential_care' 
-  | 'employment_support'
-  | 'psychological_support'
+  | 'employment_support' 
+  | 'psychological_support' 
   | 'respiratory_physiotherapy';
 
 export type FunctionalNeedId = 
@@ -113,8 +113,11 @@ export interface CriterionEvidence {
   note?: string;
 }
 
+export type EvidenceSublevel = 'A1' | 'A2_support' | 'A2_entity' | 'B1' | 'B2' | 'C';
+
 export interface MatchExplanation {
   level: EvidenceLevel;
+  sublevel?: EvidenceSublevel;
   suitability: SuitabilityStatus;
   because: string[];
   does_not_confirm: string[];
@@ -206,7 +209,7 @@ export interface SpecializedCentre {
   sector: string;
   centre_type: string;
   subtype: string;
-  public_private_status: 'red_publica' | 'concertado' | 'privado_autorizado';
+  public_private_status: 'red_publica' | 'concertado' | 'privado_autorizado' | 'no_especificado';
   management_type: string;
   address: string;
   postal_code: string;
@@ -218,6 +221,7 @@ export interface SpecializedCentre {
   email: string;
   website: string;
   explicit_specialisations: ProfileId[];
+  entity_declared_specialisations?: ProfileId[];
   related_services: string[];
   supports: SupportTypeId[];
   services_offered: ServiceRecord[];
@@ -230,6 +234,7 @@ export interface SpecializedCentre {
   conflict_record?: ConflictRecord;
   last_checked: string;
   limitations: string[];
+  is_individual_practitioner?: boolean;
 }
 
 export interface SearchQueryState {
@@ -250,6 +255,7 @@ export interface EvaluatedCentreResult {
   centre: SpecializedCentre;
   match_assessment: MatchAssessment;
   evidence_level: EvidenceLevel;
+  evidence_sublevel?: EvidenceSublevel;
   suitability: SuitabilityStatus;
   combination_status: CombinationStatus;
   combination_details: {

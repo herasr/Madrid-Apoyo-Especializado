@@ -1,14 +1,20 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * Madrid Apoyo Especializado v1.7 - Canonical Validation Test Suite
+ * Madrid Apoyo Especializado v1.8 - Canonical Validation Test Suite
  * Batería de pruebas automatizadas según Secciones 18, 31, 44, 59, 65, 79 y 90 del Prompt Maestro
  * DATAMAD 2026 · Cero falsos positivos de especialización A · Orden lexicográfico estricto
  */
 
 import { REAL_CANONICAL_CENTRES } from '../data/specializedCentresData';
 import { BENCHMARK_TEST_CENTRES } from '../data/testCentresData';
-import { auditCentreAgainstSnapshot, evaluateCentre, runSpecializedSearch } from './specializedEngine';
+import {
+  auditCentreAgainstSnapshot,
+  evaluateCentre,
+  getAccessibilityNeedStatus,
+  runSpecializedSearch
+} from './specializedEngine';
+import { classifyExplicitSpecialisations } from './officialRegistryParser';
 import { SearchQueryState, SpecializedCentre } from '../types/specialized';
 import { DISAMBIGUATION_TERMS, EDUCATION_BRIDGE_MAPPINGS } from '../data/specializedTaxonomy';
 
@@ -159,15 +165,14 @@ export function runAllCanonicalTests(): {
     notes: 'Protege contra diagnósticos libres y garantiza precisión taxonómica.'
   });
 
-  // 7. COMB-001: Varios apoyos y "Todos en el mismo centro" en recurso CSV oficial
-  const jazminCenter = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'MAD-PK5416084')!;
+  // 7. COMB-001: Varios apoyos y "Todos en el mismo centro" en la misma sede física
   const qComb001: SearchQueryState = {
     ...defaultQuery,
-    profile: 'alzheimer',
-    support_types: ['rehabilitation', 'day_care'],
+    profile: 'autism',
+    support_types: ['occupational_therapy', 'speech_therapy'],
     support_combination_mode: 'all_supports_same_centre'
   };
-  const resComb001 = evaluateCentre(jazminCenter, qComb001, ALL_BENCHMARK_CENTRES, null);
+  const resComb001 = evaluateCentre(dupCenterA, qComb001, ALL_BENCHMARK_CENTRES, null);
   tests.push({
     id: 'COMB-001',
     category: 'COMBINACION',
@@ -175,7 +180,7 @@ export function runAllCanonicalTests(): {
     expected: 'all_same_centre (todos confirmados para el mismo centre_id)',
     actual: resComb001.combination_status,
     passed: resComb001.combination_status === 'all_same_centre',
-    notes: `${jazminCenter.official_name} (MAD-PK5416084) confirma rehabilitación y atención diurna en su sede.`
+    notes: `${dupCenterA.official_name} (C-DUP-01A) confirma terapia ocupacional y logopedia en la misma sede.`
   });
 
   // 8. COMB-002 & DUP-001: Mismo proveedor, sedes distintas
@@ -196,16 +201,16 @@ export function runAllCanonicalTests(): {
     notes: 'No confunde mismo proveedor con misma sede. Respeta la separación centre_id vs provider_id.'
   });
 
-  // 9. ACC-004: Vía documentada con derivación / PIA en recurso oficial concertado
-  const apanefaCenter = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'CAM-C5107')!;
+  // 9. ACC-004: Vía documentada con derivación / PIA explícita en la fuente
+  const dupCenterB = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'C-DUP-01B')!;
   tests.push({
     id: 'ACC-004',
     category: 'ACCESO',
     title: 'Vía de acceso documentada: Dependencia / PIA',
     expected: 'Tarjeta PIA con organismo y trámite documentado',
-    actual: `Tipo: ${apanefaCenter.access_route.access_type}`,
-    passed: apanefaCenter.access_route.access_type === 'dependency_pia' && apanefaCenter.access_route.next_step_action.includes('PIA'),
-    notes: `${apanefaCenter.official_name} (CAM-C5107) cuenta con plazas concertadas sujetas a resolución PIA.`
+    actual: `Tipo: ${dupCenterB.access_route.access_type}`,
+    passed: dupCenterB.access_route.access_type === 'dependency_pia' && dupCenterB.access_route.next_step_action.includes('PIA'),
+    notes: `${dupCenterB.official_name} (C-DUP-01B) documenta expresamente resolución PIA en su fuente.`
   });
 
   // 10. ACC-002 & ACC-005: Vía ausente en la fuente -> "Debe confirmarse"
@@ -476,6 +481,115 @@ export function runAllCanonicalTests(): {
       auditFake.audit_status === 'unverified' &&
       !auditFake.is_official_csv,
     notes: 'Contrasta teléfono, dirección, plazas autorizadas y firma SHA-256 contra snapshot-metadata.json.'
+  });
+
+  // 24. ACC-CSV-HONEST: Centro concertado CSV no deduce PIA sin documento expreso (#4)
+  const apanefaCenter = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'CAM-C5107')!;
+  tests.push({
+    id: 'ACC-CSV-HONEST',
+    category: 'ACCESO',
+    title: 'Plaza concertada registral no asume automáticamente tramitación PIA (#4)',
+    expected: 'access_type unknown con orientación honesta a servicios sociales',
+    actual: `Tipo: ${apanefaCenter.access_route.access_type}`,
+    passed:
+      apanefaCenter.access_route.access_type === 'unknown' &&
+      apanefaCenter.access_route.next_step_action.toLowerCase().includes('servicios sociales'),
+    notes: `${apanefaCenter.official_name} (CAM-C5107) indica que puede tener plazas públicas o concertadas sin suponer el cauce administrativo.`
+  });
+
+  // 25. ACCS-CODE-01: Códigos literales datos.madrid.es (#1, #2)
+  const code1Centre: SpecializedCentre = {
+    ...teaCenter,
+    centre_id: 'TEST-ACC-1',
+    accessibility_features: ['Accesible (Código 1 · datos.madrid.es)', 'Bucle magnético (Código 6 · datos.madrid.es)']
+  };
+  const code2Centre: SpecializedCentre = {
+    ...teaCenter,
+    centre_id: 'TEST-ACC-2',
+    accessibility_features: ['Parcialmente accesible (Código 2 · datos.madrid.es)']
+  };
+  const code3Centre: SpecializedCentre = {
+    ...teaCenter,
+    centre_id: 'TEST-ACC-3',
+    accessibility_features: ['Sin información (Código 3 · datos.madrid.es) · palabra adaptada no válida']
+  };
+  const evalCode1 = evaluateCentre(code1Centre, { ...defaultQuery, accessibility_needs: ['wheelchair_access', 'magnetic_loops'] }, [code1Centre], null);
+  const evalCode2 = evaluateCentre(code2Centre, { ...defaultQuery, accessibility_needs: ['wheelchair_access'] }, [code2Centre], null);
+  const evalCode3 = evaluateCentre(code3Centre, { ...defaultQuery, accessibility_needs: ['wheelchair_access'] }, [code3Centre], null);
+  tests.push({
+    id: 'ACCS-CODE-01',
+    category: 'EVIDENCIA',
+    title: 'Filtro de accesibilidad por código oficial: Cód. 1 accesible, Cód. 2 parcial, Cód. 3 excluido (#1/#2)',
+    expected: 'Cód.1 confirmed+complete, Cód.2 partial, Cód.3 not_stated+incompatible',
+    actual: `1:${getAccessibilityNeedStatus(code1Centre, 'wheelchair_access')}/${evalCode1.suitability}, 2:${evalCode2.suitability}, 3:${evalCode3.suitability}`,
+    passed:
+      getAccessibilityNeedStatus(code1Centre, 'wheelchair_access') === 'confirmed' &&
+      getAccessibilityNeedStatus(code1Centre, 'magnetic_loops') === 'confirmed' &&
+      evalCode1.suitability === 'complete' &&
+      evalCode2.suitability === 'partial' &&
+      evalCode3.suitability === 'incompatible',
+    notes: 'Impide falsos positivos por palabras sueltas cuando ACCESIBILIDAD es Código 3 «Sin información».'
+  });
+
+  // 26. AGE-NO-CONSTA: Edad no declarada no excluye al buscar etapa vital menor (#3)
+  const unstatedAgeCentre: SpecializedCentre = {
+    ...amdemCenter,
+    allowed_life_stages: []
+  };
+  const evalUnstatedAge = evaluateCentre(unstatedAgeCentre, { ...defaultQuery, life_stage: 'minor' }, [unstatedAgeCentre], null);
+  tests.push({
+    id: 'AGE-NO-CONSTA',
+    category: 'REGLAS_NEGATIVAS',
+    title: 'Centro sin edad declarada en el registro no se descarta como incompatible (#3)',
+    expected: 'suitability partial y aviso «no consta» en matriz',
+    actual: `Adecuación: ${evalUnstatedAge.suitability}`,
+    passed:
+      evalUnstatedAge.suitability === 'partial' &&
+      evalUnstatedAge.criterion_matrix.some(c => c.criterion_id === 'lifestage.minor' && c.status === 'confirm_required'),
+    notes: 'Mantiene visibles los ~700 centros que no especifican edad oficial con advertencia «Edad: no consta, confirmar».'
+  });
+
+  // 27. EVID-A2-ENTITY: Distinción A2 entidad titular (#8)
+  const entityTeaCentre: SpecializedCentre = {
+    ...teaCenter,
+    centre_id: 'TEST-A2-ENT',
+    provider_name: 'ASOCIACION AUTISMO DE PRUEBA (ENTIDAD)',
+    official_name: 'CENTRO OCUPACIONAL LOS OLIVOS',
+    explicit_specialisations: [],
+    entity_declared_specialisations: ['autism']
+  };
+  const evalA2Entity = evaluateCentre(entityTeaCentre, { ...defaultQuery, profile: 'autism' }, [teaCenter, entityTeaCentre], null);
+  tests.push({
+    id: 'EVID-A2-ENTITY',
+    category: 'EVIDENCIA',
+    title: 'Distingue nivel «A2 · Lo declara la entidad titular» del A1 explícito en centro (#8)',
+    expected: 'A2 con evidence_sublevel A2_entity y ordenación detrás de A1',
+    actual: `Nivel ${evalA2Entity.evidence_level} (${evalA2Entity.evidence_sublevel})`,
+    passed:
+      evalA2Entity.evidence_level === 'A2' &&
+      evalA2Entity.evidence_sublevel === 'A2_entity' &&
+      evalA2Entity.sort_rank > resEv001.sort_rank,
+    notes: 'Transparenta ante familias y jurado si la condición figura en el nombre de la entidad titular y no en el del centro.'
+  });
+
+  // 28. BOBATH-CP-NOOCC: Regex «parálisis o daño cerebral» (#9) y no equivalencia «centro ocupacional» -> terapia ocupacional (#5)
+  const bobathSpecs = classifyExplicitSpecialisations({
+    name: 'BOBATH, SERVICIO DE ATENCION A PERSONAS CON PARALISIS O DAÑO CEREBRAL',
+    subtype: 'SERVICIOS ESPECIALIZADOS',
+    sector: 'Personas con discapacidad física'
+  });
+  const coCentre = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'CAM-C1812')!;
+  tests.push({
+    id: 'BOBATH-CP-NOOCC',
+    category: 'TAXONOMIA',
+    title: 'Patrón «parálisis o daño cerebral» (#9) y no deducir terapia ocupacional desde «centro ocupacional» (#5)',
+    expected: 'Bobath => CP+DCA; CAM-C1812 sin occupational_therapy automático',
+    actual: `Bobath: ${bobathSpecs.join('+')}, C1812 supports: ${coCentre.supports.join(',')}`,
+    passed:
+      bobathSpecs.includes('cerebral_palsy') &&
+      bobathSpecs.includes('acquired_brain_injury') &&
+      !coCentre.supports.includes('occupational_therapy'),
+    notes: 'Corrige la detección conjunta de parálisis/daño cerebral y evita convertir centros ocupacionales en terapia ocupacional clínica.'
   });
 
   const executionTimeMs = performance.now() - startTime;
