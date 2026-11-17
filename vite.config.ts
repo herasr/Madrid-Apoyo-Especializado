@@ -16,17 +16,53 @@ export default defineConfig(() => {
         registerType: 'autoUpdate',
         includeAssets: ['apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
         workbox: {
-          maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
+          maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,json}'],
-          globIgnores: ['**/data/snapshots/*.csv', '**/data/snapshots/snapshot-202*.csv'],
+          globIgnores: [
+            '**/data/snapshots/*.csv',
+            '**/data/snapshots/snapshot-202*.csv',
+            '**/data/snapshots/catalog-classified.json',
+          ],
+          runtimeCaching: [
+            {
+              urlPattern: /\/data\/snapshots\/catalog-classified\.json$/i,
+              handler: 'StaleWhileRevalidate',
+              options: {
+                cacheName: 'datamad-catalog-classified-v1',
+                expiration: {
+                  maxEntries: 2,
+                  maxAgeSeconds: 60 * 60 * 24 * 14,
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
+            {
+              urlPattern: /\/data\/(?:snapshots\/(?:snapshot-metadata|snapshot-diffs)|municipalities)\.json$/i,
+              handler: 'StaleWhileRevalidate',
+              options: {
+                cacheName: 'datamad-reference-json-v1',
+                expiration: {
+                  maxEntries: 10,
+                  maxAgeSeconds: 60 * 60 * 24 * 14,
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
+          ],
         },
         manifest: {
           id: base,
+          lang: 'es',
           name: 'Madrid Apoyo Especializado',
           short_name: 'MadridApoyo',
           description: 'Buscador de recursos de atención social autorizados de Madrid y Comunidad de Madrid',
+          categories: ['government', 'accessibility'],
           theme_color: '#ffffff',
-          background_color: '#ffffff',
+          background_color: '#FBF9F5',
           display: 'standalone',
           start_url: base,
           scope: base,

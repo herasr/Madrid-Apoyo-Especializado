@@ -12,8 +12,7 @@ import { DynamicIngestionState } from '../../utils/liveSnapshotParser';
 import {
   X,
   History,
-  CheckCircle2,
-  AlertTriangle
+  CheckCircle2
 } from 'lucide-react';
 
 interface WhatChangedModalProps {
@@ -86,11 +85,12 @@ export const WhatChangedModal: React.FC<WhatChangedModalProps> = ({
         </div>
         {!inline && (
           <button
+            type="button"
             onClick={onClose}
             aria-label="Cerrar modal"
             className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg transition-colors cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         )}
       </div>
@@ -193,8 +193,9 @@ export const WhatChangedModal: React.FC<WhatChangedModalProps> = ({
         </span>
         {!inline && (
           <button
+            type="button"
             onClick={onClose}
-            className="px-4 py-1.5 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-stone-800 transition-colors"
+            className="px-4 py-1.5 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-stone-800 transition-colors cursor-pointer"
           >
             Cerrar
           </button>
@@ -213,6 +214,9 @@ export const WhatChangedModal: React.FC<WhatChangedModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="what-changed-modal-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       {cardBody}
     </div>

@@ -295,23 +295,33 @@ export default function App() {
   // Carga del catálogo pre-clasificado (cacheado offline PWA) o CSVs en vivo (#6, #7, #12)
   const [activeCentres, setActiveCentres] = useState<SpecializedCentre[]>([]);
   const [isCatalogLoading, setIsCatalogLoading] = useState<boolean>(true);
+  const [isRetryingCatalog, setIsRetryingCatalog] = useState<boolean>(false);
   const [dynamicState, setDynamicState] = useState<DynamicIngestionState | null>(null);
 
-  useEffect(() => {
-    let active = true;
+  const fetchCatalog = (isRetry = false) => {
+    if (isRetry) setIsRetryingCatalog(true);
+    let cancelled = false;
     loadLiveSnapshotData()
       .then(({ centres: liveCentres, state }) => {
-        if (!active) return;
+        if (cancelled) return;
         setActiveCentres(liveCentres);
         setDynamicState(state);
         setIsCatalogLoading(false);
+        setIsRetryingCatalog(false);
       })
       .catch(() => {
-        if (active) setIsCatalogLoading(false);
+        if (!cancelled) {
+          setIsCatalogLoading(false);
+          setIsRetryingCatalog(false);
+        }
       });
     return () => {
-      active = false;
+      cancelled = true;
     };
+  };
+
+  useEffect(() => {
+    return fetchCatalog(false);
   }, []);
 
   // Seleccion de centros para comparar (hasta 3 centros §15)
@@ -346,8 +356,11 @@ export default function App() {
 
   // Ejecución del motor de búsqueda verificable (§27, §41, §78)
   const searchOutput = useMemo(() => {
+    if (isUrlBlocked) {
+      return { results: [], incompatible_results: [], total_results: 0 };
+    }
     return runSpecializedSearch(query, activeCentres, resolvedOrigin.coordinates);
-  }, [query, activeCentres, resolvedOrigin]);
+  }, [isUrlBlocked, query, activeCentres, resolvedOrigin]);
 
   // Centros en el comparador (mantiene los seleccionados independientemente de filtros de radio o estado)
   const comparedCentres = useMemo(() => {
@@ -391,6 +404,13 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-[#FBF9F5] text-stone-900 antialiased">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-stone-900 focus:text-white focus:rounded-lg focus:text-xs focus:font-semibold focus:shadow-lg no-print"
+      >
+        Saltar al contenido principal
+      </a>
+
       {/* 1. Header con contrato de barra superior de 3 zonas (§2 de frontend-design) */}
       <SpecializedHeader
         activeTab={activeTab}
@@ -398,6 +418,7 @@ export default function App() {
         easyReadMode={easyReadMode}
         setEasyReadMode={setEasyReadMode}
         savedSearchesCount={savedCount}
+        comparedCount={comparedCentreIds.length}
         openSavedSearches={() => setIsSavedSearchesOpen(true)}
         openGlossary={() => setIsGlossaryOpen(true)}
         onOpenWhatChanged={() => setActiveTab('what_changed')}
@@ -405,10 +426,10 @@ export default function App() {
 
       {/* Alerta de validación de URL cuando hay parámetros rechazados */}
       {urlValidationErrors.length > 0 && (
-        <div className="bg-amber-50 border-b border-amber-300 text-amber-950 py-3 px-4 text-xs shadow-xs">
+        <div role="alert" className="bg-amber-50 border-b border-amber-300 text-amber-950 py-3 px-4 text-xs shadow-xs no-print">
           <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-start gap-2.5">
-              <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+              <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" aria-hidden="true" />
               <div>
                 <span className="font-bold text-stone-900 block sm:inline">
                   Validación estricta de URL:
@@ -419,10 +440,11 @@ export default function App() {
               </div>
             </div>
             <button
+              type="button"
               onClick={handleClearUrlErrorsAndReset}
-              className="px-3 py-1.5 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-stone-800 transition-colors flex items-center gap-1 shrink-0 self-end sm:self-center"
+              className="px-3 py-1.5 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-stone-800 transition-colors flex items-center gap-1 shrink-0 self-end sm:self-center cursor-pointer"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
+              <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
               <span>Ver catálogo general completo</span>
             </button>
           </div>
@@ -430,14 +452,18 @@ export default function App() {
       )}
 
       {/* 3. Contenedor principal de vistas */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className={`flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 outline-none ${printableContactItem ? 'no-print' : ''}`}
+      >
         {/* PESTAÑA: BÚSQUEDA Y RESULTADOS */}
         {activeTab === 'search' && (
           <div>
             {compareLimitNotice && (
-              <div className="mb-4 p-3 rounded-xl border border-amber-300 bg-amber-50 text-amber-950 text-xs flex items-center justify-between gap-3">
+              <div role="status" aria-live="polite" className="mb-4 p-3 rounded-xl border border-amber-300 bg-amber-50 text-amber-950 text-xs flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0" />
+                  <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0" aria-hidden="true" />
                   <span>{compareLimitNotice}</span>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
@@ -482,7 +508,7 @@ export default function App() {
             />
 
             {(dynamicState?.used_fallback || dynamicState?.error) && (
-              <div className="mb-4 p-3.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-950 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div role="status" aria-live="polite" className="mb-4 p-3.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-950 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-start gap-2.5">
                   <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" aria-hidden="true" />
                   <div>
@@ -494,13 +520,24 @@ export default function App() {
                     </span>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('what_changed')}
-                  className="px-2.5 py-1 rounded bg-stone-900 text-white font-semibold hover:bg-stone-800 shrink-0 self-end sm:self-center cursor-pointer"
-                >
-                  Ver detalle técnico
-                </button>
+                <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                  <button
+                    type="button"
+                    disabled={isRetryingCatalog}
+                    onClick={() => fetchCatalog(true)}
+                    className="px-2.5 py-1 rounded border border-amber-400 bg-white text-stone-900 font-semibold hover:bg-amber-100 cursor-pointer disabled:opacity-60 inline-flex items-center gap-1"
+                  >
+                    <RotateCcw className="w-3 h-3" aria-hidden="true" />
+                    <span>{isRetryingCatalog ? 'Reintentando...' : 'Reintentar'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('what_changed')}
+                    className="px-2.5 py-1 rounded bg-stone-900 text-white font-semibold hover:bg-stone-800 cursor-pointer"
+                  >
+                    Ver detalle técnico
+                  </button>
+                </div>
               </div>
             )}
 
@@ -508,7 +545,7 @@ export default function App() {
             {isUrlBlocked ? (
               <div className="bg-white rounded-xl border border-amber-200 p-8 shadow-xs text-center max-w-xl mx-auto my-8 space-y-4">
                 <div className="w-12 h-12 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto text-amber-700">
-                  <AlertTriangle className="w-6 h-6" />
+                  <AlertTriangle className="w-6 h-6" aria-hidden="true" />
                 </div>
                 <h3 className="text-base font-bold text-stone-900">
                   Búsqueda pausada por parámetros de URL no reconocidos
@@ -528,17 +565,35 @@ export default function App() {
 
                 <div className="flex items-center justify-center gap-3 pt-2">
                   <button
+                    type="button"
                     onClick={handleClearUrlErrorsAndReset}
-                    className="px-4 py-2 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-stone-800 transition-colors inline-flex items-center gap-1.5"
+                    className="px-4 py-2 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-stone-800 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
                   >
-                    <RotateCcw className="w-3.5 h-3.5" />
+                    <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
                     <span>Restablecer y ver todos los recursos oficiales</span>
                   </button>
                 </div>
               </div>
             ) : isCatalogLoading && activeCentres.length === 0 ? (
-              <div className="bg-white rounded-xl border border-stone-200 p-8 text-center text-xs text-stone-600">
-                Cargando catálogo oficial verificado de la Comunidad de Madrid...
+              <div
+                role="status"
+                aria-live="polite"
+                className="space-y-4"
+              >
+                <div className="text-xs font-mono text-stone-600 px-1">
+                  Cargando catálogo oficial verificado de la Comunidad de Madrid...
+                </div>
+                {[0, 1, 2].map((skeletonIdx) => (
+                  <div
+                    key={skeletonIdx}
+                    className="bg-white rounded-xl border border-stone-200 p-5 space-y-3 animate-pulse"
+                    aria-hidden="true"
+                  >
+                    <div className="h-4 bg-stone-200 rounded w-2/3" />
+                    <div className="h-3 bg-stone-100 rounded w-1/2" />
+                    <div className="h-8 bg-stone-50 rounded border border-stone-100" />
+                  </div>
+                ))}
               </div>
             ) : (
               <SpecializedResultsList
@@ -570,8 +625,9 @@ export default function App() {
                 </p>
               </div>
               <button
+                type="button"
                 onClick={() => setActiveTab('search')}
-                className="px-3 py-1.5 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-stone-800"
+                className="px-3 py-1.5 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-stone-800 cursor-pointer shrink-0"
               >
                 Volver a la lista
               </button>
@@ -617,8 +673,9 @@ export default function App() {
                 </p>
               </div>
               <button
+                type="button"
                 onClick={() => setActiveTab('search')}
-                className="px-3.5 py-1.5 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-stone-800"
+                className="px-3.5 py-1.5 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-stone-800 cursor-pointer"
               >
                 Ir al buscador
               </button>
@@ -737,10 +794,10 @@ export default function App() {
             <button
               type="button"
               onClick={() => setActiveTab('tests')}
-              aria-label="Ver suite canónica de 28 pruebas oficiales"
+              aria-label="Ver batería canónica de validación"
               className="hover:text-stone-950 underline underline-offset-2 font-mono cursor-pointer"
             >
-              Suite Canónica (28 tests)
+              Suite Canónica de Validación
             </button>
           </div>
         </div>

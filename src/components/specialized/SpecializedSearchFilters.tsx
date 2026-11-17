@@ -11,12 +11,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   SpecializedCentre,
   SearchQueryState, 
-  ProfileId, 
   SupportTypeId, 
   FunctionalNeedId, 
   LifeStage, 
-  NetworkPreference, 
-  CombinationMode 
+  NetworkPreference
 } from '../../types/specialized';
 import { 
   CORE_PROFILES, 
@@ -30,8 +28,6 @@ import { getProfileDefinition } from '../../utils/specializedEngine';
 import { 
   MapPin, 
   Navigation, 
-  X, 
-  Search, 
   RotateCcw, 
   ChevronDown, 
   ChevronUp, 
@@ -50,7 +46,7 @@ const ACCESSIBILITY_FEATURES = [
   { id: 'magnetic_loops', label: 'Bucle magnético (Cód. 6)', icon: Ear }
 ];
 
-import { MADRID_MUNICIPALITIES, findMunicipalityByName, resolveSearchOrigin } from '../../data/municipalitiesData';
+import { MADRID_MUNICIPALITIES } from '../../data/municipalitiesData';
 
 interface MunicipalityOption {
   code: string;
@@ -322,11 +318,28 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
     <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-xs mb-8 space-y-6">
       {/* 2. Dimensión 1: Perfiles oficiales verificados */}
       <div>
-        <div className="flex items-center justify-between mb-2.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-stone-700">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-stone-700">
             Perfil o condición
-          </label>
-
+          </h3>
+          <div className="text-[11px] text-stone-500 flex flex-wrap items-center gap-1.5">
+            <span>¿Buscas un término amplio? Desambiguar:</span>
+            <button
+              type="button"
+              onClick={() => onOpenDisambiguation('neurodivergent')}
+              className="underline text-stone-700 hover:text-stone-950 font-medium cursor-pointer"
+            >
+              neurodivergente
+            </button>
+            <span aria-hidden="true">·</span>
+            <button
+              type="button"
+              onClick={() => onOpenDisambiguation('psychomotor')}
+              className="underline text-stone-700 hover:text-stone-950 font-medium cursor-pointer"
+            >
+              psicomotriz
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
@@ -410,22 +423,27 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
       <div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5">
           <div className="flex items-center gap-2">
-            <label className="text-xs font-bold uppercase tracking-wider text-stone-700">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-stone-700">
               Tipos de apoyo
-            </label>
+            </h3>
             {activeProfileDef && (
-              <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                Adaptados a {activeProfileDef.preferred_label.split('(')[0].trim()}
+              <span className="text-[11px] font-semibold text-emerald-800">
+                · Adaptados a {activeProfileDef.preferred_label.split('(')[0].trim()}
               </span>
             )}
           </div>
 
           {/* Selector de modo de combinación */}
-          <div className="inline-flex p-0.5 bg-stone-100 rounded-lg border border-stone-200 text-xs">
+          <div
+            role="group"
+            aria-label="Modo de combinación de apoyos"
+            className="inline-flex p-0.5 bg-stone-100 rounded-lg border border-stone-200 text-xs"
+          >
             <button
               type="button"
+              aria-pressed={query.support_combination_mode === 'any_support'}
               onClick={() => setQuery(prev => ({ ...prev, support_combination_mode: 'any_support' }))}
-              className={`px-2.5 py-1 font-medium rounded-md transition-colors ${
+              className={`px-2.5 py-1 font-medium rounded-md transition-colors cursor-pointer ${
                 query.support_combination_mode === 'any_support'
                   ? 'bg-stone-900 text-white shadow-xs'
                   : 'text-stone-600 hover:text-stone-900'
@@ -435,15 +453,16 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
             </button>
             <button
               type="button"
+              aria-pressed={query.support_combination_mode === 'all_supports_same_centre'}
               onClick={() => setQuery(prev => ({ ...prev, support_combination_mode: 'all_supports_same_centre' }))}
               title="Exige que todos los apoyos marcados estén confirmados en el mismo centro físico"
-              className={`px-2.5 py-1 font-medium rounded-md transition-colors flex items-center gap-1 ${
+              className={`px-2.5 py-1 font-medium rounded-md transition-colors flex items-center gap-1 cursor-pointer ${
                 query.support_combination_mode === 'all_supports_same_centre'
                   ? 'bg-stone-900 text-white shadow-xs'
                   : 'text-stone-600 hover:text-stone-900'
               }`}
             >
-              <Building2 className="w-3 h-3" />
+              <Building2 className="w-3 h-3" aria-hidden="true" />
               <span>Todos en la misma sede</span>
             </button>
           </div>
@@ -510,9 +529,9 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
         {/* Etapa Vital (Dinámica según las etapas autorizadas en la taxonomía) */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="text-xs font-bold uppercase tracking-wider text-stone-700">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-stone-700">
               Etapa vital
-            </label>
+            </h3>
             {activeProfileDef && (
               <span className="text-[10px] text-stone-500 font-medium">
                 {displayedLifeStages.length} autorizada{displayedLifeStages.length === 1 ? '' : 's'}
@@ -532,7 +551,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                     ...prev,
                     life_stage: isSelected ? null : (key as LifeStage)
                   }))}
-                  className={`px-3 py-2 text-xs rounded-lg border text-left transition-colors ${
+                  className={`px-3 py-2 text-xs rounded-lg border text-left transition-colors cursor-pointer ${
                     isSelected
                       ? 'border-stone-900 bg-stone-900 text-white font-semibold'
                       : 'border-stone-200 hover:bg-stone-50 text-stone-700'
@@ -550,9 +569,9 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
 
         {/* Titularidad y Red */}
         <div>
-          <label className="text-xs font-bold uppercase tracking-wider text-stone-700 block mb-2">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-stone-700 block mb-2">
             Red y titularidad
-          </label>
+          </h3>
           <div className="space-y-1.5 text-xs">
             {[
               { id: 'all', label: 'Todas las titularidades' },
@@ -583,9 +602,9 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
         {/* Localización territorial y radio */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="text-xs font-bold uppercase tracking-wider text-stone-700">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-stone-700">
               Ubicación y radio
-            </label>
+            </h3>
           </div>
 
           <div className="space-y-2">
@@ -594,13 +613,13 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
               type="button"
               onClick={requestBrowserLocation}
               disabled={geoStatus === 'requesting'}
-              className={`w-full py-2 px-3 text-xs font-medium rounded-lg border flex items-center justify-center gap-2 transition-colors ${
+              className={`w-full py-2 px-3 text-xs font-medium rounded-lg border flex items-center justify-center gap-2 transition-colors cursor-pointer ${
                 query.location_mode === 'browser' && query.user_ephemeral_location
                   ? 'border-emerald-600 bg-emerald-50 text-emerald-900 font-semibold shadow-xs'
                   : 'border-stone-300 bg-white text-stone-700 hover:bg-stone-50'
               }`}
             >
-              <Navigation className="w-3.5 h-3.5" />
+              <Navigation className="w-3.5 h-3.5" aria-hidden="true" />
               <span>
                 {geoStatus === 'requesting'
                   ? 'Obteniendo posición...'
@@ -611,7 +630,11 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
             </button>
 
             {(geoStatus === 'denied' || geoStatus === 'timeout') && (
-              <div className="text-[11px] text-amber-950 bg-amber-50 border border-amber-200 rounded-lg p-2 leading-snug">
+              <div
+                role="status"
+                aria-live="polite"
+                className="text-[11px] text-amber-950 bg-amber-50 border border-amber-200 rounded-lg p-2 leading-snug"
+              >
                 {geoStatus === 'timeout'
                   ? 'Tiempo de espera agotado al obtener tu GPS. Selecciona un municipio en el desplegable inferior para fijar el origen.'
                   : 'No se pudo acceder a la ubicación GPS del navegador. Selecciona tu municipio en el desplegable inferior para ordenar por distancia.'}
@@ -619,12 +642,12 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
             )}
 
             {/* Selector de municipio alternativo (§67.1) */}
-            <div>
+            <div className="flex items-center gap-1.5">
               <select
                 aria-label="Seleccionar municipio de la Comunidad de Madrid para origen de distancias"
                 value={query.location_mode === 'municipality' ? (query.municipality || '') : ''}
                 onChange={(e) => handleSelectMunicipality(e.target.value)}
-                className="w-full text-xs py-2 px-2.5 rounded-lg border border-stone-300 bg-white text-stone-800 focus:outline-none focus:border-stone-900"
+                className="w-full text-xs py-2 px-2.5 rounded-lg border border-stone-300 bg-white text-stone-800 focus:outline-none focus:border-stone-900 cursor-pointer"
               >
                 <option value="">Seleccionar municipio para cambiar de origen...</option>
                 {municipalities.map((m) => (
@@ -633,6 +656,17 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                   </option>
                 ))}
               </select>
+              {query.location_mode === 'municipality' && query.municipality && (
+                <button
+                  type="button"
+                  onClick={() => handleSelectMunicipality('')}
+                  aria-label="Quitar municipio de origen y volver a toda la Comunidad de Madrid"
+                  title="Volver a toda la Comunidad de Madrid"
+                  className="px-2 py-2 text-xs text-stone-600 hover:text-stone-900 border border-stone-300 rounded-lg bg-white hover:bg-stone-50 shrink-0 cursor-pointer"
+                >
+                  ×
+                </button>
+              )}
             </div>
 
             {/* Selector de radio en kilómetros */}
@@ -645,7 +679,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                   aria-pressed={query.radius_km === r}
                   aria-label={`Radio de ${r} kilómetros`}
                   onClick={() => setQuery(prev => ({ ...prev, radius_km: r }))}
-                  className={`px-2 py-1 rounded text-xs transition-colors ${
+                  className={`px-2 py-1 rounded text-xs transition-colors cursor-pointer ${
                     query.radius_km === r
                       ? 'bg-stone-900 text-white font-bold'
                       : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
@@ -658,7 +692,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
 
             {/* Indicador de origen de distancias activo (§67) */}
             <div className="flex items-center gap-1.5 text-[11px] text-stone-600 bg-stone-50 p-2 rounded-lg border border-stone-200">
-              <MapPin className="w-3.5 h-3.5 text-stone-700 shrink-0" />
+              <MapPin className="w-3.5 h-3.5 text-stone-700 shrink-0" aria-hidden="true" />
               <span>
                 <strong className="text-stone-800">Origen de cálculo:</strong>{' '}
                 {query.location_mode === 'browser' && query.user_ephemeral_location
@@ -674,9 +708,9 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
 
       {/* 5. Accesibilidad física oficial por códigos */}
       <div>
-        <label className="text-xs font-bold uppercase tracking-wider text-stone-700 block mb-2.5">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-stone-700 block mb-2.5">
           Accesibilidad oficial (Ayuntamiento de Madrid)
-        </label>
+        </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
           {ACCESSIBILITY_FEATURES.map((feat) => {
             const isChecked = query.accessibility_needs.includes(feat.id);
@@ -692,14 +726,14 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                     ? prev.accessibility_needs.filter(id => id !== feat.id)
                     : [...prev.accessibility_needs, feat.id]
                 }))}
-                className={`p-2.5 rounded-lg border text-left text-xs transition-colors flex items-center gap-2 ${
+                className={`p-2.5 rounded-lg border text-left text-xs transition-colors flex items-center gap-2 cursor-pointer ${
                   isChecked
                     ? 'border-stone-900 bg-stone-900 text-white font-semibold shadow-xs'
                     : 'border-stone-200 hover:bg-stone-50 text-stone-700'
                 }`}
               >
-                <feat.icon className="w-4 h-4" aria-hidden="true" />
-                {feat.label}
+                <feat.icon className="w-4 h-4 shrink-0" aria-hidden="true" />
+                <span>{feat.label}</span>
               </button>
             );
           })}
@@ -712,13 +746,13 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
           type="button"
           aria-expanded={showAdvancedNeeds}
           onClick={() => setShowAdvancedNeeds(prev => !prev)}
-          className="text-xs font-semibold text-stone-600 hover:text-stone-900 flex items-center gap-1.5 focus:outline-none"
+          className="text-xs font-semibold text-stone-700 hover:text-stone-950 flex items-center gap-1.5 cursor-pointer"
         >
           {showAdvancedNeeds ? <ChevronUp className="w-3.5 h-3.5" aria-hidden="true" /> : <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />}
           <span>Necesidades funcionales observables (comunicación, deglución, motricidad, regulación sensorial...)</span>
           {activeProfileDef && (
-            <span className="text-[10px] text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-              {displayedFunctionalNeeds.length} relevantes
+            <span className="text-[11px] text-emerald-800 font-semibold">
+              · {displayedFunctionalNeeds.length} relevantes
             </span>
           )}
           {query.functional_needs.length > 0 && (
@@ -739,7 +773,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                   aria-pressed={isSelected}
                   aria-label={`Filtrar por necesidad funcional: ${need.label}`}
                   onClick={() => toggleFunctionalNeed(need.id)}
-                  className={`p-2 rounded-md border text-left text-xs transition-colors ${
+                  className={`p-2 rounded-md border text-left text-xs transition-colors cursor-pointer ${
                     isSelected
                       ? 'border-stone-900 bg-stone-900 text-white font-medium'
                       : 'border-stone-200 bg-white hover:bg-stone-50 text-stone-700'
@@ -770,7 +804,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                 type="button"
                 aria-label="Eliminar filtro de perfil o condición"
                 onClick={() => setQuery(prev => ({ ...prev, profile: null }))}
-                className="hover:text-stone-900 ml-1"
+                className="hover:text-stone-900 ml-1 cursor-pointer"
               >
                 <span aria-hidden="true">×</span>
               </button>
@@ -784,7 +818,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                 type="button"
                 aria-label={`Eliminar filtro de apoyo: ${SUPPORT_TYPES[s]?.label || s}`}
                 onClick={() => toggleSupport(s)} 
-                className="hover:text-stone-900 ml-1"
+                className="hover:text-stone-900 ml-1 cursor-pointer"
               >
                 <span aria-hidden="true">×</span>
               </button>
@@ -798,7 +832,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                 type="button"
                 aria-label={`Eliminar filtro de etapa vital: ${LIFE_STAGES[query.life_stage]?.label}`}
                 onClick={() => setQuery(prev => ({ ...prev, life_stage: null }))} 
-                className="hover:text-stone-900 ml-1"
+                className="hover:text-stone-900 ml-1 cursor-pointer"
               >
                 <span aria-hidden="true">×</span>
               </button>
@@ -812,7 +846,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                 type="button"
                 aria-label={`Eliminar filtro de municipio: ${query.municipality}`}
                 onClick={() => setQuery(prev => ({ ...prev, municipality: null, user_ephemeral_location: null, location_mode: 'all' }))} 
-                className="hover:text-stone-900 ml-1"
+                className="hover:text-stone-900 ml-1 cursor-pointer"
               >
                 <span aria-hidden="true">×</span>
               </button>
@@ -826,7 +860,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                 type="button"
                 aria-label="Eliminar filtro de ubicación GPS"
                 onClick={() => setQuery(prev => ({ ...prev, user_ephemeral_location: null, location_mode: 'all' }))} 
-                className="hover:text-stone-900 ml-1"
+                className="hover:text-stone-900 ml-1 cursor-pointer"
               >
                 <span aria-hidden="true">×</span>
               </button>
@@ -845,7 +879,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                     ...prev,
                     accessibility_needs: prev.accessibility_needs.filter(id => id !== accId)
                   }))}
-                  className="hover:text-stone-900 ml-1"
+                  className="hover:text-stone-900 ml-1 cursor-pointer"
                 >
                   <span aria-hidden="true">×</span>
                 </button>
@@ -857,10 +891,10 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
             <span key={fnId} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-stone-100 text-stone-800 border border-stone-200">
               {FUNCTIONAL_NEEDS[fnId]?.label || fnId}
               <button 
-                type="button" 
+                type="button"
                 aria-label={`Eliminar filtro de necesidad funcional: ${FUNCTIONAL_NEEDS[fnId]?.label || fnId}`}
                 onClick={() => toggleFunctionalNeed(fnId)} 
-                className="hover:text-stone-900 ml-1"
+                className="hover:text-stone-900 ml-1 cursor-pointer"
               >
                 <span aria-hidden="true">×</span>
               </button>
@@ -885,9 +919,9 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
           <button
             type="button"
             onClick={onResetFilters}
-            className="text-xs text-stone-500 hover:text-stone-900 flex items-center gap-1 font-medium transition-colors"
+            className="text-xs text-stone-600 hover:text-stone-900 flex items-center gap-1 font-medium transition-colors cursor-pointer"
           >
-            <RotateCcw className="w-3 h-3" />
+            <RotateCcw className="w-3 h-3" aria-hidden="true" />
             <span>Limpiar filtros</span>
           </button>
         </div>

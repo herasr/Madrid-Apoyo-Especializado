@@ -1,7 +1,7 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * Madrid Apoyo Especializado v1.7 - Official CSV Registry Parser & Evidence Classifier
+ * Madrid Apoyo Especializado v1.8 - Official CSV Registry Parser & Evidence Classifier
  * Convierte de forma determinista y sin extrapolaciones los 3 CSV oficiales descargados:
  *   1. Catálogo de Centros de Atención Social (datos.madrid.es)
  *   2. Registro General de Centros de Atención Social (datos.comunidad.madrid)
@@ -287,7 +287,7 @@ function inferSupportsFromOfficialFields(
   }
   if (/\b(ocupacional|centro ocupacional|centros ocupacionales)\b/.test(norm)) {
     supports.add('day_care');
-    extraRelated.add('centro ocupacional (relacionado; confirmar si dispone de terapia ocupacional clínica)');
+    extraRelated.add('centro ocupacional');
   }
   if (/\bterapia ocupacional\b/.test(norm) && !/\b(centro ocupacional|centros ocupacionales)\b/.test(norm)) {
     supports.add('occupational_therapy');
@@ -295,13 +295,20 @@ function inferSupportsFromOfficialFields(
   if (/\b(residencia|residencias|residencial|piso tutelado|pisos tutelados|vivienda comunitaria|viviendas comunitarias|hogar)\b/.test(norm)) {
     supports.add('residential_care');
   }
-  if (/\b(rehabilitacion|recuperacion|fisioterapia)\b/.test(norm)) {
+  if (
+    /\b(rehabilitacion|fisioterapia)\b/.test(norm) ||
+    (/\brecuperacion\b/.test(norm) && !/\brecuperacion profesional\b/.test(norm))
+  ) {
     supports.add('rehabilitation');
   }
   if (/\b(atencion temprana)\b/.test(norm)) {
-    extraRelated.add('atención temprana (relacionado; confirmar servicios clínicos concretos)');
+    extraRelated.add('atención temprana');
   }
-  if (/\b(insercion laboral|empleo|rehabilitacion laboral|laboral)\b/.test(norm)) {
+  if (
+    /\b(insercion laboral|insercion socio laboral|insercion sociolaboral|empleo|rehabilitacion laboral|recuperacion profesional|preparacion laboral|laboral)\b/.test(
+      norm
+    )
+  ) {
     supports.add('employment_support');
   }
   if (/\b(psicosocial|psico social|apoyo psicologico|psicologia|grupos de ayuda mutua)\b/.test(norm)) {
@@ -652,7 +659,17 @@ export function buildCentresFromOfficialCSVs(params: {
         const rawPhone = (r[col('contacto_telefono')] || '').trim();
         const phone = rawPhone.toUpperCase() === 'RESERVADO' ? '' : rawPhone;
         const email = (r[col('contacto_correo')] || '').trim().split(';')[0]?.trim() || '';
-        const entity = (r[col('entidad_denominacion')] || '').trim();
+        const entityRaw = (r[col('entidad_denominacion')] || '').trim();
+        const entityNif = (r[col('entidad_nif')] || '').trim();
+        const isSoleProprietorPerson =
+          !entityNif &&
+          Boolean(entityRaw) &&
+          !isLegalOrganizationName(entityRaw) &&
+          entityRaw.split(/\s+/).length >= 2;
+        const safeProviderName = isSoleProprietorPerson
+          ? 'Persona física titular acreditada en Registro CAM (nombre omitido por privacidad)'
+          : entityRaw || denom;
+        const entity = isSoleProprietorPerson ? '' : entityRaw;
         const gest = (r[col('tipo_gestion')] || '').trim();
 
         const key = `CAM-${regId}`;
@@ -679,7 +696,7 @@ export function buildCentresFromOfficialCSVs(params: {
         const entityDeclaredSpecs = entityOnlyAllSpecs.filter(s => !centreExplicitSpecs.includes(s));
         const allMatchedSpecs = Array.from(new Set([...centreExplicitSpecs, ...entityDeclaredSpecs]));
 
-        if (!isRelevantCamRow(sector, tipo, subtipo, denom, entity, allMatchedSpecs)) {
+        if (!isRelevantCamRow(sector, tipo, subtipo, denom, entityRaw, allMatchedSpecs)) {
           continue;
         }
 
@@ -784,7 +801,7 @@ export function buildCentresFromOfficialCSVs(params: {
             value: centreExplicitSpecs.length > 0
               ? `${denom} · ${subtipo || tipo} (${sector})`
               : entityDeclaredSpecs.length > 0
-              ? `Entidad titular: ${entity} (Denominación centro: ${denom})`
+              ? `Entidad titular: ${safeProviderName} (Denominación centro: ${denom})`
               : `${sector} · ${subtipo || tipo}`,
             source_dataset: `Registro de Centros de Atención Social CAM (${regId})`,
             source_url: OFFICIAL_DATASET_URLS.cam_centros,
@@ -818,12 +835,18 @@ export function buildCentresFromOfficialCSVs(params: {
         const limitations: string[] = [];
         if (centreExplicitSpecs.length === 0 && entityDeclaredSpecs.length > 0) {
           limitations.push(
-            `La especialización proviene de la entidad titular (${entity}), no de la denominación individual del centro (${denom}).`
+            `La especialización proviene de la entidad titular (${safeProviderName}), no de la denominación individual del centro (${denom}).`
           );
         } else if (centreExplicitSpecs.length === 0) {
           limitations.push(
             `El registro oficial declara sector "${sector}" y denominación "${denom}", sin mencionar literalmente una patología específica.`
           );
+        }
+        if (supportResult.extraRelated.includes('centro ocupacional')) {
+          limitations.push('Centro ocupacional: confirmar con la entidad si dispone de terapia ocupacional clínica diferenciada.');
+        }
+        if (supportResult.extraRelated.includes('atención temprana')) {
+          limitations.push('Centro de atención temprana: confirmar con el equipo qué especialidades terapéuticas concretas presta.');
         }
         if (lifeStages.length === 0) {
           limitations.push('Etapa vital o edad admitida no consta en el registro oficial (confirmar con el centro).');
@@ -843,8 +866,8 @@ export function buildCentresFromOfficialCSVs(params: {
 
         centres.push({
           centre_id: key,
-          provider_id: `PROV-${normalizeStrict(r[col('entidad_nif')] || entity || regId).replace(/\s+/g, '-').slice(0, 28)}`,
-          provider_name: entity || denom,
+          provider_id: `PROV-${normalizeStrict(entityNif || (isSoleProprietorPerson ? regId : entityRaw) || regId).replace(/\s+/g, '-').slice(0, 28)}`,
+          provider_name: safeProviderName,
           official_name: denom,
           resource_domain: 'social',
           sector: sector || 'Atención Social',

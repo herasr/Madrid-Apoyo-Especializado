@@ -6,38 +6,59 @@
 
 import { useEffect, RefObject } from 'react';
 
+const FOCUSABLE_SELECTOR = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled]):not([type="hidden"])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(', ');
+
+function getVisibleFocusableElements(container: HTMLElement): HTMLElement[] {
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+    (el) => el.offsetParent !== null || el.getClientRects().length > 0
+  );
+}
+
 export const useFocusTrap = (containerRef: RefObject<HTMLElement | null>, isOpen: boolean) => {
   useEffect(() => {
     if (!isOpen || !containerRef.current) return;
 
     const modal = containerRef.current;
     const previouslyActiveElement = document.activeElement as HTMLElement | null;
-    
-    // Find all focusable elements
-    const focusableElements = modal.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    
-    if (focusableElements.length === 0) return;
 
-    const firstElement = focusableElements[0] as HTMLElement;
-    const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
-
-    // Focus first element on open
-    firstElement.focus();
+    const initialFocusables = getVisibleFocusableElements(modal);
+    if (initialFocusables.length > 0) {
+      initialFocusables[0].focus();
+    } else if (typeof modal.focus === 'function') {
+      modal.focus();
+    }
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Tab') {
-        if (e.shiftKey) { // Shift + Tab
-          if (document.activeElement === firstElement) {
-            e.preventDefault();
-            lastElement.focus();
-          }
-        } else { // Tab
-          if (document.activeElement === lastElement) {
-            e.preventDefault();
-            firstElement.focus();
-          }
+      if (e.key !== 'Tab') return;
+
+      const focusableElements = getVisibleFocusableElements(modal);
+      if (focusableElements.length === 0) {
+        e.preventDefault();
+        modal.focus();
+        return;
+      }
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+      const activeElement = document.activeElement as HTMLElement | null;
+      const isInsideModal = activeElement ? modal.contains(activeElement) : false;
+
+      if (e.shiftKey) {
+        if (!isInsideModal || activeElement === firstElement || activeElement === modal) {
+          e.preventDefault();
+          lastElement.focus();
+        }
+      } else {
+        if (!isInsideModal || activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
         }
       }
     };

@@ -24,6 +24,7 @@ interface SpecializedHeaderProps {
   easyReadMode: boolean;
   setEasyReadMode: (v: boolean | ((prev: boolean) => boolean)) => void;
   savedSearchesCount: number;
+  comparedCount?: number;
   openSavedSearches: () => void;
   openGlossary: () => void;
   onOpenWhatChanged?: () => void;
@@ -35,6 +36,7 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
   easyReadMode,
   setEasyReadMode,
   savedSearchesCount,
+  comparedCount = 0,
   openSavedSearches,
   openGlossary,
   onOpenWhatChanged
@@ -54,95 +56,90 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white border-b border-stone-200">
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xs border-b border-stone-200 no-print">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-6 h-16">
-            {/* Zona 1: Brand Wordmark */}
-            <div className="flex items-center gap-3 shrink-0">
-              <button 
+          <div className="flex items-center justify-between gap-4 h-14">
+            {/* Zona 1: Brand Wordmark limpio y monolítico */}
+            <div className="flex items-center shrink-0 min-w-0">
+              <button
+                type="button"
                 onClick={() => setActiveTab('search')}
-                aria-label="Volver al inicio de búsqueda de Madrid Apoyo"
-                className="text-left group cursor-pointer focus:outline-none flex items-center gap-2"
+                aria-label="Volver al inicio de búsqueda de Madrid Apoyo Especializado"
+                className="text-left group cursor-pointer rounded-md py-1 whitespace-nowrap"
               >
-                <div className="w-8 h-8 rounded-lg bg-stone-900 text-white flex items-center justify-center font-bold text-sm shadow-xs">
-                  M
-                </div>
-                <div>
-                  <span className="text-base sm:text-lg font-bold tracking-tight text-stone-900 group-hover:text-stone-700 transition-colors whitespace-nowrap block leading-tight">
-                    Madrid Apoyo
-                  </span>
-                  <span className="text-[10px] font-mono text-stone-500 uppercase tracking-wider block">
-                    Especializado v1.8
-                  </span>
-                </div>
+                <span className="text-base sm:text-lg font-extrabold tracking-tight text-stone-900 group-hover:text-stone-700 transition-colors">
+                  Madrid Apoyo Especializado
+                </span>
               </button>
             </div>
 
-            {/* Zona 2: Navegación principal limpia (Búsqueda, Mapa, Comparador) */}
-            <nav aria-label="Navegación principal" className="hidden md:flex items-center gap-2 bg-stone-100 p-1 rounded-xl text-xs font-semibold text-stone-700">
-              <button
-                onClick={() => setActiveTab('search')}
-                className={`px-4 py-2 rounded-lg transition-all cursor-pointer ${
-                  activeTab === 'search' ? 'bg-white text-stone-900 shadow-xs' : 'hover:text-stone-900'
-                }`}
-              >
-                Búsqueda
-              </button>
-              <button
-                onClick={() => setActiveTab('map')}
-                className={`px-4 py-2 rounded-lg transition-all cursor-pointer ${
-                  activeTab === 'map' ? 'bg-white text-stone-900 shadow-xs' : 'hover:text-stone-900'
-                }`}
-              >
-                Mapa
-              </button>
-              <button
-                onClick={() => setActiveTab('comparator')}
-                className={`px-4 py-2 rounded-lg transition-all cursor-pointer ${
-                  activeTab === 'comparator' ? 'bg-white text-stone-900 shadow-xs' : 'hover:text-stone-900'
-                }`}
-              >
-                Comparador
-              </button>
+            {/* Zona 2: Navegación principal limpia sin contenedor cápsula */}
+            <nav aria-label="Navegación principal" className="hidden md:flex items-center gap-6 h-full text-xs font-semibold">
+              {[
+                { id: 'search', label: 'Búsqueda' },
+                { id: 'map', label: 'Mapa' },
+                { id: 'comparator', label: 'Comparador' }
+              ].map((navItem) => {
+                const isActive = activeTab === navItem.id;
+                return (
+                  <button
+                    key={navItem.id}
+                    type="button"
+                    aria-current={isActive ? 'page' : undefined}
+                    onClick={() => setActiveTab(navItem.id)}
+                    className={`h-full inline-flex items-center gap-1 border-b-2 transition-colors whitespace-nowrap cursor-pointer ${
+                      isActive
+                        ? 'border-stone-900 text-stone-950 font-bold'
+                        : 'border-transparent text-stone-600 hover:text-stone-900 hover:border-stone-300'
+                    }`}
+                  >
+                    <span>{navItem.label}</span>
+                    {navItem.id === 'comparator' && comparedCount > 0 && (
+                      <span className="font-mono text-[11px] text-stone-900 tabular-nums">
+                        ({comparedCount})
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </nav>
 
             {/* Zona 3: Utilidades esenciales */}
-            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-              {/* Modo lectura fácil */}
+            <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
               <button
                 type="button"
+                aria-pressed={easyReadMode}
                 onClick={() => setEasyReadMode(prev => !prev)}
                 title="Lectura fácil"
                 aria-label="Activar o desactivar modo de lectura fácil"
-                className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors flex items-center gap-1.5 cursor-pointer ${
-                  easyReadMode 
-                    ? 'bg-amber-100 border-amber-300 text-amber-900 font-semibold' 
+                className={`px-2.5 py-1.5 text-xs font-medium rounded-lg border transition-colors flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
+                  easyReadMode
+                    ? 'bg-amber-100 border-amber-400 text-amber-950 font-semibold'
                     : 'bg-white border-stone-300 text-stone-700 hover:bg-stone-50'
                 }`}
               >
-                <Eye className="w-3.5 h-3.5 text-stone-500" aria-hidden="true" />
+                <Eye className="w-3.5 h-3.5 text-stone-600 shrink-0" aria-hidden="true" />
                 <span className="hidden sm:inline">Lectura fácil</span>
               </button>
 
-              {/* Búsquedas guardadas */}
               <PWAInstallButton />
+
               <button
                 type="button"
                 onClick={openSavedSearches}
                 title="Búsquedas guardadas"
                 aria-label={`Ver búsquedas guardadas en el navegador${savedSearchesCount > 0 ? ` (${savedSearchesCount})` : ''}`}
-                className="px-3 py-1.5 text-xs font-medium rounded-lg border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 transition-colors flex items-center gap-1.5 cursor-pointer"
+                className="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 transition-colors flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
               >
-                <Bookmark className="w-3.5 h-3.5 text-stone-500" aria-hidden="true" />
+                <Bookmark className="w-3.5 h-3.5 text-stone-600 shrink-0" aria-hidden="true" />
                 <span className="hidden sm:inline">Guardadas</span>
                 {savedSearchesCount > 0 && (
-                  <span className="ml-0.5 text-xs font-mono font-semibold text-stone-900">
+                  <span className="text-xs font-mono font-semibold text-stone-900 tabular-nums">
                     ({savedSearchesCount})
                   </span>
                 )}
               </button>
 
-              {/* Glosario */}
               <button
                 type="button"
                 onClick={openGlossary}
@@ -153,7 +150,6 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
                 <BookOpen className="w-4 h-4" aria-hidden="true" />
               </button>
 
-              {/* Verificar fuentes oficiales y reportar discrepancias */}
               <button
                 type="button"
                 onClick={() => setIsSourcesModalOpen(true)}
@@ -166,27 +162,36 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
             </div>
           </div>
 
-          {/* Barra móvil para pestañas principales */}
-          <div className="md:hidden flex items-center justify-center gap-2 py-2 border-t border-stone-100 text-xs font-semibold text-stone-700">
-            <button
-              onClick={() => setActiveTab('search')}
-              className={`flex-1 py-1.5 rounded-lg text-center ${activeTab === 'search' ? 'bg-stone-900 text-white' : 'bg-stone-100'}`}
-            >
-              Búsqueda
-            </button>
-            <button
-              onClick={() => setActiveTab('map')}
-              className={`flex-1 py-1.5 rounded-lg text-center ${activeTab === 'map' ? 'bg-stone-900 text-white' : 'bg-stone-100'}`}
-            >
-              Mapa
-            </button>
-            <button
-              onClick={() => setActiveTab('comparator')}
-              className={`flex-1 py-1.5 rounded-lg text-center ${activeTab === 'comparator' ? 'bg-stone-900 text-white' : 'bg-stone-100'}`}
-            >
-              Comparador
-            </button>
-          </div>
+          {/* Barra móvil compacta para pestañas principales */}
+          <nav aria-label="Navegación móvil" className="md:hidden flex items-center justify-around border-t border-stone-100 text-xs font-semibold">
+            {[
+              { id: 'search', label: 'Búsqueda' },
+              { id: 'map', label: 'Mapa' },
+              { id: 'comparator', label: 'Comparador' }
+            ].map((navItem) => {
+              const isActive = activeTab === navItem.id;
+              return (
+                <button
+                  key={navItem.id}
+                  type="button"
+                  aria-current={isActive ? 'page' : undefined}
+                  onClick={() => setActiveTab(navItem.id)}
+                  className={`flex-1 py-2 text-center border-b-2 transition-colors whitespace-nowrap cursor-pointer ${
+                    isActive
+                      ? 'border-stone-900 text-stone-950 font-bold'
+                      : 'border-transparent text-stone-600 hover:text-stone-900'
+                  }`}
+                >
+                  <span>{navItem.label}</span>
+                  {navItem.id === 'comparator' && comparedCount > 0 && (
+                    <span className="font-mono text-[11px] text-stone-900 tabular-nums ml-1">
+                      ({comparedCount})
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
         </div>
       </header>
 
@@ -197,6 +202,9 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
           role="dialog"
           aria-modal="true"
           aria-labelledby="sources-verification-title"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsSourcesModalOpen(false);
+          }}
         >
           <div
             ref={sourcesModalRef}
@@ -205,7 +213,7 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
           >
             <div className="px-6 py-4 border-b border-stone-200 flex items-center justify-between bg-stone-50">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-emerald-700" />
+                <ShieldCheck className="w-5 h-5 text-emerald-700" aria-hidden="true" />
                 <h2 id="sources-verification-title" className="text-base font-bold text-stone-900">
                   Verificación de fuentes y reporte de discrepancias
                 </h2>
@@ -216,7 +224,7 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
                 aria-label="Cerrar modal"
                 className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5" aria-hidden="true" />
               </button>
             </div>
 
@@ -230,33 +238,33 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
                   <a
                     href="https://datos.madrid.es/dataset/212774-0-atencion-social"
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="font-semibold text-stone-900 underline inline-flex items-center gap-1 hover:text-stone-700"
                   >
                     <span>Ayuntamiento de Madrid · Catálogo de Centros de Atención Social (212774-0)</span>
-                    <ExternalLink className="w-3 h-3" />
+                    <ExternalLink className="w-3 h-3" aria-hidden="true" />
                   </a>
                 </li>
                 <li>
                   <a
                     href="https://datos.comunidad.madrid/dataset/atencion_social_registro_centros"
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="font-semibold text-stone-900 underline inline-flex items-center gap-1 hover:text-stone-700"
                   >
                     <span>Comunidad de Madrid · Registro General de Centros de Atención Social</span>
-                    <ExternalLink className="w-3 h-3" />
+                    <ExternalLink className="w-3 h-3" aria-hidden="true" />
                   </a>
                 </li>
                 <li>
                   <a
                     href="https://datos.comunidad.madrid/dataset/atencion_social_registro_servicios"
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="font-semibold text-stone-900 underline inline-flex items-center gap-1 hover:text-stone-700"
                   >
                     <span>Comunidad de Madrid · Registro General de Servicios de Atención Social</span>
-                    <ExternalLink className="w-3 h-3" />
+                    <ExternalLink className="w-3 h-3" aria-hidden="true" />
                   </a>
                 </li>
               </ul>

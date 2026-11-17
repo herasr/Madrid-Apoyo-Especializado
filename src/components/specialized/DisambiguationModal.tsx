@@ -1,7 +1,7 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * Madrid Apoyo Especializado v1.7 - Desambiguación Obligatoria de Términos Amplios
+ * Madrid Apoyo Especializado v1.8 - Desambiguación Obligatoria de Términos Amplios
  * Tratamiento de «neurodivergente» y «psicomotriz» sin realizar diagnósticos libres (§54)
  */
 
@@ -9,7 +9,7 @@ import React, { useRef } from 'react';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { DISAMBIGUATION_TERMS } from '../../data/specializedTaxonomy';
 import { SearchQueryState, ProfileId, SupportTypeId, FunctionalNeedId } from '../../types/specialized';
-import { X, HelpCircle, ArrowRight, ShieldAlert, Check } from 'lucide-react';
+import { X, ArrowRight, ShieldAlert } from 'lucide-react';
 
 interface DisambiguationModalProps {
   term: 'neurodivergent' | 'psychomotor' | null;
@@ -68,6 +68,9 @@ export const DisambiguationModal: React.FC<DisambiguationModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="disambiguation-modal-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <div 
         ref={modalRef}
@@ -110,13 +113,14 @@ export const DisambiguationModal: React.FC<DisambiguationModalProps> = ({
               {data.options.map((opt) => (
                 <button
                   key={opt.id}
+                  type="button"
                   onClick={() => handleSelectOption(opt)}
                   className="w-full p-3 rounded-lg border border-stone-200 hover:border-stone-900 hover:bg-stone-50 transition-all text-left flex items-center justify-between group cursor-pointer"
                 >
                   <div className="font-semibold text-stone-900 group-hover:text-stone-950">
                     {opt.label}
                   </div>
-                  <ArrowRight className="w-4 h-4 text-stone-400 group-hover:text-stone-900 group-hover:translate-x-0.5 transition-all" />
+                  <ArrowRight className="w-4 h-4 text-stone-400 group-hover:text-stone-900 group-hover:translate-x-0.5 transition-all" aria-hidden="true" />
                 </button>
               ))}
             </div>
@@ -126,8 +130,9 @@ export const DisambiguationModal: React.FC<DisambiguationModalProps> = ({
         {/* Pie */}
         <div className="px-6 py-3 border-t border-stone-200 bg-stone-50 flex items-center justify-end">
           <button
+            type="button"
             onClick={onClose}
-            className="px-4 py-1.5 text-xs font-semibold text-stone-600 hover:text-stone-900"
+            className="px-4 py-1.5 text-xs font-semibold text-stone-600 hover:text-stone-900 cursor-pointer"
           >
             Cancelar
           </button>

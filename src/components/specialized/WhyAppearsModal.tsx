@@ -14,11 +14,6 @@ import {
   HelpCircle, 
   AlertTriangle, 
   ExternalLink, 
-  ShieldCheck, 
-  FileText, 
-  UserCheck, 
-  Clock,
-  Layers,
   Building2
 } from 'lucide-react';
 
@@ -41,7 +36,7 @@ export const WhyAppearsModal: React.FC<WhyAppearsModalProps> = ({ item, onClose 
 
   if (!item) return null;
 
-  const { centre, match_assessment, evidence_level, evidence_sublevel, combination_status, combination_details, criterion_matrix } = item;
+  const { centre, match_assessment, evidence_level, evidence_sublevel, combination_details, criterion_matrix } = item;
 
   return (
     <div 
@@ -49,6 +44,9 @@ export const WhyAppearsModal: React.FC<WhyAppearsModalProps> = ({ item, onClose 
       role="dialog"
       aria-modal="true"
       aria-labelledby="why-appears-modal-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <div 
         ref={modalRef}
@@ -69,11 +67,12 @@ export const WhyAppearsModal: React.FC<WhyAppearsModalProps> = ({ item, onClose 
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
             aria-label="Cerrar modal"
             className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-stone-200/50 transition-colors cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
@@ -127,7 +126,7 @@ export const WhyAppearsModal: React.FC<WhyAppearsModalProps> = ({ item, onClose 
             </div>
           </div>
 
-          {/* 2. Novedad v1.7: Desglose de combinación de apoyos en esta sede (§82.4) */}
+          {/* 2. Desglose de combinación de apoyos en esta sede (§82.4) */}
           {combination_details.length > 0 && (
             <div>
               <h3 className="font-bold text-stone-900 mb-2 flex items-center gap-1.5 text-sm">
@@ -253,7 +252,7 @@ export const WhyAppearsModal: React.FC<WhyAppearsModalProps> = ({ item, onClose 
                         <a 
                           href={prov.source_url} 
                           target="_blank" 
-                          rel="noreferrer"
+                          rel="noopener noreferrer"
                           className="hover:text-stone-900 underline inline-flex items-center gap-1"
                         >
                           <span>{prov.source_dataset}</span>
@@ -277,8 +276,9 @@ export const WhyAppearsModal: React.FC<WhyAppearsModalProps> = ({ item, onClose 
             Última revisión técnica: <span className="font-mono">{centre.last_checked}</span> · DATAMAD 2026
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="px-4 py-1.5 bg-stone-900 text-white rounded-lg hover:bg-stone-800 text-xs font-semibold transition-colors"
+            className="px-4 py-1.5 bg-stone-900 text-white rounded-lg hover:bg-stone-800 text-xs font-semibold transition-colors cursor-pointer"
           >
             Cerrar ficha de auditoría
           </button>

@@ -85,12 +85,12 @@ export async function loadLiveSnapshotData(
   try {
     // 1. Obtener metadatos multi-fuente, diferencias reales y catálogo pre-clasificado JSON (#6, #7)
     const [metaRes, diffsRes, catalogRes] = await Promise.all([
-      fetch(resolvePublicAssetUrl('data/snapshots/snapshot-metadata.json')),
+      fetch(resolvePublicAssetUrl('data/snapshots/snapshot-metadata.json')).catch(() => null),
       fetch(resolvePublicAssetUrl('data/snapshots/snapshot-diffs.json')).catch(() => null),
       fetch(resolvePublicAssetUrl('data/snapshots/catalog-classified.json')).catch(() => null)
     ]);
 
-    if (metaRes.ok) {
+    if (metaRes && metaRes.ok) {
       const rawMeta = await metaRes.json();
       metaJson = rawMeta;
       state.timestamp = rawMeta.timestamp || state.timestamp;

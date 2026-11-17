@@ -12,12 +12,9 @@ import {
   X, 
   Bookmark, 
   Trash2, 
-  ExternalLink, 
-  Calendar, 
   History, 
   Plus, 
-  ShieldCheck,
-  Check
+  ShieldCheck
 } from 'lucide-react';
 import { CORE_PROFILES, SUPPORT_TYPES, LIFE_STAGES, FUNCTIONAL_NEEDS } from '../../data/specializedTaxonomy';
 import { getProfileDefinition, ACCESSIBILITY_MAP } from '../../utils/specializedEngine';
@@ -135,6 +132,9 @@ export const SavedSearchesModal: React.FC<SavedSearchesModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="saved-searches-modal-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <div 
         ref={modalRef}
@@ -155,22 +155,24 @@ export const SavedSearchesModal: React.FC<SavedSearchesModalProps> = ({
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
             aria-label="Cerrar modal"
             className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg transition-colors cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
         {/* Formulario para guardar búsqueda actual */}
         <div className="p-6 border-b border-stone-200 bg-stone-50/50">
           <form onSubmit={handleSaveCurrent} className="space-y-2">
-            <label className="block text-xs font-bold text-stone-800">
+            <label htmlFor="saved-search-name-input" className="block text-xs font-bold text-stone-800">
               Guardar configuración actual de filtros
             </label>
             <div className="flex gap-2">
               <input
+                id="saved-search-name-input"
                 type="text"
                 value={newSearchName}
                 onChange={(e) => setNewSearchName(e.target.value)}
@@ -179,9 +181,9 @@ export const SavedSearchesModal: React.FC<SavedSearchesModalProps> = ({
               />
               <button
                 type="submit"
-                className="px-4 py-2 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-stone-800 transition-colors flex items-center gap-1.5"
+                className="px-4 py-2 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-stone-800 transition-colors flex items-center gap-1.5 cursor-pointer"
               >
-                <Plus className="w-3.5 h-3.5" />
+                <Plus className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Guardar</span>
               </button>
             </div>
@@ -216,66 +218,73 @@ export const SavedSearchesModal: React.FC<SavedSearchesModalProps> = ({
 
                   <div className="flex items-center gap-1">
                     <button
+                      type="button"
                       onClick={() => handleApply(s)}
-                      className="px-3 py-1 bg-stone-900 text-white rounded-md text-xs font-semibold hover:bg-stone-800 transition-colors"
+                      className="px-3 py-1 bg-stone-900 text-white rounded-md text-xs font-semibold hover:bg-stone-800 transition-colors cursor-pointer"
                     >
                       Abrir búsqueda
                     </button>
                     <button
+                      type="button"
                       onClick={() => handleDelete(s.saved_search_id)}
-                      className="p-1.5 text-stone-400 hover:text-rose-600 rounded-md transition-colors"
+                      className="p-1.5 text-stone-400 hover:text-rose-600 rounded-md transition-colors cursor-pointer"
                       title="Eliminar"
+                      aria-label={`Eliminar búsqueda guardada ${s.name}`}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4" aria-hidden="true" />
                     </button>
                   </div>
                 </div>
 
-                {/* Resumen de filtros */}
-                <div className="flex flex-wrap gap-1 text-[11px] text-stone-600">
-                  {s.filters.profile && (
-                    <span className="bg-stone-100 px-2 py-0.5 rounded text-stone-800">
-                      {getProfileDefinition(s.filters.profile)?.preferred_label || CORE_PROFILES[s.filters.profile as keyof typeof CORE_PROFILES]?.preferred_label || s.filters.profile}
-                    </span>
-                  )}
-                  {s.filters.support_types.map(st => (
-                    <span key={st} className="bg-stone-100 px-2 py-0.5 rounded text-stone-800">
-                      {SUPPORT_TYPES[st]?.label || st}
-                    </span>
-                  ))}
-                  {s.filters.life_stage && (
-                    <span className="bg-stone-100 px-2 py-0.5 rounded text-stone-800">
-                      {LIFE_STAGES[s.filters.life_stage]?.label}
-                    </span>
-                  )}
-                  {s.filters.municipality && (
-                    <span className="bg-stone-100 px-2 py-0.5 rounded text-stone-800">
-                      {s.filters.municipality} (±{s.filters.radius_km} km)
-                    </span>
-                  )}
-                  {s.filters.network_preference && s.filters.network_preference !== 'all' && (
-                    <span className="bg-stone-100 px-2 py-0.5 rounded text-stone-800">
-                      {s.filters.network_preference === 'public_network' ? 'Red Pública/Concertada' : 'Privados autorizados'}
-                    </span>
-                  )}
-                  {s.filters.support_combination_mode === 'all_supports_same_centre' && (
-                    <span className="bg-stone-100 px-2 py-0.5 rounded text-stone-800">
-                      Todos en misma sede
-                    </span>
-                  )}
-                  {(s.filters.accessibility_needs || []).map(acc => {
-                    const label = ACCESSIBILITY_MAP[acc]?.label || acc;
-                    return (
-                      <span key={acc} className="bg-stone-100 px-2 py-0.5 rounded text-stone-800">
-                        Acceso: {label.split('(')[0].trim()}
-                      </span>
-                    );
-                  })}
-                  {(s.filters.functional_needs || []).map(fn => (
-                    <span key={fn} className="bg-stone-100 px-2 py-0.5 rounded text-stone-800">
-                      {FUNCTIONAL_NEEDS[fn]?.label || fn}
-                    </span>
-                  ))}
+                {/* Resumen editorial de filtros */}
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-stone-700 pt-1 border-t border-stone-100">
+                  {(() => {
+                    const summaryParts: string[] = [];
+                    if (s.filters.profile) {
+                      summaryParts.push(
+                        getProfileDefinition(s.filters.profile)?.preferred_label ||
+                          CORE_PROFILES[s.filters.profile as keyof typeof CORE_PROFILES]?.preferred_label ||
+                          s.filters.profile
+                      );
+                    }
+                    s.filters.support_types.forEach(st => {
+                      summaryParts.push(SUPPORT_TYPES[st]?.label || st);
+                    });
+                    if (s.filters.life_stage && LIFE_STAGES[s.filters.life_stage]?.label) {
+                      summaryParts.push(LIFE_STAGES[s.filters.life_stage].label);
+                    }
+                    if (s.filters.municipality) {
+                      summaryParts.push(`${s.filters.municipality} (±${s.filters.radius_km} km)`);
+                    }
+                    if (s.filters.network_preference && s.filters.network_preference !== 'all') {
+                      summaryParts.push(
+                        s.filters.network_preference === 'public_network'
+                          ? 'Red Pública/Concertada'
+                          : 'Privados autorizados'
+                      );
+                    }
+                    if (s.filters.support_combination_mode === 'all_supports_same_centre') {
+                      summaryParts.push('Todos en misma sede');
+                    }
+                    (s.filters.accessibility_needs || []).forEach(acc => {
+                      const label = ACCESSIBILITY_MAP[acc]?.label || acc;
+                      summaryParts.push(`Acceso: ${label.split('(')[0].trim()}`);
+                    });
+                    (s.filters.functional_needs || []).forEach(fn => {
+                      summaryParts.push(FUNCTIONAL_NEEDS[fn]?.label || fn);
+                    });
+
+                    if (summaryParts.length === 0) {
+                      return <span className="text-stone-500 italic">Catálogo completo sin filtros restrictivos</span>;
+                    }
+
+                    return summaryParts.map((part, idx) => (
+                      <React.Fragment key={`${s.saved_search_id}-part-${idx}`}>
+                        {idx > 0 && <span className="text-stone-300" aria-hidden="true">·</span>}
+                        <span className="font-medium text-stone-800">{part}</span>
+                      </React.Fragment>
+                    ));
+                  })()}
                 </div>
               </div>
             ))
@@ -283,15 +292,16 @@ export const SavedSearchesModal: React.FC<SavedSearchesModalProps> = ({
         </div>
 
         {/* Pie con botón de "Qué ha cambiado" y Limpiar todo */}
-        <div className="px-6 py-3 border-t border-stone-200 bg-stone-50 flex items-center justify-between text-xs">
+        <div className="px-6 py-3 border-t border-stone-200 bg-stone-50 flex flex-wrap items-center justify-between gap-2 text-xs">
           <button
+            type="button"
             onClick={() => {
               onClose();
               onOpenWhatChanged();
             }}
-            className="font-semibold text-stone-900 hover:text-stone-700 flex items-center gap-1.5"
+            className="font-semibold text-stone-900 hover:text-stone-700 flex items-center gap-1.5 cursor-pointer"
           >
-            <History className="w-3.5 h-3.5 text-stone-600" />
+            <History className="w-3.5 h-3.5 text-stone-600" aria-hidden="true" />
             <span>Ver qué ha cambiado en el conjunto de datos (§84)</span>
           </button>
 
@@ -301,14 +311,14 @@ export const SavedSearchesModal: React.FC<SavedSearchesModalProps> = ({
                 <button
                   type="button"
                   onClick={handleClearAll}
-                  className="px-2.5 py-1 bg-rose-600 text-white rounded font-semibold hover:bg-rose-700 transition-colors"
+                  className="px-2.5 py-1 bg-rose-600 text-white rounded font-semibold hover:bg-rose-700 transition-colors cursor-pointer"
                 >
                   Confirmar borrado
                 </button>
                 <button
                   type="button"
                   onClick={() => setConfirmClearAll(false)}
-                  className="text-stone-500 hover:text-stone-800"
+                  className="text-stone-600 hover:text-stone-900 cursor-pointer"
                 >
                   Cancelar
                 </button>
@@ -317,7 +327,7 @@ export const SavedSearchesModal: React.FC<SavedSearchesModalProps> = ({
               <button
                 type="button"
                 onClick={handleClearAll}
-                className="text-stone-400 hover:text-rose-600 transition-colors"
+                className="text-stone-500 hover:text-rose-700 transition-colors cursor-pointer"
               >
                 Borrar todas las búsquedas locales
               </button>

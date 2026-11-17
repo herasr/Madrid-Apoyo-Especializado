@@ -1,7 +1,7 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * Madrid Apoyo Especializado v1.7 - Core Matching Engine
+ * Madrid Apoyo Especializado v1.8 - Core Matching Engine
  * Algoritmo de ordenación lexicográfica explicable:
  * A1 < A2 < B1 < B2 < C. La distancia nunca supera la evidencia (§41, §78).
  * Separación estricta entre especialización, adecuación, disponibilidad y cercanía (§70).
@@ -134,7 +134,7 @@ export function calculatePublicTransitTime(distanceKm: number): { minutes: numbe
   }
   return {
     minutes,
-    label: `~${minutes} min en transporte público`
+    label: `~${minutes} min est. transp. público`
   };
 }
 
@@ -279,10 +279,10 @@ export function evaluateCentre(
 
     criterion_matrix.push({
       criterion_id: 'geo.proximity',
-      criterion_label: 'Proximidad y transporte público',
+      criterion_label: 'Proximidad y traslado estimado',
       requested: true,
       status: 'calculated',
-      note: `Distancia: ${distance_label} · Transporte público: ${transit_time_label} (referencia: ${resolvedOrigin.name}${resolvedOrigin.isCustom ? `, radio: ${query.radius_km} km` : ''})`
+      note: `Distancia lineal: ${distance_label} · Estimación teórica transp. público: ${transit_time_label} (desde ${resolvedOrigin.name}${resolvedOrigin.isCustom ? `, radio: ${query.radius_km} km` : '; sin consulta de horarios CRTM en tiempo real'})`
     });
   } else {
     distance_km = null;

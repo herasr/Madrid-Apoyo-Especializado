@@ -11,14 +11,14 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import L from 'leaflet';
 import { EvaluatedCentreResult } from '../../types/specialized';
 import { 
-  MapPin, 
   ZoomIn, 
   ZoomOut, 
   Compass, 
   Maximize2, 
   Crosshair, 
   AlertTriangle,
-  ChevronRight
+  ChevronRight,
+  X
 } from 'lucide-react';
 
 interface MapViewProps {
@@ -123,11 +123,23 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
     originLayerRef.current = originGroup;
     mapInstanceRef.current = map;
 
-    setTimeout(() => {
+    const resizeTimer = setTimeout(() => {
       map.invalidateSize();
     }, 150);
 
+    const resizeObserver =
+      typeof ResizeObserver !== 'undefined' && mapContainerRef.current
+        ? new ResizeObserver(() => {
+            map.invalidateSize();
+          })
+        : null;
+    if (resizeObserver && mapContainerRef.current) {
+      resizeObserver.observe(mapContainerRef.current);
+    }
+
     return () => {
+      clearTimeout(resizeTimer);
+      resizeObserver?.disconnect();
       map.remove();
       mapInstanceRef.current = null;
     };
@@ -404,6 +416,31 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
         </div>
       </div>
 
+      {/* Leyenda de niveles de evidencia */}
+      <div className="px-5 py-2 border-b border-stone-200 bg-white flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-stone-600">
+        <span className="font-semibold text-stone-800">Niveles en mapa:</span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block w-3 h-3 rounded-xs bg-[#059669]" aria-hidden="true" />
+          <strong className="font-mono text-stone-900">A1</strong> centro explícito
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block w-3 h-3 rounded-xs bg-[#0d9488]" aria-hidden="true" />
+          <strong className="font-mono text-stone-900">A2</strong> entidad / registro
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block w-3 h-3 rounded-xs bg-[#0284c7]" aria-hidden="true" />
+          <strong className="font-mono text-stone-900">B1</strong> apoyo especializado
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block w-3 h-3 rounded-xs bg-[#4f46e5]" aria-hidden="true" />
+          <strong className="font-mono text-stone-900">B2</strong> sector general
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block w-3 h-3 rounded-xs bg-[#57534e]" aria-hidden="true" />
+          <strong className="font-mono text-stone-900">C</strong> orientación / general
+        </span>
+      </div>
+
       {/* 2. Cuerpo del mapa: Split View */}
       <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[560px]">
         <div className="lg:col-span-8 relative h-[480px] lg:h-[580px] w-full bg-stone-100">
@@ -434,7 +471,7 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
           {/* Tarjeta flotante de origen */}
           <div className="absolute bottom-3 left-3 z-[400] bg-white/95 backdrop-blur-sm border border-stone-300 rounded-lg px-3 py-2 text-xs shadow-md max-w-xs">
             <div className="flex items-center gap-1.5 font-bold text-stone-900">
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block animate-pulse" />
+              <Crosshair className="w-3.5 h-3.5 text-blue-700 shrink-0" aria-hidden="true" />
               <span>{originName}</span>
             </div>
             <div className="text-[11px] text-stone-600 mt-0.5">
@@ -444,7 +481,7 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
 
           {offlineTileError && (
             <div className="absolute top-14 left-3 z-[400] bg-amber-50 border border-amber-300 text-amber-950 rounded-lg px-3 py-2 text-xs shadow-md max-w-sm flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0" />
+              <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0" aria-hidden="true" />
               <span>Modo sin conexión: No se pueden cargar las teselas del mapa base. Use la lista lateral de recursos.</span>
             </div>
           )}
@@ -459,13 +496,26 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
               </span>
             </div>
 
-            <input
-              type="text"
-              value={searchFilterText}
-              onChange={(e) => setSearchFilterText(e.target.value)}
-              placeholder="Buscar en el mapa por nombre o municipio..."
-              className="w-full text-xs px-2.5 py-1.5 rounded-lg border border-stone-300 bg-white focus:outline-none focus:border-stone-900"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                aria-label="Filtrar centros visibles en el mapa por nombre, tipo o municipio"
+                value={searchFilterText}
+                onChange={(e) => setSearchFilterText(e.target.value)}
+                placeholder="Buscar en el mapa por nombre o municipio..."
+                className="w-full text-xs pl-2.5 pr-8 py-1.5 rounded-lg border border-stone-300 bg-white focus:outline-none focus:border-stone-900"
+              />
+              {searchFilterText && (
+                <button
+                  type="button"
+                  onClick={() => setSearchFilterText('')}
+                  aria-label="Limpiar filtro de búsqueda en el mapa"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-stone-400 hover:text-stone-800 cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" aria-hidden="true" />
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="flex-1 overflow-y-auto divide-y divide-stone-100 p-2 space-y-1">
@@ -515,7 +565,10 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
                           {item.distance_label}
                         </div>
                         {item.transit_time_label && (
-                          <div className="font-mono text-[10px] text-blue-800 font-medium">
+                          <div
+                            className="font-mono text-[10px] text-blue-800 font-medium"
+                            title="Estimación orientativa por distancia lineal (sin consulta de horarios CRTM)"
+                          >
                             {item.transit_time_label}
                           </div>
                         )}

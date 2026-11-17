@@ -58,6 +58,9 @@ export const PWAInstallButton: React.FC = () => {
             role="dialog"
             aria-modal="true"
             aria-labelledby="ios-install-title"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setShowIOSGuide(false);
+            }}
           >
             <div 
               ref={modalRef}
@@ -70,8 +73,9 @@ export const PWAInstallButton: React.FC = () => {
                 2. Desliza hacia abajo y toca <strong>Añadir a la pantalla de inicio</strong>.
               </p>
               <button
+                type="button"
                 onClick={() => setShowIOSGuide(false)}
-                className="mt-4 w-full rounded-lg bg-stone-100 py-2 text-xs font-semibold text-stone-800 hover:bg-stone-200"
+                className="mt-4 w-full rounded-lg bg-stone-100 py-2 text-xs font-semibold text-stone-800 hover:bg-stone-200 cursor-pointer"
               >
                 Cerrar
               </button>

@@ -21,7 +21,9 @@ import {
 } from './officialRegistryParser';
 import { findMunicipalityByName, MADRID_MUNICIPALITIES } from '../data/municipalitiesData';
 import { CORE_PROFILES } from '../data/specializedTaxonomy';
-import { runAllCanonicalTests } from './specializedTestsSuite';
+import { runAllCanonicalTests, TEST_SUITE_CATEGORIES } from './specializedTestsSuite';
+import { loadLiveSnapshotData } from './liveSnapshotParser';
+import { escapeCsvCell, buildResultsCsv, buildResultsJsonPayload } from '../components/specialized/SpecializedResultsList';
 import { SpecializedCentre, SearchQueryState } from '../types/specialized';
 
 const MOCK_CENTRE_TEA: SpecializedCentre = {
@@ -115,8 +117,10 @@ describe('Specialized Search Engine (Funciones Puras)', () => {
   });
 
   describe('calculatePublicTransitTime', () => {
-    it('calcula estimaciones realistas según distancia', () => {
-      expect(calculatePublicTransitTime(1.0).minutes).toBe(13);
+    it('calcula estimaciones orientativas según distancia', () => {
+      const t1 = calculatePublicTransitTime(1.0);
+      expect(t1.minutes).toBe(13);
+      expect(t1.label).toContain('est.');
       expect(calculatePublicTransitTime(5.0).minutes).toBe(23);
       expect(calculatePublicTransitTime(20.0).minutes).toBe(58);
     });
@@ -281,7 +285,7 @@ describe('Specialized Search Engine (Funciones Puras)', () => {
       madridCsvText: madridBuf.toString('latin1'),
       camCentrosCsvText: camCentrosBuf.toString('utf8'),
       camServiciosCsvText: camServiciosBuf.toString('utf8'),
-      snapshotDate: meta.last_updated?.slice(0, 10) || '2026-11-15'
+      snapshotDate: meta.timestamp?.slice(0, 10) || '2026-11-15'
     });
 
     it('verifica integridad exacta SHA-256 entre los ficheros CSV en disco y snapshot-metadata.json', () => {
@@ -331,11 +335,29 @@ describe('Specialized Search Engine (Funciones Puras)', () => {
       expect(unstatedKept.every(r => r.suitability === 'partial')).toBe(true);
     });
 
-    it('#4 y #5: sin PIA deducido por concierto y sin occupational_therapy en centros ocupacionales', () => {
+    it('#4 y #5: sin PIA deducido por concierto y sin occupational_therapy ni falso B1/B2 en centros ocupacionales', () => {
       expect(parsed.centres.every(c => c.access_route.access_type === 'unknown')).toBe(true);
       const c1812 = parsed.centres.find(c => c.centre_id === 'CAM-C1812');
       expect(c1812).toBeDefined();
       expect(c1812!.supports).not.toContain('occupational_therapy');
+
+      // Ningún centro ocupacional genérico debe escalar a B1/B2 por el texto de advertencia en related_services
+      const evAbi = evaluateCentre(
+        c1812!,
+        { ...DEFAULT_QUERY, profile: 'acquired_brain_injury' },
+        parsed.centres,
+        null
+      );
+      expect(evAbi.evidence_level).toBe('C');
+
+      // Los servicios de FORMACIÓN Y/O RECUPERACIÓN PROFESIONAL se clasifican como apoyo laboral, no rehabilitación médica
+      const s6541 = parsed.centres.find(c => c.centre_id === 'CAM-SRV-S6541');
+      expect(s6541).toBeDefined();
+      expect(s6541!.supports).toContain('employment_support');
+      expect(s6541!.supports).not.toContain('rehabilitation');
+
+      expect(evAbi.transit_time_label).toBeTruthy();
+      expect(evAbi.transit_time_label).toContain('est.');
     });
 
     it('#8 y #9: A2_entity en entidades de TEA y Bobath (CAM-SRV-S3848) con parálisis + daño cerebral', () => {
@@ -513,6 +535,71 @@ describe('Specialized Search Engine (Funciones Puras)', () => {
           ).length;
           expect(explicitCount).toBeGreaterThanOrEqual(3);
         }
+      }
+    });
+
+    it('neutraliza inyección de fórmulas en exportación CSV y excluye GPS efímero del JSON exportado', () => {
+      expect(escapeCsvCell('=CMD("calc")')).toBe('"\'=CMD(""calc"")"');
+      expect(escapeCsvCell('+SUM(A1:A2)')).toBe('"\'+SUM(A1:A2)"');
+      expect(escapeCsvCell('-2+3')).toBe('"\'-2+3"');
+      expect(escapeCsvCell('@IMPORTXML')).toBe('"\'@IMPORTXML"');
+
+      const ev = evaluateCentre(MOCK_CENTRE_TEA, DEFAULT_QUERY, [MOCK_CENTRE_TEA], [40.4168, -3.7038]);
+      const csv = buildResultsCsv([ev]);
+      expect(csv).toContain('Estimación Transporte Público');
+      expect(csv).toContain('URLs Oficiales');
+      expect(csv).toContain('https://comunidad.madrid');
+
+      const jsonPayload = buildResultsJsonPayload([ev], {
+        ...DEFAULT_QUERY,
+        user_ephemeral_location: [40.4168, -3.7038],
+        location_mode: 'browser'
+      });
+      expect(jsonPayload.total_results).toBe(1);
+      expect((jsonPayload.query as any).user_ephemeral_location).toBeUndefined();
+    });
+
+    it('sincroniza al 100% las categorías de la batería canónica con el visor de pruebas', () => {
+      const suite = runAllCanonicalTests();
+      const allowedIds = new Set<string>(TEST_SUITE_CATEGORIES.map(c => c.id));
+      expect(suite.total).toBeGreaterThanOrEqual(25);
+      expect(suite.failedCount).toBe(0);
+      for (const testItem of suite.results) {
+        expect(allowedIds.has(testItem.category)).toBe(true);
+      }
+    });
+
+    it('mantiene operativo el catálogo pre-clasificado aunque falle snapshot-metadata.json en caché parcial', async () => {
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = (async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.includes('snapshot-metadata.json')) {
+          return Promise.reject(new Error('offline_metadata_miss'));
+        }
+        if (url.includes('snapshot-diffs.json')) {
+          return new Response(JSON.stringify({ diffs: [] }), { status: 200 });
+        }
+        if (url.includes('catalog-classified.json')) {
+          return new Response(
+            JSON.stringify({
+              centres: classifiedJson.centres.slice(0, 5),
+              lookup_records: classifiedJson.lookup_records.slice(0, 5),
+              total_records: 5
+            }),
+            { status: 200 }
+          );
+        }
+        return new Response(null, { status: 404 });
+      }) as typeof fetch;
+
+      try {
+        const loaded = await loadLiveSnapshotData([]);
+        expect(loaded.state.loaded).toBe(true);
+        expect(loaded.state.load_source).toBe('preclassified_json');
+        expect(loaded.state.used_fallback).toBe(false);
+        expect(loaded.centres.length).toBe(5);
+      } finally {
+        globalThis.fetch = originalFetch;
       }
     });
   });

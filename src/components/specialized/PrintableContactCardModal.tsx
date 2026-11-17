@@ -11,13 +11,7 @@ import { EvaluatedCentreResult } from '../../types/specialized';
 import { 
   X, 
   Printer, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  CheckSquare, 
   AlertCircle, 
-  Calendar,
-  Building2,
   FileText
 } from 'lucide-react';
 import { LIFE_STAGES } from '../../data/specializedTaxonomy';
@@ -41,7 +35,7 @@ export const PrintableContactCardModal: React.FC<PrintableContactCardProps> = ({
 
   if (!item) return null;
 
-  const { centre, evidence_level, match_assessment } = item;
+  const { centre, match_assessment } = item;
   const today = new Date().toISOString().split('T')[0];
 
   const handlePrint = () => {
@@ -50,14 +44,17 @@ export const PrintableContactCardModal: React.FC<PrintableContactCardProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4 printable-modal-backdrop"
       role="dialog"
       aria-modal="true"
       aria-labelledby="contact-card-modal-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <div 
         ref={modalRef}
-        className="bg-white rounded-2xl max-w-2xl w-full border border-stone-200 shadow-xl overflow-hidden my-8 max-h-[90vh] flex flex-col"
+        className="bg-white rounded-2xl max-w-2xl w-full border border-stone-200 shadow-xl overflow-hidden my-8 max-h-[90vh] flex flex-col printable-modal-sheet"
         tabIndex={-1}
       >
         {/* Cabecera modal con botón Imprimir */}
@@ -70,18 +67,20 @@ export const PrintableContactCardModal: React.FC<PrintableContactCardProps> = ({
           </div>
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={handlePrint}
               className="px-3.5 py-1.5 bg-stone-900 text-white rounded-lg hover:bg-stone-800 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
             >
-              <Printer className="w-4 h-4" />
+              <Printer className="w-4 h-4" aria-hidden="true" />
               <span>Imprimir / Guardar PDF</span>
             </button>
             <button
+              type="button"
               onClick={onClose}
               aria-label="Cerrar modal"
               className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg transition-colors cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -114,9 +113,9 @@ export const PrintableContactCardModal: React.FC<PrintableContactCardProps> = ({
               <span className="font-medium">{centre.address}, {centre.postal_code} {centre.municipality}</span>
               {item.distance_label && (
                 <div className="text-[11px] text-stone-600 mt-1">
-                  Distancia: <strong>{item.distance_label}</strong>
+                  Distancia lineal orientativa: <strong>{item.distance_label}</strong>
                   {item.transit_time_label && (
-                    <span> · Transporte público: <strong>{item.transit_time_label}</strong></span>
+                    <span> · <strong>{item.transit_time_label}</strong> (cálculo teórico aproximado)</span>
                   )}
                 </div>
               )}
@@ -238,8 +237,9 @@ export const PrintableContactCardModal: React.FC<PrintableContactCardProps> = ({
             Documento generado por Madrid Apoyo Especializado · Código abierto DATAMAD 2026
           </span>
           <button
+            type="button"
             onClick={onClose}
-            className="px-4 py-1.5 text-xs font-semibold text-stone-700 hover:text-stone-900"
+            className="px-4 py-1.5 text-xs font-semibold text-stone-700 hover:text-stone-900 cursor-pointer"
           >
             Cerrar
           </button>

@@ -371,7 +371,8 @@ export async function runIngestionProcess() {
     downloaded.push({ spec, buffer, sha256, rows, prevRows });
   }
 
-  // Fase 1.5: Verificación idempotente. Si todos los hashes SHA-256 coinciden con los ficheros en disco y catalog-classified.json existe, omitir ingesta.
+  // Fase 1.5: Verificación idempotente. Si todos los hashes SHA-256 coinciden con los ficheros en disco y catalog-classified.json existe, omitir ingesta salvo --force.
+  const forceIngest = process.argv.includes('--force');
   const classifiedPath = path.join(snapshotsDir, 'catalog-classified.json');
   const allHashesMatchExisting = downloaded.every(item => {
     const latestPath = path.join(snapshotsDir, item.spec.latest_file);
@@ -381,7 +382,7 @@ export async function runIngestionProcess() {
     return existingHash === item.sha256;
   });
 
-  if (allHashesMatchExisting && fs.existsSync(classifiedPath) && fs.existsSync(metadataPath)) {
+  if (!forceIngest && allHashesMatchExisting && fs.existsSync(classifiedPath) && fs.existsSync(metadataPath)) {
     console.log('✓ Registros oficiales sin cambios (SHA-256 idéntico en todas las fuentes). Ingesta omitida de forma idempotente.');
     try {
       const existingMeta = JSON.parse(fs.readFileSync(metadataPath, 'utf-8'));

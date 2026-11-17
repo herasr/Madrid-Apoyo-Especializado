@@ -20,19 +20,24 @@ import { DISAMBIGUATION_TERMS, EDUCATION_BRIDGE_MAPPINGS } from '../data/special
 
 const ALL_BENCHMARK_CENTRES = [...REAL_CANONICAL_CENTRES, ...BENCHMARK_TEST_CENTRES];
 
+export const TEST_SUITE_CATEGORIES = [
+  { id: 'EVIDENCIA', label: 'Modelo de Evidencia (A1-C)' },
+  { id: 'TAXONOMIA', label: 'Taxonomía y Desambiguación' },
+  { id: 'REGLAS_NEGATIVAS', label: 'Reglas Negativas de Inferencia' },
+  { id: 'AUDITORIA_CSV', label: 'Auditoría CSV y SHA-256' },
+  { id: 'COMBINACION', label: 'Combinación en Misma Sede' },
+  { id: 'ACCESO', label: 'Vías de Acceso y Advertencias' },
+  { id: 'ORDEN', label: 'Orden Lexicográfico Estricto' },
+  { id: 'GEOGRAFIA', label: 'Geografía y Radio' },
+  { id: 'PUENTE_EDUCATIVO', label: 'Puente con Educa Apoyo' },
+  { id: 'PRIVACIDAD', label: 'Privacidad y RGPD' }
+] as const;
+
+export type TestSuiteCategoryId = (typeof TEST_SUITE_CATEGORIES)[number]['id'];
+
 export interface TestCaseResult {
   id: string;
-  category:
-    | 'TAXONOMIA'
-    | 'EVIDENCIA'
-    | 'REGLAS_NEGATIVAS'
-    | 'COMBINACION'
-    | 'ACCESO'
-    | 'GEOGRAFIA'
-    | 'ORDEN'
-    | 'PRIVACIDAD'
-    | 'PUENTE_EDUCATIVO'
-    | 'AUDITORIA_CSV';
+  category: TestSuiteCategoryId;
   title: string;
   expected: string;
   actual: string;

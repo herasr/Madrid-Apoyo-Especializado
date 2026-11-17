@@ -1,14 +1,14 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * Madrid Apoyo Especializado v1.7 - Avisos de Transición entre Etapas Vitales
+ * Madrid Apoyo Especializado v1.8 - Avisos de Transición entre Etapas Vitales
  * Avisos preventivos sin almacenar fecha de nacimiento ni datos de edad exacta (§85)
  */
 
 import React from 'react';
-import { LifeStageTransitionDef, LifeStage } from '../../types/specialized';
+import { LifeStage } from '../../types/specialized';
 import { LIFE_STAGE_TRANSITIONS, LIFE_STAGES } from '../../data/specializedTaxonomy';
-import { AlertCircle, ArrowRight, X, Clock, HelpCircle } from 'lucide-react';
+import { ArrowRight, X, Clock } from 'lucide-react';
 
 interface LifeStageTransitionBannerProps {
   currentLifeStage: LifeStage | null;
@@ -45,11 +45,13 @@ export const LifeStageTransitionBanner: React.FC<LifeStageTransitionBannerProps>
         </div>
 
         <button
+          type="button"
           onClick={onDismiss}
-          className="p-1 text-amber-700 hover:text-amber-900 rounded-md hover:bg-amber-100 transition-colors"
+          className="p-1 text-amber-700 hover:text-amber-900 rounded-md hover:bg-amber-100 transition-colors cursor-pointer"
           title="Ocultar aviso de transición"
+          aria-label="Ocultar aviso de transición entre etapas vitales"
         >
-          <X className="w-4 h-4" />
+          <X className="w-4 h-4" aria-hidden="true" />
         </button>
       </div>
 
@@ -57,16 +59,16 @@ export const LifeStageTransitionBanner: React.FC<LifeStageTransitionBannerProps>
         <button
           type="button"
           onClick={() => onTransitionToNextStage(transitionDef.next_stage)}
-          className="px-3.5 py-1.5 bg-amber-900 text-amber-50 font-semibold rounded-lg hover:bg-amber-950 transition-colors flex items-center gap-1.5"
+          className="px-3.5 py-1.5 bg-amber-900 text-amber-50 font-semibold rounded-lg hover:bg-amber-950 transition-colors flex items-center gap-1.5 cursor-pointer"
         >
           <span>Ver recursos para {LIFE_STAGES[transitionDef.next_stage].label}</span>
-          <ArrowRight className="w-3.5 h-3.5" />
+          <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
         </button>
 
         <button
           type="button"
           onClick={onDismiss}
-          className="text-amber-800 hover:text-amber-950 font-medium"
+          className="text-amber-800 hover:text-amber-950 font-medium cursor-pointer"
         >
           No mostrar ahora
         </button>

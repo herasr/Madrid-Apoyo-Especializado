@@ -6,15 +6,12 @@
  */
 
 import React from 'react';
-import { SpecializedCentre, EvaluatedCentreResult } from '../../types/specialized';
+import { EvaluatedCentreResult } from '../../types/specialized';
 import { SUPPORT_TYPES, LIFE_STAGES } from '../../data/specializedTaxonomy';
 import { 
   X, 
   Building2, 
   CheckCircle2, 
-  HelpCircle, 
-  AlertCircle, 
-  Phone, 
   ExternalLink,
   Plus,
   Printer
@@ -87,7 +84,12 @@ export const SpecializedComparatorView: React.FC<ComparatorViewProps> = ({
           <div className="text-[11px] font-mono font-medium text-stone-600 mt-0.5 space-y-0.5">
             <div>{item.distance_label}</div>
             {item.transit_time_label && (
-              <div className="text-blue-800 font-semibold">{item.transit_time_label}</div>
+              <div
+                className="text-blue-800 font-semibold"
+                title="Estimación orientativa por distancia lineal (no consulta horarios CRTM en tiempo real)"
+              >
+                {item.transit_time_label}
+              </div>
             )}
           </div>
         </div>
@@ -96,14 +98,18 @@ export const SpecializedComparatorView: React.FC<ComparatorViewProps> = ({
     {
       title: 'Apoyos confirmados en esta sede',
       render: (item: EvaluatedCentreResult) => (
-        <div className="space-y-1">
-          {item.centre.supports.map(s => (
-            <div key={s} className="text-stone-700 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-stone-400" />
-              <span>{SUPPORT_TYPES[s]?.label || s}</span>
-            </div>
-          ))}
-        </div>
+        <ul className="space-y-1">
+          {item.centre.supports.length > 0 ? (
+            item.centre.supports.map(s => (
+              <li key={s} className="text-stone-700 flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 shrink-0" aria-hidden="true" />
+                <span>{SUPPORT_TYPES[s]?.label || s}</span>
+              </li>
+            ))
+          ) : (
+            <li className="text-stone-500 italic">No desglosados en registro</li>
+          )}
+        </ul>
       )
     },
     {
@@ -189,11 +195,11 @@ export const SpecializedComparatorView: React.FC<ComparatorViewProps> = ({
             <a 
               href={item.centre.website}
               target="_blank" 
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="text-stone-900 underline inline-flex items-center gap-1 hover:text-stone-700"
             >
               <span>Sitio web oficial</span>
-              <ExternalLink className="w-3 h-3" />
+              <ExternalLink className="w-3 h-3" aria-hidden="true" />
             </a>
           )}
         </div>
@@ -214,7 +220,7 @@ export const SpecializedComparatorView: React.FC<ComparatorViewProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 no-print">
           <button
             type="button"
             onClick={() => window.print()}
@@ -259,14 +265,14 @@ export const SpecializedComparatorView: React.FC<ComparatorViewProps> = ({
                       <h4 className="font-bold text-stone-900 text-sm leading-snug">
                         {item.centre.official_name}
                       </h4>
-                      <div className="text-[11px] text-stone-500 mt-0.5">
+                      <div className="text-[11px] text-stone-500 mt-0.5 font-mono">
                         {item.centre.municipality} · {item.centre.centre_id}
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => onRemoveFromCompare(item.centre.centre_id)}
-                      className="text-stone-400 hover:text-stone-700 p-1 cursor-pointer"
+                      className="text-stone-400 hover:text-stone-700 p-1 cursor-pointer no-print"
                       title="Quitar del comparador"
                       aria-label={`Quitar ${item.centre.official_name} del comparador`}
                     >
@@ -274,20 +280,22 @@ export const SpecializedComparatorView: React.FC<ComparatorViewProps> = ({
                     </button>
                   </div>
                   <button
+                    type="button"
                     onClick={() => onWhyAppears(item)}
-                    className="mt-2 text-[11px] text-stone-800 font-semibold underline hover:text-stone-600 block"
+                    className="mt-2 text-[11px] text-stone-800 font-semibold underline hover:text-stone-600 block cursor-pointer no-print"
                   >
                     Ver por qué aparece
                   </button>
                 </th>
               ))}
               {comparedCentres.length < 3 && (
-                <th className="p-4 bg-stone-50/50 border-l border-dashed border-stone-200 text-center align-middle">
+                <th className="p-4 bg-stone-50/50 border-l border-dashed border-stone-200 text-center align-middle no-print">
                   <button
+                    type="button"
                     onClick={onGoToSearch}
-                    className="p-4 rounded-lg border border-dashed border-stone-300 text-stone-500 hover:text-stone-800 hover:border-stone-400 text-center inline-flex flex-col items-center gap-1 transition-colors"
+                    className="p-4 rounded-lg border border-dashed border-stone-300 text-stone-500 hover:text-stone-800 hover:border-stone-400 text-center inline-flex flex-col items-center gap-1 transition-colors cursor-pointer"
                   >
-                    <Plus className="w-5 h-5" />
+                    <Plus className="w-5 h-5" aria-hidden="true" />
                     <span>Añadir 3er centro</span>
                   </button>
                 </th>
@@ -305,7 +313,7 @@ export const SpecializedComparatorView: React.FC<ComparatorViewProps> = ({
                     {dim.render(item)}
                   </td>
                 ))}
-                {comparedCentres.length < 3 && <td className="p-4 bg-stone-50/30 border-l border-dashed border-stone-200" />}
+                {comparedCentres.length < 3 && <td className="p-4 bg-stone-50/30 border-l border-dashed border-stone-200 no-print" />}
               </tr>
             ))}
           </tbody>

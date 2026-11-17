@@ -1,7 +1,7 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * Madrid Apoyo Especializado v1.7 - Benchmark Test Centres Dataset
+ * Madrid Apoyo Especializado v1.8 - Benchmark Test Centres Dataset
  * Registros de prueba y reglas negativas para la suite de validación canónica.
  * Separados de los registros canónicos de producción (DATAMAD 2026).
  */

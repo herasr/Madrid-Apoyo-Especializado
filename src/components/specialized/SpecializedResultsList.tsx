@@ -17,7 +17,10 @@ import {
   Share2, 
   Download, 
   FileSpreadsheet, 
-  Check 
+  Check,
+  ShieldCheck,
+  Layers,
+  Compass
 } from 'lucide-react';
 
 interface ResultsListProps {
@@ -32,6 +35,89 @@ interface ResultsListProps {
   easyReadMode: boolean;
 }
 
+/**
+ * Neutraliza inyección de fórmulas en hojas de cálculo (Excel / LibreOffice / Sheets)
+ * prefijando valores que comiencen por =, +, -, @, tabulación o retorno de carro.
+ */
+export function escapeCsvCell(value: unknown): string {
+  const raw = value === null || value === undefined ? '' : String(value);
+  const safe = /^[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw;
+  return `"${safe.replace(/"/g, '""')}"`;
+}
+
+export function buildResultsCsv(results: EvaluatedCentreResult[]): string {
+  const headers = [
+    'ID Centro',
+    'Nombre Oficial',
+    'Municipio',
+    'Distrito',
+    'Dirección',
+    'Teléfono',
+    'Correo Electrónico',
+    'Web Oficial',
+    'Plazas Autorizadas',
+    'Coordenadas (Lat, Lon)',
+    'Nivel Evidencia',
+    'Subnivel Evidencia',
+    'Adecuación',
+    'Distancia (km)',
+    'Estimación Transporte Público',
+    'Titularidad',
+    'Tipo Centro',
+    'Subtipo',
+    'Apoyos Confirmados',
+    'Trazabilidad Registral',
+    'URLs Oficiales'
+  ];
+
+  const rows = results.map(r => [
+    escapeCsvCell(r.centre.centre_id),
+    escapeCsvCell(r.centre.official_name),
+    escapeCsvCell(r.centre.municipality),
+    escapeCsvCell(r.centre.district || ''),
+    escapeCsvCell(r.centre.address),
+    escapeCsvCell(r.centre.phone || ''),
+    escapeCsvCell(r.centre.email || ''),
+    escapeCsvCell(r.centre.website || ''),
+    escapeCsvCell(r.centre.availability.authorised_places ?? 'N/D'),
+    escapeCsvCell(r.centre.coordinates ? r.centre.coordinates.join(', ') : 'Sin coordenadas'),
+    escapeCsvCell(r.evidence_level),
+    escapeCsvCell(r.evidence_sublevel),
+    escapeCsvCell(r.suitability),
+    escapeCsvCell(r.distance_km !== null ? r.distance_km.toFixed(1) : 'Sin coords'),
+    escapeCsvCell(r.transit_time_label || 'Sin estimación'),
+    escapeCsvCell(r.centre.public_private_status),
+    escapeCsvCell(r.centre.centre_type),
+    escapeCsvCell(r.centre.subtype || ''),
+    escapeCsvCell(r.centre.supports.join('; ')),
+    escapeCsvCell(r.centre.provenance_records.map(p => `${p.attribute_name}:${p.source_dataset}`).join('; ')),
+    escapeCsvCell(Array.from(new Set(r.centre.provenance_records.map(p => p.source_url).filter(Boolean))).join(' | '))
+  ]);
+
+  return '\uFEFF' + [headers.map(escapeCsvCell).join(','), ...rows.map(row => row.join(','))].join('\n');
+}
+
+export function buildResultsJsonPayload(results: EvaluatedCentreResult[], query: SearchQueryState) {
+  return {
+    exported_at: new Date().toISOString(),
+    taxonomy_version: '1.8.0',
+    total_results: results.length,
+    query: {
+      profile: query.profile,
+      functional_needs: query.functional_needs,
+      support_types: query.support_types,
+      support_combination_mode: query.support_combination_mode,
+      life_stage: query.life_stage,
+      municipality: query.municipality,
+      radius_km: query.radius_km,
+      network_preference: query.network_preference,
+      accessibility_needs: query.accessibility_needs,
+      location_mode: query.location_mode
+    },
+    results
+  };
+}
+
 export const SpecializedResultsList: React.FC<ResultsListProps> = ({
   results,
   incompatibleResults,
@@ -44,67 +130,43 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
   easyReadMode
 }) => {
   const [showIncompatibles, setShowIncompatibles] = useState(false);
-  const [copiedLink, setCopiedLink] = useState(false);
+  const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'error'>('idle');
   const [displayLimit, setDisplayLimit] = useState(40);
 
   useEffect(() => {
     setDisplayLimit(40);
   }, [results]);
 
-  // Copiar enlace reproducibilidad de la búsqueda completa
-  const handleCopyShareLink = () => {
-    if (typeof window !== 'undefined') {
-      navigator.clipboard.writeText(window.location.href);
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2500);
+  // Copiar enlace de reproducibilidad con fallback seguro en iframes restringidos
+  const handleCopyShareLink = async () => {
+    if (typeof window === 'undefined') return;
+    const url = window.location.href;
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = url;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (!ok) throw new Error('copy_failed');
+      }
+      setCopyStatus('copied');
+    } catch {
+      setCopyStatus('error');
+    } finally {
+      setTimeout(() => setCopyStatus('idle'), 2800);
     }
   };
 
-  // Descarga CSV de resultados con trazabilidad, procedencia, contacto y URL revocation
+  // Descarga CSV de resultados con neutralización de fórmulas y trazabilidad completa
   const handleExportCSV = () => {
-    const headers = [
-      'ID Centro',
-      'Nombre Oficial',
-      'Municipio',
-      'Distrito',
-      'Dirección',
-      'Teléfono',
-      'Correo Electrónico',
-      'Plazas Autorizadas',
-      'Coordenadas (Lat, Lon)',
-      'Nivel Evidencia',
-      'Subnivel Evidencia',
-      'Adecuación',
-      'Distancia (km)',
-      'Titularidad',
-      'Tipo Centro',
-      'Subtipo',
-      'Apoyos Confirmados',
-      'Trazabilidad Registral'
-    ];
-
-    const rows = results.map(r => [
-      `"${r.centre.centre_id}"`,
-      `"${(r.centre.official_name || '').replace(/"/g, '""')}"`,
-      `"${(r.centre.municipality || '').replace(/"/g, '""')}"`,
-      `"${(r.centre.district || '').replace(/"/g, '""')}"`,
-      `"${(r.centre.address || '').replace(/"/g, '""')}"`,
-      `"${(r.centre.phone || '').replace(/"/g, '""')}"`,
-      `"${(r.centre.email || '').replace(/"/g, '""')}"`,
-      `"${r.centre.availability.authorised_places ?? 'N/D'}"`,
-      `"${r.centre.coordinates ? r.centre.coordinates.join(', ') : 'Sin coordenadas'}"`,
-      `"${r.evidence_level}"`,
-      `"${r.evidence_sublevel}"`,
-      `"${r.suitability}"`,
-      `"${r.distance_km !== null ? r.distance_km.toFixed(1) : 'Sin coords'}"`,
-      `"${r.centre.public_private_status}"`,
-      `"${(r.centre.centre_type || '').replace(/"/g, '""')}"`,
-      `"${(r.centre.subtype || '').replace(/"/g, '""')}"`,
-      `"${r.centre.supports.join('; ')}"`,
-      `"${r.centre.provenance_records.map(p => `${p.attribute_name}:${p.source_dataset}`).join('; ').replace(/"/g, '""')}"`
-    ]);
-
-    const csvStr = '\uFEFF' + [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+    const csvStr = buildResultsCsv(results);
     const blob = new Blob([csvStr], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -116,9 +178,10 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
-  // Descarga JSON estructurado con datos completos y URL revocation
+  // Descarga JSON estructurado con metadatos de consulta (sin coordenadas GPS personales)
   const handleExportJSON = () => {
-    const jsonStr = JSON.stringify(results, null, 2);
+    const payload = buildResultsJsonPayload(results, query);
+    const jsonStr = JSON.stringify(payload, null, 2);
     const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -130,7 +193,6 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
-  // Totales reales por grupo antes del corte progresivo, evitando cabeceras engañosas
   const totalGroupA = results.filter(r => r.evidence_level === 'A1' || r.evidence_level === 'A2').length;
   const totalGroupB = results.filter(r => r.evidence_level === 'B1' || r.evidence_level === 'B2').length;
   const totalGroupC = results.filter(r => r.evidence_level === 'C').length;
@@ -145,7 +207,7 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
     return (
       <div className="bg-white rounded-xl border border-stone-200 p-8 shadow-xs text-center max-w-xl mx-auto my-8 space-y-4">
         <div className="w-12 h-12 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto text-amber-700">
-          <AlertCircle className="w-6 h-6" />
+          <AlertCircle className="w-6 h-6" aria-hidden="true" />
         </div>
         <h3 className="text-base font-bold text-stone-900">
           No consta especialización en las fuentes consultadas
@@ -154,7 +216,6 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
           Ningún centro autorizado de la Comunidad de Madrid cumple simultáneamente todos los criterios seleccionados con los filtros actuales.
         </p>
 
-        {/* Alternativas estructuradas (§38) */}
         <div className="p-4 bg-stone-50 rounded-xl border border-stone-200 text-left text-xs space-y-2 text-stone-700">
           <div className="font-bold text-stone-800">Alternativas recomendadas:</div>
           <ul className="list-disc list-inside space-y-1 text-stone-600 pl-1">
@@ -169,10 +230,11 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
         </div>
 
         <button
+          type="button"
           onClick={onResetFilters}
-          className="px-4 py-2 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-stone-800 transition-colors inline-flex items-center gap-1.5"
+          className="px-4 py-2 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-stone-800 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
         >
-          <RotateCcw className="w-3.5 h-3.5" />
+          <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
           <span>Restablecer criterios de búsqueda</span>
         </button>
       </div>
@@ -183,32 +245,42 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
     <div className="space-y-6">
       {/* Barra de cabecera de la lista con exportaciones y compartir */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-200 pb-3">
-        <div className="flex items-center gap-2">
+        <div className="flex items-baseline gap-2.5">
           <h2 className="text-base font-bold text-stone-900">
             Resultados de la búsqueda
           </h2>
-          <span className="text-xs font-mono font-semibold text-stone-600 bg-stone-100 px-2 py-0.5 rounded">
-            {results.length} {results.length === 1 ? 'recurso' : 'recursos'}
+          <span className="text-xs font-mono font-semibold text-stone-600 tabular-nums">
+            · {results.length} {results.length === 1 ? 'recurso' : 'recursos'}
           </span>
         </div>
 
         {/* Acciones de exportación y enlace compartible */}
-        <div className="flex flex-wrap items-center gap-2.5 text-xs">
+        <div className="flex flex-wrap items-center gap-2 text-xs">
           <button
             type="button"
             onClick={handleCopyShareLink}
-            className="px-2.5 py-1 bg-white border border-stone-300 hover:bg-stone-50 text-stone-800 rounded-lg text-[11px] font-medium transition-colors flex items-center gap-1"
+            className="px-2.5 py-1.5 bg-white border border-stone-300 hover:bg-stone-50 text-stone-800 rounded-lg text-[11px] font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
             title="Copiar enlace URL con todos los criterios de esta búsqueda"
             aria-label="Copiar enlace URL con todos los criterios de esta búsqueda"
           >
-            {copiedLink ? <Check className="w-3 h-3 text-emerald-600" aria-hidden="true" /> : <Share2 className="w-3 h-3 text-stone-600" aria-hidden="true" />}
-            <span>{copiedLink ? '¡Enlace copiado!' : 'Compartir búsqueda'}</span>
+            {copyStatus === 'copied' ? (
+              <Check className="w-3.5 h-3.5 text-emerald-700" aria-hidden="true" />
+            ) : (
+              <Share2 className="w-3.5 h-3.5 text-stone-600" aria-hidden="true" />
+            )}
+            <span>
+              {copyStatus === 'copied'
+                ? 'Enlace copiado'
+                : copyStatus === 'error'
+                ? 'Copie la URL de la barra'
+                : 'Compartir búsqueda'}
+            </span>
           </button>
 
           <button
             type="button"
             onClick={handleExportCSV}
-            className="px-2.5 py-1 bg-white border border-stone-300 text-stone-700 hover:bg-stone-50 rounded-lg font-medium transition-colors flex items-center gap-1"
+            className="px-2.5 py-1.5 bg-white border border-stone-300 text-stone-700 hover:bg-stone-50 rounded-lg font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
             title="Exportar resultados en formato CSV con fuentes y procedencia"
             aria-label="Exportar resultados en formato CSV con fuentes y procedencia"
           >
@@ -219,13 +291,21 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
           <button
             type="button"
             onClick={handleExportJSON}
-            className="px-2.5 py-1 bg-white border border-stone-300 text-stone-700 hover:bg-stone-50 rounded-lg font-medium transition-colors flex items-center gap-1"
+            className="px-2.5 py-1.5 bg-white border border-stone-300 text-stone-700 hover:bg-stone-50 rounded-lg font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
             title="Exportar estructurado completo en JSON"
             aria-label="Exportar estructurado completo en JSON"
           >
             <Download className="w-3.5 h-3.5 text-stone-600" aria-hidden="true" />
             <span>JSON</span>
           </button>
+
+          <span className="sr-only" aria-live="polite">
+            {copyStatus === 'copied'
+              ? 'Enlace de búsqueda copiado al portapapeles.'
+              : copyStatus === 'error'
+              ? 'No se pudo copiar automáticamente; use la dirección del navegador.'
+              : ''}
+          </span>
         </div>
       </div>
 
@@ -233,9 +313,9 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
         {/* Grupo A: Especialización publicada (A1 y A2) */}
         {groupA.length > 0 && (
           <section className="space-y-3">
-            <div className="flex items-center justify-between border-b border-emerald-100 pb-2">
+            <div className="flex items-center justify-between border-b border-emerald-200 pb-2">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-600" />
+                <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" aria-hidden="true" />
                 <h3 className="text-sm font-bold text-stone-900">
                   Especialización Publicada ({groupA.length < totalGroupA ? `${groupA.length} mostrados de ${totalGroupA}` : totalGroupA})
                 </h3>
@@ -264,9 +344,9 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
         {/* Grupo B: Servicios relacionados (B1 y B2) */}
         {groupB.length > 0 && (
           <section className="space-y-3">
-            <div className="flex items-center justify-between border-b border-sky-100 pb-2">
+            <div className="flex items-center justify-between border-b border-sky-200 pb-2">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-sky-600" />
+                <Layers className="w-4 h-4 text-sky-700 shrink-0" aria-hidden="true" />
                 <h3 className="text-sm font-bold text-stone-900">
                   Servicios Relacionados ({groupB.length < totalGroupB ? `${groupB.length} mostrados de ${totalGroupB}` : totalGroupB})
                 </h3>
@@ -297,7 +377,7 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
           <section className="space-y-3">
             <div className="flex items-center justify-between border-b border-stone-200 pb-2">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-stone-400" />
+                <Compass className="w-4 h-4 text-stone-600 shrink-0" aria-hidden="true" />
                 <h3 className="text-sm font-bold text-stone-900">
                   Orientación General ({groupC.length < totalGroupC ? `${groupC.length} mostrados de ${totalGroupC}` : totalGroupC})
                 </h3>
@@ -326,7 +406,7 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
 
       {results.length > displayLimit && (
         <div className="flex flex-col items-center gap-2 pt-2">
-          <div className="text-xs text-stone-500 font-mono">
+          <div className="text-xs text-stone-500 font-mono tabular-nums">
             Mostrando {visibleSlice.length} de {results.length} recursos oficiales
           </div>
           <button
@@ -339,7 +419,6 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
         </div>
       )}
 
-
       {/* 4. Sección de Centros Incompatibles Excluidos de la Lista Principal (§78) */}
       {incompatibleResults.length > 0 && (
         <div className="pt-6 border-t border-stone-200">
@@ -347,7 +426,7 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
             type="button"
             aria-expanded={showIncompatibles}
             onClick={() => setShowIncompatibles(prev => !prev)}
-            className="text-xs font-bold text-stone-600 hover:text-stone-900 flex items-center justify-between w-full p-3 rounded-lg bg-stone-100 border border-stone-200 cursor-pointer"
+            className="text-xs font-bold text-stone-700 hover:text-stone-900 flex items-center justify-between w-full p-3 rounded-lg bg-stone-100 border border-stone-200 cursor-pointer"
           >
             <span>
               Recursos excluidos por incompatibilidad de criterios ({incompatibleResults.length})

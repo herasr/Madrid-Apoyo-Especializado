@@ -149,13 +149,8 @@ export const TaxonomyGovernanceView: React.FC<TaxonomyGovernanceViewProps> = ({ 
       <div className="border-b border-stone-200 pb-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-xs uppercase px-2 py-0.5 rounded bg-stone-900 text-white font-bold">
-                Taxonomía v{TAXONOMY_METADATA.version}
-              </span>
-              <span className="text-xs text-stone-500 font-mono">
-                Liberada: {TAXONOMY_METADATA.released_at} · Catálogo vivo: {centres.length} recursos
-              </span>
+            <div className="text-[11px] text-stone-500 font-mono uppercase tracking-wider">
+              Taxonomía v{TAXONOMY_METADATA.version} · Liberada {TAXONOMY_METADATA.released_at} · Catálogo vivo: {centres.length} recursos
             </div>
             <h1 className="text-xl font-bold text-stone-900 mt-1">
               Gobernanza Taxonómica y Auditoría Territorial (§33, §58)
@@ -184,21 +179,35 @@ export const TaxonomyGovernanceView: React.FC<TaxonomyGovernanceViewProps> = ({ 
 
         {/* Pestañas de gobernanza */}
         <div className="flex items-center gap-2 mt-6 overflow-x-auto text-xs font-semibold" role="tablist" aria-label="Secciones de gobernanza taxonómica">
-          {[
+          {([
             { id: 'categories', label: 'Catálogo y Ciclo de Vida' },
             { id: 'rules', label: 'Reglas Negativas de Inferencia' },
             { id: 'voids', label: 'Vacíos Territoriales Calculados' },
             { id: 'analytics', label: 'Candidatos en Cola (Auditoría CSV)' }
-          ].map((t) => (
+          ] as const).map((t, index, allTabs) => (
             <button
               key={t.id}
               type="button"
               role="tab"
               id={`tab-${t.id}`}
+              tabIndex={activeTab === t.id ? 0 : -1}
               aria-selected={activeTab === t.id}
               aria-controls={`tabpanel-${t.id}`}
               aria-label={`Sección: ${t.label}`}
-              onClick={() => setActiveTab(t.id as 'categories' | 'rules' | 'voids' | 'analytics')}
+              onClick={() => setActiveTab(t.id)}
+              onKeyDown={(e) => {
+                let targetIndex: number | null = null;
+                if (e.key === 'ArrowRight') targetIndex = (index + 1) % allTabs.length;
+                else if (e.key === 'ArrowLeft') targetIndex = (index - 1 + allTabs.length) % allTabs.length;
+                else if (e.key === 'Home') targetIndex = 0;
+                else if (e.key === 'End') targetIndex = allTabs.length - 1;
+                if (targetIndex !== null) {
+                  e.preventDefault();
+                  const nextId = allTabs[targetIndex].id;
+                  setActiveTab(nextId);
+                  document.getElementById(`tab-${nextId}`)?.focus();
+                }
+              }}
               className={`px-3 py-1.5 rounded-lg border transition-colors whitespace-nowrap cursor-pointer ${
                 activeTab === t.id
                   ? 'bg-stone-900 text-white border-stone-900'
@@ -213,7 +222,7 @@ export const TaxonomyGovernanceView: React.FC<TaxonomyGovernanceViewProps> = ({ 
 
       {/* Pestaña 1: Catálogo y Ciclo de vida (§51, §52) */}
       {activeTab === 'categories' && (
-        <div className="space-y-6">
+        <div role="tabpanel" id="tabpanel-categories" aria-labelledby="tab-categories" className="space-y-6">
           <div className="p-4 bg-stone-50 rounded-xl border border-stone-200 text-xs text-stone-700 leading-relaxed">
             <strong>Puerta de Aceptación (§25.3):</strong> Un perfil solo pasa a estado <em>approved</em> si cuenta con al menos 3 centros explícitos en registro, reglas negativas documentadas y trazabilidad literal en fuentes oficiales.
           </div>
@@ -231,7 +240,7 @@ export const TaxonomyGovernanceView: React.FC<TaxonomyGovernanceViewProps> = ({ 
                   <div key={prof.id} className="p-3.5 rounded-xl border border-stone-200 bg-white space-y-2 text-xs">
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-bold text-stone-900">{prof.preferred_label}</span>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-50 text-emerald-900 border border-emerald-200 font-bold shrink-0">
+                      <span className="text-[10px] font-mono uppercase text-emerald-800 font-bold shrink-0">
                         {prof.status}
                       </span>
                     </div>
@@ -259,7 +268,7 @@ export const TaxonomyGovernanceView: React.FC<TaxonomyGovernanceViewProps> = ({ 
                   <div key={prof.id} className="p-3.5 rounded-xl border border-amber-200 bg-amber-50/30 space-y-2 text-xs">
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-bold text-amber-950">{prof.preferred_label}</span>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-100 text-amber-900 border border-amber-300 font-bold shrink-0">
+                      <span className="text-[10px] font-mono uppercase text-amber-900 font-bold shrink-0">
                         {prof.status}
                       </span>
                     </div>
@@ -287,7 +296,7 @@ export const TaxonomyGovernanceView: React.FC<TaxonomyGovernanceViewProps> = ({ 
                   <div key={prof.id} className="p-3.5 rounded-xl border border-stone-200 bg-stone-50/50 space-y-1.5 text-xs">
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-bold text-stone-800">{prof.preferred_label}</span>
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-stone-200 text-stone-700 shrink-0">
+                      <span className="text-[10px] font-mono uppercase text-stone-600 font-semibold shrink-0">
                         pending
                       </span>
                     </div>
@@ -307,7 +316,7 @@ export const TaxonomyGovernanceView: React.FC<TaxonomyGovernanceViewProps> = ({ 
 
       {/* Pestaña 2: Reglas Negativas de Inferencia (§26.1) */}
       {activeTab === 'rules' && (
-        <div className="space-y-3">
+        <div role="tabpanel" id="tabpanel-rules" aria-labelledby="tab-rules" className="space-y-3">
           <div className="p-4 bg-stone-50 rounded-xl border border-stone-200 text-xs text-stone-700 leading-relaxed">
             Las <strong>reglas negativas obligatorias</strong> impiden que el motor de coincidencia extrapole competencias clínicas sin evidencia expresa. Su cumplimiento se comprueba automáticamente antes de publicar la aplicación.
           </div>
@@ -344,7 +353,7 @@ export const TaxonomyGovernanceView: React.FC<TaxonomyGovernanceViewProps> = ({ 
 
       {/* Pestaña 3: Vacíos Territoriales Calculados en Tiempo Real (§33) */}
       {activeTab === 'voids' && (
-        <div className="space-y-4">
+        <div role="tabpanel" id="tabpanel-voids" aria-labelledby="tab-voids" className="space-y-4">
           <div className="p-4 bg-stone-50 rounded-xl border border-stone-200 text-xs text-stone-700 leading-relaxed">
             <strong>Auditoría geográfica automatizada (§16, §33):</strong> Cruce directo entre 6 cabeceras comarcales de la Comunidad de Madrid y los centros con especialización publicada (nivel A1 o A2 por entidad titular) en los CSV oficiales activos. Se muestran los casos donde el recurso especializado más cercano está a &ge; 25 km en línea recta.
           </div>
@@ -386,9 +395,9 @@ export const TaxonomyGovernanceView: React.FC<TaxonomyGovernanceViewProps> = ({ 
 
       {/* Pestaña 4: Auditoría de cobertura de los 13 perfiles en el catálogo CSV real */}
       {activeTab === 'analytics' && (
-        <div className="space-y-4">
+        <div role="tabpanel" id="tabpanel-analytics" aria-labelledby="tab-analytics" className="space-y-4">
           <div className="p-4 bg-stone-50 rounded-xl border border-stone-200 text-xs text-stone-700 leading-relaxed flex items-start gap-2.5">
-            <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
+            <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" aria-hidden="true" />
             <div>
               <strong>Cero telemetría en servidor (RGPD):</strong> La aplicación no envía ni registra consultas ciudadanas en servidores externos. En lugar de cifras simuladas, esta tabla audita la evidencia real en los 3 CSV oficiales para los {allProfilesList.length} perfiles taxonómicos respecto a su puerta mínima de aceptación (&ge; 3 centros explícitos A1).
             </div>
@@ -429,18 +438,18 @@ export const TaxonomyGovernanceView: React.FC<TaxonomyGovernanceViewProps> = ({ 
                           </span>
                         ) : (
                           <span className="text-amber-800 flex items-center gap-1 font-medium">
-                            <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                            <AlertTriangle className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                             <span>Insuficiente en CSV sociales actuales ({cov.a1}/{minRequired})</span>
                           </span>
                         )}
                       </td>
                       <td className="p-3">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold border ${
+                        <span className={`text-[11px] font-mono uppercase font-bold ${
                           prof.status === 'approved'
-                            ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
+                            ? 'text-emerald-800'
                             : prof.status === 'experimental'
-                            ? 'bg-amber-50 text-amber-900 border-amber-200'
-                            : 'bg-stone-100 text-stone-800 border-stone-200'
+                            ? 'text-amber-800'
+                            : 'text-stone-600'
                         }`}>
                           {prof.status}
                         </span>

@@ -1,8 +1,8 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
- * Madrid Apoyo Especializado v1.7 - Taxonomy Subsystem
- * Taxonomía externa, ampliable, versionada y gobernada (v1.7.0)
+ * Madrid Apoyo Especializado v1.8 - Taxonomy Subsystem
+ * Taxonomía externa, ampliable, versionada y gobernada (v1.8.0)
  * Fecha de publicación: 2026-11-08 · DATAMAD 2026
  */
 
@@ -74,7 +74,7 @@ export const TAXONOMY_METADATA = {
   pending_profiles_count: 7,
   deprecated_profiles_count: 0,
   governance_rules_count: 8,
-  canonical_queries_count: 100,
+  canonical_queries_count: 28,
   minimum_review_requirements: {
     level_a_precision: 0.95,
     level_b_precision: 0.85,
