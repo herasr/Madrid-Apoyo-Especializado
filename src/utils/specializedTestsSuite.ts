@@ -134,13 +134,13 @@ export function runAllCanonicalTests(): {
     id: 'NEG-002',
     category: 'REGLAS_NEGATIVAS',
     title: 'Fisioterapia deportiva/genérica para lesión medular',
-    expected: 'Máximo nivel C e incompatibilidad de adecuación',
+    expected: 'Máximo nivel C y adecuación parcial (sin excluir del listado)',
     actual: `Nivel ${resNeg002.evidence_level}, Adecuación ${resNeg002.suitability}`,
-    passed: resNeg002.evidence_level === 'C' && resNeg002.suitability === 'incompatible',
-    notes: 'Fisioterapia genérica no eleva a nivel A ni B para patología medular compleja.'
+    passed: resNeg002.evidence_level === 'C' && resNeg002.suitability === 'partial',
+    notes: 'Fisioterapia genérica no eleva a nivel A ni B para patología medular compleja ni desaparece de la lista.'
   });
 
-  // 5. NEG-003 & TAX-002: Discapacidad intelectual sin TEA -> No inferir TEA
+  // 5. NEG-003 & TAX-002: Discapacidad intelectual sin TEA -> Máximo C sin excluir
   const diCenter = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'C-NEG-DI')!;
   const qNeg003: SearchQueryState = {
     ...defaultQuery,
@@ -151,10 +151,10 @@ export function runAllCanonicalTests(): {
     id: 'NEG-003',
     category: 'REGLAS_NEGATIVAS',
     title: 'Discapacidad intelectual no implica TEA',
-    expected: 'Bloqueado para nivel A y adecuación incompatible',
+    expected: 'Topado a nivel C y adecuación parcial (0 falsos positivos nivel A/B)',
     actual: `Nivel ${resNeg003.evidence_level}, Adecuación ${resNeg003.suitability}`,
-    passed: resNeg003.evidence_level === 'C' && resNeg003.suitability === 'incompatible',
-    notes: '0 falsos positivos: la discapacidad intelectual jamás se equipara a TEA.'
+    passed: resNeg003.evidence_level === 'C' && resNeg003.suitability === 'partial',
+    notes: '0 falsos positivos de especialización TEA: la discapacidad intelectual jamás sube a A o B.'
   });
 
   // 6. TAX-005 & NORES-003: Término "neurodivergente" -> Solicitar desambiguación obligatoria
@@ -312,7 +312,7 @@ export function runAllCanonicalTests(): {
   tests.push({
     id: 'AVL-001',
     category: 'EVIDENCIA',
-    title: 'Caducidad de disponibilidad a los 30 días (§72)',
+    title: 'Caducidad de disponibilidad a los 30 días',
     expected: 'stale = true, estado visible «Confirmar con el centro»',
     actual: staleCenter.availability.stale ? 'Caducado (>30 días); marcado como stale' : 'Fallo',
     passed: staleCenter.availability.stale === true,
@@ -371,14 +371,16 @@ export function runAllCanonicalTests(): {
   tests.push({
     id: 'REG-CEPRI-QUINTERO',
     category: 'REGLAS_NEGATIVAS',
-    title: 'CEPRI (CAM-C2412) y Quintero Lumbreras (CAM-C1812) bloqueados para TEA',
-    expected: 'Nivel C / incompatible por NEG-003 (el CSV oficial solo dice discapacidad intelectual)',
+    title: 'CEPRI (CAM-C2412) y Quintero Lumbreras (CAM-C1812) limitados a C para TEA',
+    expected: 'Nivel C y adecuación partial por NEG-003 (sin falsos A/B y sin exclusión)',
     actual: `CEPRI: ${evalCepriTea.evidence_level}/${evalCepriTea.suitability}, Quintero: ${evalQuinteroTea.evidence_level}/${evalQuinteroTea.suitability}`,
     passed:
       cepri.explicit_specialisations.length === 0 &&
       quintero.explicit_specialisations.length === 0 &&
-      evalCepriTea.suitability === 'incompatible' &&
-      evalQuinteroTea.suitability === 'incompatible',
+      evalCepriTea.evidence_level === 'C' &&
+      evalQuinteroTea.evidence_level === 'C' &&
+      evalCepriTea.suitability === 'partial' &&
+      evalQuinteroTea.suitability === 'partial',
     notes: 'Aplica NEG-003 sobre fichas reales cuyo sector registral oficial es «Personas con discapacidad intelectual».'
   });
 
@@ -390,27 +392,28 @@ export function runAllCanonicalTests(): {
   tests.push({
     id: 'REG-BOBATH-AT',
     category: 'REGLAS_NEGATIVAS',
-    title: 'Centros de atención temprana genérica (Bobath AT y APADIS AT) sin falsos A1',
-    expected: 'No alcanzan A1 para parálisis cerebral o psicomotricidad si el CSV solo indica Infancia/Atención Temprana',
-    actual: `Bobath AT: ${evalBobathCp.evidence_level}, APADIS AT: ${evalApadisPsy.evidence_level}`,
+    title: 'Centros de atención temprana genérica (Bobath AT y APADIS AT) limitados sin falsos A1',
+    expected: 'No alcanzan A1/A2 y permanecen en lista (B2 para psicomotriz AT, sin excluir)',
+    actual: `Bobath AT: ${evalBobathCp.evidence_level}/${evalBobathCp.suitability}, APADIS AT: ${evalApadisPsy.evidence_level}/${evalApadisPsy.suitability}`,
     passed:
       bobathAt.explicit_specialisations.length === 0 &&
       apadisAt.explicit_specialisations.length === 0 &&
       !['A1', 'A2'].includes(evalBobathCp.evidence_level) &&
-      !['A1', 'A2'].includes(evalApadisPsy.evidence_level),
-    notes: 'El servicio independiente CAM-SRV-S3848 mantiene su ficha diferenciada; el centro infantil CAM-C2758 no hereda parálisis cerebral.'
+      evalApadisPsy.evidence_level === 'B2' &&
+      evalApadisPsy.suitability === 'partial',
+    notes: 'El servicio independiente CAM-SRV-S3848 mantiene su ficha diferenciada; APADIS AT aparece en B2 para confirmar psicomotricidad.'
   });
 
-  // 22. REG-AMAFE: Regresión AMAFE (CAM-C8927) no debe salir como neurodegenerativa
+  // 22. REG-AMAFE: Regresión AMAFE (CAM-C8927) limitado a C sin falso A1 neurodegenerativo
   const amafe = ALL_BENCHMARK_CENTRES.find(c => c.centre_id === 'CAM-C8927')!;
   const evalAmafeNeuro = evaluateCentre(amafe, { ...defaultQuery, profile: 'neurodegenerative_diseases' }, ALL_BENCHMARK_CENTRES, null);
   tests.push({
     id: 'REG-AMAFE',
     category: 'REGLAS_NEGATIVAS',
     title: 'AMAFE (CAM-C8927 · Psicosis/Enfermedad mental crónica) sin falso A1 neurodegenerativo',
-    expected: 'Nivel C e incompatible para enfermedades neurodegenerativas',
+    expected: 'Nivel C y adecuación partial para enfermedades neurodegenerativas',
     actual: `Nivel ${evalAmafeNeuro.evidence_level}, Adecuación ${evalAmafeNeuro.suitability}`,
-    passed: amafe.explicit_specialisations.length === 0 && evalAmafeNeuro.evidence_level === 'C',
+    passed: amafe.explicit_specialisations.length === 0 && evalAmafeNeuro.evidence_level === 'C' && evalAmafeNeuro.suitability === 'partial',
     notes: 'El sector registral oficial «Personas con enfermedad mental crónica» no se cruza con neurodegenerativas.'
   });
 

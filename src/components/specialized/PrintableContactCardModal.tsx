@@ -93,9 +93,9 @@ export const PrintableContactCardModal: React.FC<PrintableContactCardProps> = ({
               <div className="text-[11px] font-mono uppercase tracking-wider text-stone-500">
                 Madrid Apoyo Especializado v1.8 · DATAMAD 2026
               </div>
-              <h1 className="text-lg font-bold text-stone-900 mt-1">
+              <h2 className="text-lg font-bold text-stone-900 mt-1">
                 {centre.official_name}
-              </h1>
+              </h2>
               <div className="text-stone-600 mt-0.5">
                 {centre.subtype || centre.centre_type} · {centre.municipality}
               </div>

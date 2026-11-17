@@ -62,9 +62,15 @@ export const WhatChangedModal: React.FC<WhatChangedModalProps> = ({
         <div className="flex items-center gap-2">
           <History className="w-5 h-5 text-stone-700" />
           <div>
-            <h2 id="what-changed-modal-title" className="text-base font-bold text-stone-900">
-              ¿Qué ha cambiado entre versiones del registro oficial? (§84)
-            </h2>
+            {inline ? (
+              <h3 id="what-changed-modal-title" className="text-base font-bold text-stone-900">
+                ¿Qué ha cambiado entre versiones del registro oficial?
+              </h3>
+            ) : (
+              <h2 id="what-changed-modal-title" className="text-base font-bold text-stone-900">
+                ¿Qué ha cambiado entre versiones del registro oficial?
+              </h2>
+            )}
             <div className="text-[11px] text-stone-500 font-mono">
               {dynamicState?.loaded ? (
                 <span className="text-emerald-700 font-bold">
@@ -98,11 +104,11 @@ export const WhatChangedModal: React.FC<WhatChangedModalProps> = ({
       {/* Contenido con trazabilidad SHA-256 real por fuente */}
       <div className="p-6 overflow-y-auto space-y-4 text-xs">
         <div className="p-3 bg-stone-100/70 border border-stone-200 rounded-lg text-stone-700 leading-relaxed">
-          <strong>Comparativa real automatizada (§84.2):</strong> El script de ingesta compara cada descarga oficial (Ayuntamiento de Madrid y Comunidad de Madrid Centros/Servicios) frente al snapshot inmediatamente anterior y verifica las firmas criptográficas SHA-256 exactas en disco.
+          <strong>Comparativa real automatizada:</strong> El script de ingesta compara cada descarga oficial (Ayuntamiento de Madrid y Comunidad de Madrid Centros/Servicios) frente al snapshot inmediatamente anterior y verifica las firmas criptográficas SHA-256 exactas en disco.
         </div>
 
         {dynamicState?.sources && dynamicState.sources.length > 0 && (
-          <div className="border border-stone-200 rounded-xl overflow-hidden">
+          <div className="border border-stone-200 rounded-xl overflow-x-auto">
             <table className="w-full text-left border-collapse text-[11px]">
               <thead>
                 <tr className="bg-stone-100 text-stone-700 font-bold border-b border-stone-200">
@@ -142,6 +148,8 @@ export const WhatChangedModal: React.FC<WhatChangedModalProps> = ({
                 badgeColor = 'bg-emerald-50 text-emerald-900 border-emerald-200';
               } else if (diff.category === 'servicio') {
                 badgeColor = 'bg-sky-50 text-sky-900 border-sky-200';
+              } else if (diff.category === 'acceso') {
+                badgeColor = 'bg-teal-50 text-teal-900 border-teal-200';
               } else if (diff.category === 'vigencia') {
                 badgeColor = 'bg-amber-50 text-amber-900 border-amber-200';
               } else if (diff.category === 'incidencia_fuente' || diff.category === 'baja') {
@@ -158,9 +166,15 @@ export const WhatChangedModal: React.FC<WhatChangedModalProps> = ({
                       <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase border ${badgeColor}`}>
                         {diff.category}
                       </span>
-                      <h3 className="font-bold text-stone-900 text-sm">
-                        {diff.centre_name}
-                      </h3>
+                      {inline ? (
+                        <h4 className="font-bold text-stone-900 text-sm">
+                          {diff.centre_name}
+                        </h4>
+                      ) : (
+                        <h3 className="font-bold text-stone-900 text-sm">
+                          {diff.centre_name}
+                        </h3>
+                      )}
                     </div>
                     <span className="font-mono text-[11px] text-stone-400 shrink-0">
                       {diff.change_id}

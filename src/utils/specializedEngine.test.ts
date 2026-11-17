@@ -16,9 +16,11 @@ import {
 import {
   buildCentresFromOfficialCSVs,
   classifyExplicitSpecialisations,
+  formatOfficialSpanishName,
   mapCamMunicipalityName,
   utm30NToWgs84
 } from './officialRegistryParser';
+import { computeDiffs } from '../../scripts/ingest';
 import { findMunicipalityByName, MADRID_MUNICIPALITIES } from '../data/municipalitiesData';
 import { CORE_PROFILES } from '../data/specializedTaxonomy';
 import { runAllCanonicalTests, TEST_SUITE_CATEGORIES } from './specializedTestsSuite';
@@ -164,7 +166,7 @@ describe('Specialized Search Engine (Funciones Puras)', () => {
     it('identifica características de accesibilidad física en el centro', () => {
       expect(centreHasAccessibilityFeature(MOCK_CENTRE_TEA, 'wheelchair_access')).toBe(true);
       expect(centreHasAccessibilityFeature(MOCK_CENTRE_TEA, 'magnetic_loops')).toBe(true);
-      expect(centreHasAccessibilityFeature(MOCK_CENTRE_TEA, 'braille_signage')).toBe(false);
+      expect(centreHasAccessibilityFeature(MOCK_CENTRE_TEA, 'tactile_signage')).toBe(false);
     });
   });
 
@@ -245,7 +247,7 @@ describe('Specialized Search Engine (Funciones Puras)', () => {
     it('clasifica incompatibilidad por falta de requisito de accesibilidad física exigido', () => {
       const query: SearchQueryState = {
         ...DEFAULT_QUERY,
-        accessibility_needs: ['braille_signage']
+        accessibility_needs: ['tactile_signage']
       };
       const res = evaluateCentre(MOCK_CENTRE_TEA, query, [MOCK_CENTRE_TEA]);
       expect(res.suitability).toBe('incompatible');
@@ -601,6 +603,75 @@ describe('Specialized Search Engine (Funciones Puras)', () => {
       } finally {
         globalThis.fetch = originalFetch;
       }
+    });
+
+    it('auditoría 15 puntos: reglas negativas limitan nivel (<= B2) sin excluir, NEG-006 para TEA, Title Case y diffs de coordenadas', () => {
+      // #1: Atención temprana en psicomotriz -> B2 partial sin excluir (ni desaparecer bajo 965 C)
+      const psyRes = runSpecializedSearch({ ...DEFAULT_QUERY, profile: 'psychomotor_early_support' }, parsed.centres, null);
+      const b2AtHits = psyRes.results.filter(r => r.evidence_level === 'B2');
+      expect(b2AtHits.length).toBeGreaterThan(80);
+      expect(psyRes.incompatible_results.length).toBe(0);
+
+      // #1: Parálisis cerebral y autismo no excluyen centros de discapacidad física ni intelectual
+      const cpRes = runSpecializedSearch({ ...DEFAULT_QUERY, profile: 'cerebral_palsy' }, parsed.centres, null);
+      expect(cpRes.incompatible_results.length).toBe(0);
+      const autismRes = runSpecializedSearch({ ...DEFAULT_QUERY, profile: 'autism' }, parsed.centres, null);
+      expect(autismRes.incompatible_results.length).toBe(0);
+
+      // #1 texto NEG-006 en TEA sobre centro de enfermedad mental crónica (AMAFE)
+      const amafe = parsed.centres.find(c => c.centre_id === 'CAM-C8927')!;
+      const evAmafeTea = evaluateCentre(amafe, { ...DEFAULT_QUERY, profile: 'autism' }, parsed.centres, null);
+      expect(evAmafeTea.evidence_level).toBe('C');
+      expect(evAmafeTea.suitability).toBe('partial');
+      expect(evAmafeTea.match_assessment.suitability_reasons.some(r => r.includes('TEA') && !r.includes('neurológica'))).toBe(true);
+
+      // #13 Title Case preservando siglas
+      expect(formatOfficialSpanishName('CEPRI LA PEINETA, CENTRO DE DIA')).toBe('CEPRI La Peineta, Centro de Dia');
+      expect(formatOfficialSpanishName('ASOCIACION DE PADRES DE PERSONAS CON AUTISMO-APNA')).toBe('Asociacion de Padres de Personas con Autismo-APNA');
+      expect(formatOfficialSpanishName('CENTRO DE ATENCION TEMPRANA ASPACE-TEA')).toBe('Centro de Atencion Temprana ASPACE-TEA');
+
+      // #2 Diffs detectan cambios de accesibilidad (Cód. 3 -> 1) y coordenadas
+      const prevRows = [
+        ['PK', 'NOMBRE', 'TELEFONO', 'CLASE-VIAL', 'NOMBRE-VIA', 'NUM', 'ACCESIBILIDAD', 'LATITUD', 'LONGITUD'],
+        ['11906', 'Centro Base 1', '910000001', 'CALLE', 'Maqueda', '1', '3', '40.4000', '-3.7500']
+      ];
+      const currRows = [
+        ['PK', 'NOMBRE', 'TELEFONO', 'CLASE-VIAL', 'NOMBRE-VIA', 'NUM', 'ACCESIBILIDAD', 'LATITUD', 'LONGITUD'],
+        ['11906', 'Centro Base 1', '910000001', 'CALLE', 'Maqueda', '1', '1', '40.4012', '-3.7510']
+      ];
+      const diffs = computeDiffs('madrid_municipal', prevRows, currRows, '2026-11-15', '2026-11-17');
+      expect(diffs.length).toBe(1);
+      expect(diffs[0].detail).toContain('Accesibilidad código');
+      expect(diffs[0].detail).toContain('Coordenadas');
+    });
+
+    it('auditoría profunda DATAMAD: cruce multi-fuente sin falsas discrepancias y CentrosServiciosSociales sin apoyos residenciales/diurnos falsos', () => {
+      const slimMap = new Map<string, any>(classifiedJson.lookup_records);
+      const linkedWithMad = parsed.centres.filter(c =>
+        c.centre_id.startsWith('CAM-') &&
+        c.provenance_records.some(p => p.source_dataset.includes('datos.madrid.es PK'))
+      );
+      expect(linkedWithMad.length).toBeGreaterThan(0);
+
+      for (const centre of linkedWithMad) {
+        const audit = auditCentreAgainstSnapshot(centre, meta, slimMap);
+        expect(audit.audit_status).not.toBe('discrepancy');
+        expect(audit.audit_status).not.toBe('unverified');
+      }
+
+      // Centros de Servicios Sociales municipales (información/tramitación) no deben heredar day_care/residential_care del texto descriptivo
+      const maravillas = parsed.centres.find(c => c.centre_id === 'MAD-PK174917');
+      expect(maravillas).toBeDefined();
+      expect(maravillas!.supports).not.toContain('day_care');
+      expect(maravillas!.supports).not.toContain('residential_care');
+
+      const cpSearch = runSpecializedSearch({ ...DEFAULT_QUERY, profile: 'cerebral_palsy' }, parsed.centres, null);
+      const cpMaravillas = cpSearch.results.find(r => r.centre.centre_id === 'MAD-PK174917');
+      expect(cpMaravillas?.evidence_level).toBe('C');
+
+      const neuroSearch = runSpecializedSearch({ ...DEFAULT_QUERY, profile: 'neurodegenerative_diseases' }, parsed.centres, null);
+      const neuroMaravillas = neuroSearch.results.find(r => r.centre.centre_id === 'MAD-PK174917');
+      expect(neuroMaravillas?.evidence_level).toBe('C');
     });
   });
 });

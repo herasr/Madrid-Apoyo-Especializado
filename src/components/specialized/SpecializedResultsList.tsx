@@ -209,9 +209,9 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
         <div className="w-12 h-12 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto text-amber-700">
           <AlertCircle className="w-6 h-6" aria-hidden="true" />
         </div>
-        <h3 className="text-base font-bold text-stone-900">
+        <h2 className="text-base font-bold text-stone-900">
           No consta especialización en las fuentes consultadas
-        </h3>
+        </h2>
         <p className="text-xs text-stone-600 leading-relaxed max-w-md mx-auto">
           Ningún centro autorizado de la Comunidad de Madrid cumple simultáneamente todos los criterios seleccionados con los filtros actuales.
         </p>
@@ -242,12 +242,12 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div id="results-list-anchor" className="space-y-6 scroll-mt-28">
       {/* Barra de cabecera de la lista con exportaciones y compartir */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-200 pb-3">
         <div className="flex items-baseline gap-2.5">
-          <h2 className="text-base font-bold text-stone-900">
-            Resultados de la búsqueda
+          <h2 className={`${easyReadMode ? 'text-lg' : 'text-base'} font-bold text-stone-900`}>
+            {easyReadMode ? 'Centros encontrados para tu búsqueda' : 'Resultados de la búsqueda'}
           </h2>
           <span className="text-xs font-mono font-semibold text-stone-600 tabular-nums">
             · {results.length} {results.length === 1 ? 'recurso' : 'recursos'}
@@ -261,7 +261,13 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
             onClick={handleCopyShareLink}
             className="px-2.5 py-1.5 bg-white border border-stone-300 hover:bg-stone-50 text-stone-800 rounded-lg text-[11px] font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
             title="Copiar enlace URL con todos los criterios de esta búsqueda"
-            aria-label="Copiar enlace URL con todos los criterios de esta búsqueda"
+            aria-label={
+              copyStatus === 'copied'
+                ? 'Enlace copiado al portapapeles'
+                : copyStatus === 'error'
+                ? 'Copie la URL de la barra del navegador'
+                : 'Compartir búsqueda: copiar enlace URL con los criterios actuales'
+            }
           >
             {copyStatus === 'copied' ? (
               <Check className="w-3.5 h-3.5 text-emerald-700" aria-hidden="true" />
@@ -316,12 +322,12 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
             <div className="flex items-center justify-between border-b border-emerald-200 pb-2">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" aria-hidden="true" />
-                <h3 className="text-sm font-bold text-stone-900">
-                  Especialización Publicada ({groupA.length < totalGroupA ? `${groupA.length} mostrados de ${totalGroupA}` : totalGroupA})
+                <h3 className={`${easyReadMode ? 'text-base' : 'text-sm'} font-bold text-stone-900`}>
+                  {easyReadMode ? 'Centros especializados' : 'Especialización Publicada'} ({groupA.length < totalGroupA ? `${groupA.length} mostrados de ${totalGroupA}` : totalGroupA})
                 </h3>
               </div>
               <span className="text-[11px] text-stone-500">
-                Mención en registro oficial
+                {easyReadMode ? 'Confirman este apoyo o perfil' : 'Mención en registro oficial'}
               </span>
             </div>
 
@@ -347,12 +353,12 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
             <div className="flex items-center justify-between border-b border-sky-200 pb-2">
               <div className="flex items-center gap-2">
                 <Layers className="w-4 h-4 text-sky-700 shrink-0" aria-hidden="true" />
-                <h3 className="text-sm font-bold text-stone-900">
-                  Servicios Relacionados ({groupB.length < totalGroupB ? `${groupB.length} mostrados de ${totalGroupB}` : totalGroupB})
+                <h3 className={`${easyReadMode ? 'text-base' : 'text-sm'} font-bold text-stone-900`}>
+                  {easyReadMode ? 'Centros con servicios parecidos' : 'Servicios Relacionados'} ({groupB.length < totalGroupB ? `${groupB.length} mostrados de ${totalGroupB}` : totalGroupB})
                 </h3>
               </div>
               <span className="text-[11px] text-stone-500">
-                Recursos del sector relacionado
+                {easyReadMode ? 'Conviene preguntar antes por teléfono' : 'Recursos del sector relacionado'}
               </span>
             </div>
 
@@ -378,12 +384,12 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
             <div className="flex items-center justify-between border-b border-stone-200 pb-2">
               <div className="flex items-center gap-2">
                 <Compass className="w-4 h-4 text-stone-600 shrink-0" aria-hidden="true" />
-                <h3 className="text-sm font-bold text-stone-900">
-                  Orientación General ({groupC.length < totalGroupC ? `${groupC.length} mostrados de ${totalGroupC}` : totalGroupC})
+                <h3 className={`${easyReadMode ? 'text-base' : 'text-sm'} font-bold text-stone-900`}>
+                  {easyReadMode ? 'Otros centros de atención social' : 'Orientación General'} ({groupC.length < totalGroupC ? `${groupC.length} mostrados de ${totalGroupC}` : totalGroupC})
                 </h3>
               </div>
               <span className="text-[11px] text-stone-500">
-                Sector asistencial compatible
+                {easyReadMode ? 'Recursos generales para consultar' : 'Sector asistencial compatible'}
               </span>
             </div>
 

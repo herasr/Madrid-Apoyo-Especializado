@@ -722,6 +722,6 @@ export const BENCHMARK_TEST_CENTRES: SpecializedCentre[] = [
       }
     ],
     last_checked: '2026-08-10',
-    limitations: ['Dato de disponibilidad verificado hace más de 30 días: clasificado como "Confirmar con el centro" según §72.']
+    limitations: ['Dato de disponibilidad verificado hace más de 30 días: clasificado como "Confirmar con el centro".']
   }
 ];

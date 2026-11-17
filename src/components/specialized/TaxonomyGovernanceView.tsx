@@ -152,9 +152,9 @@ export const TaxonomyGovernanceView: React.FC<TaxonomyGovernanceViewProps> = ({ 
             <div className="text-[11px] text-stone-500 font-mono uppercase tracking-wider">
               Taxonomía v{TAXONOMY_METADATA.version} · Liberada {TAXONOMY_METADATA.released_at} · Catálogo vivo: {centres.length} recursos
             </div>
-            <h1 className="text-xl font-bold text-stone-900 mt-1">
-              Gobernanza Taxonómica y Auditoría Territorial (§33, §58)
-            </h1>
+            <h2 className="text-xl font-bold text-stone-900 mt-1">
+              Gobernanza Taxonómica y Auditoría Territorial
+            </h2>
             <p className="text-xs text-stone-600 mt-1 max-w-3xl leading-relaxed">
               La taxonomía es un subsistema versionable gobernado con reglas explícitas de evidencia. Todos los recuentos y distancias territoriales de este panel se calculan directamente sobre los registros CSV cargados, sin analíticas sintéticas.
             </p>
@@ -193,7 +193,6 @@ export const TaxonomyGovernanceView: React.FC<TaxonomyGovernanceViewProps> = ({ 
               tabIndex={activeTab === t.id ? 0 : -1}
               aria-selected={activeTab === t.id}
               aria-controls={`tabpanel-${t.id}`}
-              aria-label={`Sección: ${t.label}`}
               onClick={() => setActiveTab(t.id)}
               onKeyDown={(e) => {
                 let targetIndex: number | null = null;
@@ -222,9 +221,9 @@ export const TaxonomyGovernanceView: React.FC<TaxonomyGovernanceViewProps> = ({ 
 
       {/* Pestaña 1: Catálogo y Ciclo de vida (§51, §52) */}
       {activeTab === 'categories' && (
-        <div role="tabpanel" id="tabpanel-categories" aria-labelledby="tab-categories" className="space-y-6">
+        <div role="tabpanel" id="tabpanel-categories" aria-labelledby="tab-categories" tabIndex={0} className="space-y-6">
           <div className="p-4 bg-stone-50 rounded-xl border border-stone-200 text-xs text-stone-700 leading-relaxed">
-            <strong>Puerta de Aceptación (§25.3):</strong> Un perfil solo pasa a estado <em>approved</em> si cuenta con al menos 3 centros explícitos en registro, reglas negativas documentadas y trazabilidad literal en fuentes oficiales.
+            <strong>Puerta de Aceptación:</strong> Un perfil solo pasa a estado <em>approved</em> si cuenta con al menos 3 centros explícitos en registro, reglas negativas documentadas y trazabilidad literal en fuentes oficiales.
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -316,7 +315,7 @@ export const TaxonomyGovernanceView: React.FC<TaxonomyGovernanceViewProps> = ({ 
 
       {/* Pestaña 2: Reglas Negativas de Inferencia (§26.1) */}
       {activeTab === 'rules' && (
-        <div role="tabpanel" id="tabpanel-rules" aria-labelledby="tab-rules" className="space-y-3">
+        <div role="tabpanel" id="tabpanel-rules" aria-labelledby="tab-rules" tabIndex={0} className="space-y-3">
           <div className="p-4 bg-stone-50 rounded-xl border border-stone-200 text-xs text-stone-700 leading-relaxed">
             Las <strong>reglas negativas obligatorias</strong> impiden que el motor de coincidencia extrapole competencias clínicas sin evidencia expresa. Su cumplimiento se comprueba automáticamente antes de publicar la aplicación.
           </div>
@@ -353,9 +352,9 @@ export const TaxonomyGovernanceView: React.FC<TaxonomyGovernanceViewProps> = ({ 
 
       {/* Pestaña 3: Vacíos Territoriales Calculados en Tiempo Real (§33) */}
       {activeTab === 'voids' && (
-        <div role="tabpanel" id="tabpanel-voids" aria-labelledby="tab-voids" className="space-y-4">
+        <div role="tabpanel" id="tabpanel-voids" aria-labelledby="tab-voids" tabIndex={0} className="space-y-4">
           <div className="p-4 bg-stone-50 rounded-xl border border-stone-200 text-xs text-stone-700 leading-relaxed">
-            <strong>Auditoría geográfica automatizada (§16, §33):</strong> Cruce directo entre 6 cabeceras comarcales de la Comunidad de Madrid y los centros con especialización publicada (nivel A1 o A2 por entidad titular) en los CSV oficiales activos. Se muestran los casos donde el recurso especializado más cercano está a &ge; 25 km en línea recta.
+            <strong>Auditoría geográfica automatizada:</strong> Cruce directo entre 6 cabeceras comarcales de la Comunidad de Madrid y los centros con especialización publicada (nivel A1 o A2 por entidad titular) en los CSV oficiales activos. Se muestran los casos donde el recurso especializado más cercano está a &ge; 25 km en línea recta.
           </div>
 
           {centres.length === 0 ? (
@@ -395,7 +394,7 @@ export const TaxonomyGovernanceView: React.FC<TaxonomyGovernanceViewProps> = ({ 
 
       {/* Pestaña 4: Auditoría de cobertura de los 13 perfiles en el catálogo CSV real */}
       {activeTab === 'analytics' && (
-        <div role="tabpanel" id="tabpanel-analytics" aria-labelledby="tab-analytics" className="space-y-4">
+        <div role="tabpanel" id="tabpanel-analytics" aria-labelledby="tab-analytics" tabIndex={0} className="space-y-4">
           <div className="p-4 bg-stone-50 rounded-xl border border-stone-200 text-xs text-stone-700 leading-relaxed flex items-start gap-2.5">
             <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" aria-hidden="true" />
             <div>

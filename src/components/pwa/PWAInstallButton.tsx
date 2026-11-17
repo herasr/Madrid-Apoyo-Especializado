@@ -29,7 +29,7 @@ export const PWAInstallButton: React.FC = () => {
       <button
         type="button"
         onClick={install}
-        aria-label="Instalar aplicación en tu dispositivo como PWA"
+        aria-label="Instalar App en tu dispositivo"
         className="flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 transition-colors cursor-pointer"
       >
         <Download className="w-3.5 h-3.5" aria-hidden="true" />
@@ -45,7 +45,7 @@ export const PWAInstallButton: React.FC = () => {
         <button
           type="button"
           onClick={() => setShowIOSGuide(true)}
-          aria-label="Ver instrucciones para instalar en iPhone o iPad"
+          aria-label="Instalar en iOS: ver instrucciones para iPhone o iPad"
           className="flex items-center gap-2 rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition-colors cursor-pointer"
         >
           <Download className="w-3.5 h-3.5 text-stone-500" aria-hidden="true" />

@@ -185,6 +185,88 @@ export function normalizeAddressComparable(address: string): string {
     .trim();
 }
 
+const PRESERVED_SPANISH_ACRONYMS = new Set([
+  'TEA', 'DCA', 'ELA', 'TDAH', 'TDA', 'ASPACE', 'AMDEM', 'CEPRI', 'APADIS',
+  'CRECOVI', 'ONCE', 'CRPS', 'CRL', 'CD', 'CO', 'COFOIL', 'CAD', 'CAT', 'CAM',
+  'PAUTA', 'AUCAVI', 'APNA', 'AFEM', 'AMAFE', 'FAMMA', 'ASION', 'ATIPADACE',
+  'APANEFA', 'ADELA', 'FEDER', 'AVIVA', 'EASC', 'SAT', 'SA', 'SL', 'SLU', 'SAU',
+  'SAL', 'SLL', 'SERMAS', 'PEVS', 'PIA', 'RGPD', 'IMSERSO', 'COCEMFE', 'FEAPS',
+  'AFANIAS', 'APANID', 'INTRESS', 'APASCOVI', 'POLIBEA', 'AFA', 'ENVERA',
+  'CIRVITE', 'PAU', 'UAD', 'CMM', 'CEAPAT', 'ALCER', 'ASINDOWN', 'FUNDOWN',
+  'ASEM', 'ADISLI', 'ANFAS', 'AETAPI', 'FESORCAM', 'ASCASAM', 'ACUDEM', 'APROCOR',
+  'APAMA', 'APAMP', 'AMAS', 'ALEPH', 'AVANTE', 'DNI', 'NIF', 'II', 'III', 'IV',
+  'VI', 'VII', 'VIII', 'IX', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XXI', 'XXIII'
+]);
+
+const LOWERCASE_SPANISH_PREPOSITIONS = new Set([
+  'de', 'del', 'en', 'y', 'e', 'a', 'o', 'u',
+  'al', 'con', 'para', 'por', 'sin', 'su', 'sus'
+]);
+
+const LOWERCASE_SPANISH_ARTICLES = new Set(['la', 'las', 'los', 'el']);
+
+/**
+ * Convierte denominaciones registrales escritas íntegramente en MAYÚSCULAS a formato legible
+ * con mayúscula inicial en español, respetando siglas oficiales (TEA, DCA, ASPACE...) y preposiciones (#13).
+ */
+export function formatOfficialSpanishName(raw: string): string {
+  const s = (raw || '').trim();
+  if (!s || /^RESERVADO$/i.test(s)) return s;
+
+  const letters = s.match(/\p{L}/gu) || [];
+  if (letters.length === 0) return s;
+  const upperCount = letters.filter(ch => ch === ch.toLocaleUpperCase('es-ES') && ch !== ch.toLocaleLowerCase('es-ES')).length;
+  // Solo normalizar cuando la cadena viene mayoritariamente en mayúsculas (>60%)
+  if (upperCount / letters.length <= 0.6) return s;
+
+  const parts = s.split(/(\s+|[-/(),."“”«»])/);
+  let seenWord = false;
+  let prevSeparator = '';
+  let prevLowerWord = '';
+
+  return parts
+    .map((part) => {
+      if (!part) return '';
+      if (/^(\s+|[-/(),."“”«»])$/.test(part)) {
+        if (!/^\s+$/.test(part)) {
+          prevSeparator = part;
+        }
+        return part;
+      }
+
+      const cleanUpper = part.toLocaleUpperCase('es-ES');
+      const isDottedAcronym = /^(?:[A-ZÁÉÍÓÚÜÑ]{1,2}\.){2,}$/.test(cleanUpper);
+      if (PRESERVED_SPANISH_ACRONYMS.has(cleanUpper) || isDottedAcronym) {
+        seenWord = true;
+        prevSeparator = '';
+        prevLowerWord = cleanUpper.toLocaleLowerCase('es-ES');
+        return cleanUpper;
+      }
+
+      const lower = part.toLocaleLowerCase('es-ES');
+      const allowConnectorLowercase =
+        seenWord &&
+        prevSeparator !== '(' &&
+        prevSeparator !== '«' &&
+        prevSeparator !== '"' &&
+        (LOWERCASE_SPANISH_PREPOSITIONS.has(lower) ||
+          (LOWERCASE_SPANISH_ARTICLES.has(lower) &&
+            (LOWERCASE_SPANISH_PREPOSITIONS.has(prevLowerWord) || prevLowerWord === 'o')));
+
+      if (allowConnectorLowercase) {
+        prevSeparator = '';
+        prevLowerWord = lower;
+        return lower;
+      }
+
+      seenWord = true;
+      prevSeparator = '';
+      prevLowerWord = lower;
+      return lower.charAt(0).toLocaleUpperCase('es-ES') + lower.slice(1);
+    })
+    .join('');
+}
+
 /**
  * Clasifica ÚNICAMENTE si los campos oficiales del registro declaran literalmente la condición.
  * Cero inferencias por discapacidad intelectual -> TEA, discapacidad física -> DCA/LM,
@@ -433,8 +515,8 @@ function sanitizePersonalPractitionerRecord(params: {
 
   if (!looksLikePersonEntity) {
     return {
-      officialName: denom,
-      providerName: entity || denom,
+      officialName: formatOfficialSpanishName(denom),
+      providerName: formatOfficialSpanishName(entity || denom),
       isIndividualPractitioner: false
     };
   }
@@ -505,6 +587,8 @@ function formatSupportRelatedNames(supports: SupportTypeId[]): string[] {
       ? 'apoyo laboral'
       : s === 'psychological_support'
       ? 'apoyo psicosocial'
+      : s === 'respiratory_physiotherapy'
+      ? 'fisioterapia respiratoria'
       : 'logopedia'
   );
 }
@@ -550,7 +634,8 @@ export function buildCentresFromOfficialCSVs(params: {
         const r = rows[i];
         const pk = r[col('PK')]?.trim();
         if (!pk) continue;
-        const name = decodeHtmlEntities(r[col('NOMBRE')] || `Centro Municipal PK ${pk}`);
+        const rawName = decodeHtmlEntities(r[col('NOMBRE')] || `Centro Municipal PK ${pk}`);
+        const name = formatOfficialSpanishName(rawName);
         const clase = decodeHtmlEntities(r[col('CLASE-VIAL')] || '');
         const via = decodeHtmlEntities(r[col('NOMBRE-VIA')] || '');
         const num = decodeHtmlEntities(r[col('NUM')] || '');
@@ -639,7 +724,8 @@ export function buildCentresFromOfficialCSVs(params: {
         const sector = (r[col('sector')] || '').trim();
         const tipo = (r[col('tipo')] || '').trim();
         const subtipo = (r[col('subtipo')] || '').trim();
-        const denom = (r[col('denominacion')] || '').trim();
+        const rawDenom = (r[col('denominacion')] || '').trim();
+        const denom = formatOfficialSpanishName(rawDenom);
         const plazasRaw = (r[col('plazas_autorizadas_numero')] || '').trim();
         const placesNum = /^\d+$/.test(plazasRaw) && parseInt(plazasRaw, 10) > 0 ? parseInt(plazasRaw, 10) : null;
         const muniRaw = (r[col('municipio_nombre')] || '').trim();
@@ -668,7 +754,7 @@ export function buildCentresFromOfficialCSVs(params: {
           entityRaw.split(/\s+/).length >= 2;
         const safeProviderName = isSoleProprietorPerson
           ? 'Persona física titular acreditada en Registro CAM (nombre omitido por privacidad)'
-          : entityRaw || denom;
+          : formatOfficialSpanishName(entityRaw || rawDenom);
         const entity = isSoleProprietorPerson ? '' : entityRaw;
         const gest = (r[col('tipo_gestion')] || '').trim();
 
@@ -947,7 +1033,12 @@ export function buildCentresFromOfficialCSVs(params: {
     if (!isRelevantMadridRow(m.name, m.equipamiento, m.tipoPath, explicitSpecs)) continue;
 
     const key = `MAD-PK${m.pk}`;
-    const supportResult = inferSupportsFromOfficialFields(m.tipoPath, m.equipamiento, m.name);
+    const isSocialServicesOffice = normalizeStrict(m.tipoPath).includes('centrosserviciossociales');
+    const supportResult = inferSupportsFromOfficialFields(
+      m.tipoPath,
+      isSocialServicesOffice ? '' : m.equipamiento,
+      m.name
+    );
     const supports = supportResult.supports;
     const lifeStages = inferLifeStagesFromOfficialFields(m.equipamiento, m.name, m.tipoPath);
     const normMadOnlyName = normalizeStrict(m.name);

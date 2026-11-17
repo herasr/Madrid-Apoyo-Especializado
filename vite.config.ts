@@ -17,7 +17,7 @@ export default defineConfig(() => {
         includeAssets: ['apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
         workbox: {
           maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,json}'],
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,json}'],
           globIgnores: [
             '**/data/snapshots/*.csv',
             '**/data/snapshots/snapshot-202*.csv',

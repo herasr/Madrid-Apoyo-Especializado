@@ -32,9 +32,9 @@ export const LifeStageTransitionBanner: React.FC<LifeStageTransitionBannerProps>
         <div className="flex items-start gap-2.5">
           <Clock className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <h4 className="font-bold text-amber-900 text-sm">
+            <h2 className="font-bold text-amber-900 text-sm">
               {transitionDef.alert_title}
-            </h4>
+            </h2>
             <p className="leading-relaxed text-amber-900/90 max-w-3xl">
               {transitionDef.description}
             </p>

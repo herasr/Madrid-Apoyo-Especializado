@@ -9,6 +9,7 @@
 
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import L from 'leaflet';
+import 'leaflet.markercluster';
 import { EvaluatedCentreResult } from '../../types/specialized';
 import { 
   ZoomIn, 
@@ -51,7 +52,7 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
-  const markersLayerRef = useRef<L.LayerGroup | null>(null);
+  const markersLayerRef = useRef<L.MarkerClusterGroup | null>(null);
   const originLayerRef = useRef<L.LayerGroup | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
 
@@ -116,7 +117,36 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
 
     tileLayerRef.current = osmLayer;
 
-    const markersGroup = L.layerGroup().addTo(map);
+    const markersGroup = L.markerClusterGroup({
+      maxClusterRadius: 45,
+      spiderfyOnMaxZoom: true,
+      showCoverageOnHover: false,
+      zoomToBoundsOnClick: true,
+      iconCreateFunction: (cluster) => {
+        const count = cluster.getChildCount();
+        const size = count >= 100 ? 44 : count >= 20 ? 38 : 34;
+        return L.divIcon({
+          html: `<div style="
+            width:${size}px;
+            height:${size}px;
+            border-radius:9999px;
+            background:#1c1917;
+            color:#ffffff;
+            border:2.5px solid #ffffff;
+            box-shadow:0 3px 10px rgba(0,0,0,0.28);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-family:'JetBrains Mono', ui-monospace, monospace;
+            font-size:${count >= 100 ? 11 : 12}px;
+            font-weight:700;
+          ">${count}</div>`,
+          className: 'datamad-cluster-icon',
+          iconSize: L.point(size, size)
+        });
+      }
+    });
+    map.addLayer(markersGroup);
     const originGroup = L.layerGroup().addTo(map);
 
     markersLayerRef.current = markersGroup;
@@ -202,6 +232,7 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
 
     markersGroup.clearLayers();
 
+    let selectedMarker: L.Marker | null = null;
     displayedCentres.forEach((item) => {
       const [lat, lon] = item.centre.coordinates!;
       const isSelected = selectedCentreId === item.centre.centre_id;
@@ -287,9 +318,9 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
               ${safeDistLabel}
             </span>
           </div>
-          <h4 style="font-size: 13px; font-weight: 700; margin-top: 6px; margin-bottom: 2px; line-height: 1.3; color: #1c1917;">
+          <h3 style="font-size: 13px; font-weight: 700; margin-top: 6px; margin-bottom: 2px; line-height: 1.3; color: #1c1917;">
             ${safeName}
-          </h4>
+          </h3>
           <p style="font-size: 11px; color: #57534e; margin: 0; line-height: 1.3;">
             ${safeMunicipality}${safeDistrict ? ` (Distrito ${safeDistrict})` : ''} · ${safeType}
           </p>
@@ -327,11 +358,18 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
       markersGroup.addLayer(marker);
 
       if (isSelected) {
-        setTimeout(() => {
-          marker.openPopup();
-        }, 100);
+        selectedMarker = marker;
       }
     });
+
+    const targetMarker = selectedMarker as L.Marker | null;
+    if (targetMarker) {
+      setTimeout(() => {
+        markersGroup.zoomToShowLayer(targetMarker, () => {
+          targetMarker.openPopup();
+        });
+      }, 120);
+    }
 
     setTimeout(() => {
       map.invalidateSize();
@@ -383,9 +421,9 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
       <div className="px-5 py-3 border-b border-stone-200 bg-stone-50 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-xs">
           <Compass className="w-4 h-4 text-stone-700" />
-          <span className="font-bold text-stone-900">
+          <h2 className="font-bold text-stone-900">
             Mapa interactivo (OpenStreetMap)
-          </span>
+          </h2>
           <span className="text-stone-500 font-mono">
             ({geocodedResults.length} georreferenciados)
           </span>
@@ -518,73 +556,71 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto divide-y divide-stone-100 p-2 space-y-1">
+          <div className="flex-1 overflow-y-auto p-2">
             {displayedCentres.length === 0 ? (
               <div className="p-6 text-center text-xs text-stone-500">
                 No hay centros georreferenciados.
               </div>
             ) : (
-              displayedCentres.map((item) => {
-                const isSelected = selectedCentreId === item.centre.centre_id;
-                const col = getEvidenceColor(item.evidence_level);
+              <ul className="divide-y divide-stone-100 space-y-1">
+                {displayedCentres.map((item) => {
+                  const isSelected = selectedCentreId === item.centre.centre_id;
+                  const col = getEvidenceColor(item.evidence_level);
 
-                return (
-                  <div
-                    key={item.centre.centre_id}
-                    role="button"
-                    tabIndex={0}
-                    aria-pressed={isSelected}
-                    aria-label={`Ver ${item.centre.official_name} en el mapa`}
-                    onClick={() => handleCentreCardClick(item)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        handleCentreCardClick(item);
-                      }
-                    }}
-                    className={`p-3 rounded-lg text-left cursor-pointer transition-all border outline-none focus-visible:ring-2 focus-visible:ring-stone-900 ${
-                      isSelected
-                        ? 'border-stone-900 bg-stone-50 shadow-xs'
-                        : 'border-transparent hover:border-stone-200 hover:bg-stone-50/70'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-1.5">
-                        <span 
-                          className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded text-white"
-                          style={{ backgroundColor: col.bg }}
-                        >
-                          {item.evidence_level}
-                        </span>
-                        <span className="text-[11px] font-bold text-stone-600">
-                          {item.centre.municipality}
-                        </span>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <div className="font-mono font-bold text-xs text-stone-900">
-                          {item.distance_label}
-                        </div>
-                        {item.transit_time_label && (
-                          <div
-                            className="font-mono text-[10px] text-blue-800 font-medium"
-                            title="Estimación orientativa por distancia lineal (sin consulta de horarios CRTM)"
+                  return (
+                    <li
+                      key={item.centre.centre_id}
+                      className={`relative p-3 rounded-lg text-left transition-all border focus-within:ring-2 focus-within:ring-stone-900 ${
+                        isSelected
+                          ? 'border-stone-900 bg-stone-50 shadow-xs'
+                          : 'border-transparent hover:border-stone-200 hover:bg-stone-50/70'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-1.5">
+                          <span 
+                            className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded text-white"
+                            style={{ backgroundColor: col.bg }}
                           >
-                            {item.transit_time_label}
+                            {item.evidence_level}
+                          </span>
+                          <span className="text-[11px] font-bold text-stone-600">
+                            {item.centre.municipality}
+                          </span>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <div className="font-mono font-bold text-xs text-stone-900">
+                            {item.distance_label}
                           </div>
-                        )}
+                          {item.transit_time_label && (
+                            <div
+                              className="font-mono text-[10px] text-blue-800 font-medium"
+                              title="Estimación orientativa por distancia lineal (sin consulta de horarios CRTM)"
+                            >
+                              {item.transit_time_label}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
 
-                    <h5 className="font-bold text-xs text-stone-900 mt-1.5 line-clamp-1 leading-snug">
-                      {item.centre.official_name}
-                    </h5>
+                      <h3 className="font-bold text-xs text-stone-900 mt-1.5 line-clamp-1 leading-snug">
+                        <button
+                          type="button"
+                          aria-pressed={isSelected}
+                          onClick={() => handleCentreCardClick(item)}
+                          className="text-left w-full cursor-pointer focus:outline-none after:absolute after:inset-0 after:rounded-lg"
+                        >
+                          {item.centre.official_name}
+                        </button>
+                      </h3>
 
-                    <p className="text-[11px] text-stone-500 line-clamp-1 mt-0.5">
-                      {item.centre.subtype || item.centre.centre_type}
-                    </p>
-                  </div>
-                );
-              })
+                      <p className="text-[11px] text-stone-500 line-clamp-1 mt-0.5">
+                        {item.centre.subtype || item.centre.centre_type}
+                      </p>
+                    </li>
+                  );
+                })}
+              </ul>
             )}
           </div>
         </div>

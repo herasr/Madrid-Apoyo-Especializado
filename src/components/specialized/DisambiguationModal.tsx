@@ -86,11 +86,12 @@ export const DisambiguationModal: React.FC<DisambiguationModalProps> = ({
                 {data.title}
               </h2>
               <div className="text-[11px] text-stone-500">
-                Rigor metodológico y prevención de diagnósticos automáticos (§54)
+                Rigor metodológico y prevención de diagnósticos automáticos
               </div>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
             aria-label="Cerrar modal de desambiguación"
             className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg transition-colors cursor-pointer"

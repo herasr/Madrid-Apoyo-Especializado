@@ -63,6 +63,7 @@ interface SearchFiltersProps {
   centres?: SpecializedCentre[];
   onOpenDisambiguation: (term: 'neurodivergent' | 'psychomotor') => void;
   onResetFilters: () => void;
+  easyReadMode?: boolean;
 }
 
 export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
@@ -71,11 +72,32 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
   totalResults,
   centres,
   onOpenDisambiguation,
-  onResetFilters
+  onResetFilters,
+  easyReadMode = false
 }) => {
   const [municipalities, setMunicipalities] = useState<MunicipalityOption[]>(MADRID_MUNICIPALITIES);
   const [geoStatus, setGeoStatus] = useState<'idle' | 'requesting' | 'granted' | 'denied' | 'timeout'>('idle');
   const [showAdvancedNeeds, setShowAdvancedNeeds] = useState(false);
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (query.profile) count++;
+    count += query.support_types.length;
+    if (query.life_stage) count++;
+    if (query.network_preference !== 'all') count++;
+    if (query.municipality || query.location_mode === 'browser') count++;
+    count += query.accessibility_needs.length;
+    count += query.functional_needs.length;
+    return count;
+  }, [query]);
+
+  const scrollToResults = () => {
+    setIsMobileFiltersOpen(false);
+    if (typeof document !== 'undefined') {
+      document.getElementById('results-list-anchor')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   // Carga del catálogo oficial de municipios de la Comunidad de Madrid
   useEffect(() => {
@@ -315,15 +337,45 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
   }, [query.profile, activeProfileDef]);
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-xs mb-8 space-y-6">
+    <div className="bg-white rounded-xl border border-stone-200 p-4 sm:p-5 shadow-xs mb-6 sm:mb-8">
+      {/* Cabecera compacta móvil con plegado de filtros y acceso directo a resultados */}
+      <div className="md:hidden flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-stone-100">
+        <button
+          type="button"
+          aria-expanded={isMobileFiltersOpen}
+          onClick={() => setIsMobileFiltersOpen(prev => !prev)}
+          className="flex items-center gap-2 text-xs font-bold text-stone-900 py-1.5 px-2.5 rounded-lg border border-stone-200 bg-stone-50 hover:bg-stone-100 cursor-pointer"
+        >
+          <span>
+            {isMobileFiltersOpen ? 'Ocultar filtros' : 'Configurar filtros'}
+            {activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ''}
+          </span>
+          {isMobileFiltersOpen ? (
+            <ChevronUp className="w-3.5 h-3.5 text-stone-600" aria-hidden="true" />
+          ) : (
+            <ChevronDown className="w-3.5 h-3.5 text-stone-600" aria-hidden="true" />
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={scrollToResults}
+          className="px-3.5 py-1.5 bg-stone-900 text-white text-xs font-semibold rounded-lg hover:bg-stone-800 transition-colors cursor-pointer"
+        >
+          Ver {totalResults} {totalResults === 1 ? 'recurso' : 'recursos'}
+        </button>
+      </div>
+
+      <div className={`${isMobileFiltersOpen ? 'block pt-4' : 'hidden md:block'} space-y-6`}>
+      <h2 className="sr-only">Filtros de búsqueda</h2>
       {/* 2. Dimensión 1: Perfiles oficiales verificados */}
       <div>
         <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-stone-700">
-            Perfil o condición
+          <h3 className={`font-bold uppercase tracking-wider text-stone-700 ${easyReadMode ? 'text-sm normal-case tracking-normal text-stone-900' : 'text-xs'}`}>
+            {easyReadMode ? '¿Qué situación o perfil buscas?' : 'Perfil o condición'}
           </h3>
           <div className="text-[11px] text-stone-500 flex flex-wrap items-center gap-1.5">
-            <span>¿Buscas un término amplio? Desambiguar:</span>
+            <span>{easyReadMode ? '¿Dudas entre términos? Aclarar:' : '¿Buscas un término general?'}</span>
             <button
               type="button"
               onClick={() => onOpenDisambiguation('neurodivergent')}
@@ -345,20 +397,12 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
           {[...Object.values(CORE_PROFILES), ...Object.values(EXPERIMENTAL_PROFILES), ...Object.values(PENDING_PROFILES)].map((prof) => {
             const isSelected = query.profile === prof.id;
-            const statusText =
-              prof.status === 'approved'
-                ? 'Núcleo aprobado'
-                : prof.status === 'experimental'
-                ? 'Experimental'
-                : 'En revisión';
-            const hasCatalog = Boolean(centres && centres.length > 0);
-            const profCov = profileCounts[prof.id] || { a1: 0, a2: 0, total: 0 };
+            const visibleLabel = prof.preferred_label.replace(' (Reserva/Experimental)', '').replace(' (Experimental)', '');
             return (
               <button
                 key={prof.id}
                 type="button"
                 aria-pressed={isSelected}
-                aria-label={`Filtrar por perfil o condición: ${prof.preferred_label.replace(' (Reserva/Experimental)', '').replace(' (Experimental)', '')}`}
                 onClick={() => {
                   const newProfile = isSelected ? null : prof.id;
                   setQuery(prev => {
@@ -385,23 +429,15 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                     };
                   });
                 }}
-                className={`p-3 rounded-lg border text-left transition-all cursor-pointer flex flex-col justify-between gap-1 ${
+                className={`p-3 rounded-lg border text-left transition-all cursor-pointer flex items-center justify-between gap-2 ${
                   isSelected
                     ? 'border-stone-900 bg-stone-900 text-white shadow-xs'
                     : 'border-stone-200 bg-white hover:bg-stone-50 text-stone-900'
                 }`}
               >
-                <div className="text-xs font-bold leading-snug">
-                  {prof.preferred_label.replace(' (Reserva/Experimental)', '').replace(' (Experimental)', '')}
-                </div>
-                <div className={`text-[10px] font-mono flex items-center justify-between gap-1 ${isSelected ? 'text-stone-300' : 'text-stone-500'}`}>
-                  <span>{statusText}</span>
-                  {hasCatalog && (
-                    <span className={isSelected ? 'text-stone-300' : profCov.total === 0 ? 'text-amber-700' : 'text-stone-500'}>
-                      {profCov.total === 0 ? '0 A en CSV' : `${profCov.a1} A1 · ${profCov.a2} A2`}
-                    </span>
-                  )}
-                </div>
+                <span className={`${easyReadMode ? 'text-sm' : 'text-xs'} font-bold leading-snug`}>
+                  {visibleLabel}
+                </span>
               </button>
             );
           })}
@@ -411,7 +447,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
           <div className="mt-2 text-xs bg-amber-50 border border-amber-200 rounded-lg p-2.5 text-amber-950 flex items-center gap-2">
             <Info className="w-4 h-4 text-amber-700 shrink-0" aria-hidden="true" />
             <span>
-              <strong>Sin mención expresa en los CSV oficiales actuales:</strong> Ningún centro o servicio declara literalmente «{activeProfileDef?.preferred_label || query.profile}» en los ficheros vigentes; se muestran únicamente recursos relacionados u orientación general pendiente de confirmación telefónica.
+              <strong>Sin mención expresa en los registros oficiales actuales:</strong> Ningún centro o servicio declara literalmente «{activeProfileDef?.preferred_label.replace(' (Reserva/Experimental)', '').replace(' (Experimental)', '') || query.profile}» en los datos vigentes; se muestran recursos relacionados para consultar por teléfono.
             </span>
           </div>
         )}
@@ -423,8 +459,8 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
       <div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5">
           <div className="flex items-center gap-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-stone-700">
-              Tipos de apoyo
+            <h3 className={`font-bold uppercase tracking-wider text-stone-700 ${easyReadMode ? 'text-sm normal-case tracking-normal text-stone-900' : 'text-xs'}`}>
+              {easyReadMode ? '¿Qué ayuda o centro necesitas?' : 'Tipos de apoyo'}
             </h3>
             {activeProfileDef && (
               <span className="text-[11px] font-semibold text-emerald-800">
@@ -471,26 +507,19 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
           {displayedSupportTypes.map((st) => {
             const isChecked = query.support_types.includes(st.id);
-            const countInCatalog = centres && centres.length > 0 ? (supportCounts[st.id] ?? 0) : null;
             return (
               <button
                 key={st.id}
                 type="button"
                 aria-pressed={isChecked}
-                aria-label={`Filtrar por tipo de apoyo: ${st.label}`}
                 onClick={() => toggleSupport(st.id)}
-                className={`p-2.5 rounded-lg border text-left transition-colors cursor-pointer flex flex-col justify-between gap-1 ${
+                className={`p-2.5 rounded-lg border text-left transition-colors cursor-pointer flex items-center ${
                   isChecked
                     ? 'border-stone-900 bg-stone-900 text-white font-semibold shadow-xs'
                     : 'border-stone-200 hover:bg-stone-50 text-stone-700'
                 }`}
               >
-                <span className="text-xs leading-snug">{st.label}</span>
-                {countInCatalog !== null && (
-                  <span className={`text-[10px] font-mono ${isChecked ? 'text-stone-300' : countInCatalog === 0 ? 'text-amber-700' : 'text-stone-500'}`}>
-                    {countInCatalog === 0 ? '0 en CSV · confirmar' : `${countInCatalog} en CSV`}
-                  </span>
-                )}
+                <span className={`${easyReadMode ? 'text-sm' : 'text-xs'} leading-snug`}>{st.label}</span>
               </button>
             );
           })}
@@ -511,7 +540,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
             <div className="mt-2 text-xs bg-amber-50 border border-amber-200 rounded-lg p-2.5 text-amber-950 flex items-center gap-2">
               <Info className="w-4 h-4 text-amber-700 shrink-0" aria-hidden="true" />
               <span>
-                <strong>Desglose ausente en CSV:</strong> Los ficheros sociales oficiales actuales no detallan servicios de{' '}
+                <strong>Desglose no especificado en el registro oficial:</strong> Los ficheros públicos actuales no detallan servicios de{' '}
                 {query.support_types
                   .filter(s => (supportCounts[s] || 0) === 0)
                   .map(s => SUPPORT_TYPES[s]?.label || s)
@@ -529,8 +558,8 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
         {/* Etapa Vital (Dinámica según las etapas autorizadas en la taxonomía) */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-stone-700">
-              Etapa vital
+            <h3 className={`font-bold uppercase tracking-wider text-stone-700 ${easyReadMode ? 'text-sm normal-case tracking-normal text-stone-900' : 'text-xs'}`}>
+              {easyReadMode ? 'Edad de la persona' : 'Etapa vital'}
             </h3>
             {activeProfileDef && (
               <span className="text-[10px] text-stone-500 font-medium">
@@ -546,7 +575,6 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                   key={key}
                   type="button"
                   aria-pressed={isSelected}
-                  aria-label={`Filtrar por etapa vital: ${item.label} (${item.ageRange})`}
                   onClick={() => setQuery(prev => ({
                     ...prev,
                     life_stage: isSelected ? null : (key as LifeStage)
@@ -569,8 +597,8 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
 
         {/* Titularidad y Red */}
         <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-stone-700 block mb-2">
-            Red y titularidad
+          <h3 className={`font-bold uppercase tracking-wider text-stone-700 block mb-2 ${easyReadMode ? 'text-sm normal-case tracking-normal text-stone-900' : 'text-xs'}`}>
+            {easyReadMode ? 'Tipo de centro (público o privado)' : 'Red y titularidad'}
           </h3>
           <div className="space-y-1.5 text-xs">
             {[
@@ -602,8 +630,8 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
         {/* Localización territorial y radio */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-stone-700">
-              Ubicación y radio
+            <h3 className={`font-bold uppercase tracking-wider text-stone-700 ${easyReadMode ? 'text-sm normal-case tracking-normal text-stone-900' : 'text-xs'}`}>
+              {easyReadMode ? '¿En qué zona quieres buscar?' : 'Ubicación y radio'}
             </h3>
           </div>
 
@@ -708,8 +736,8 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
 
       {/* 5. Accesibilidad física oficial por códigos */}
       <div>
-        <h3 className="text-xs font-bold uppercase tracking-wider text-stone-700 block mb-2.5">
-          Accesibilidad oficial (Ayuntamiento de Madrid)
+        <h3 className={`font-bold uppercase tracking-wider text-stone-700 block mb-2.5 ${easyReadMode ? 'text-sm normal-case tracking-normal text-stone-900' : 'text-xs'}`}>
+          {easyReadMode ? 'Accesibilidad del edificio' : 'Accesibilidad oficial (Ayuntamiento de Madrid)'}
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
           {ACCESSIBILITY_FEATURES.map((feat) => {
@@ -719,7 +747,6 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                 key={feat.id}
                 type="button"
                 aria-pressed={isChecked}
-                aria-label={`Filtrar por accesibilidad física: ${feat.label}`}
                 onClick={() => setQuery(prev => ({
                   ...prev,
                   accessibility_needs: isChecked
@@ -740,7 +767,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
         </div>
       </div>
 
-      {/* 5. Necesidades funcionales transversales (desplegable opcional §50.1) */}
+      {/* 5. Necesidades funcionales transversales (desplegable opcional) */}
       <div>
         <button
           type="button"
@@ -749,7 +776,11 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
           className="text-xs font-semibold text-stone-700 hover:text-stone-950 flex items-center gap-1.5 cursor-pointer"
         >
           {showAdvancedNeeds ? <ChevronUp className="w-3.5 h-3.5" aria-hidden="true" /> : <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />}
-          <span>Necesidades funcionales observables (comunicación, deglución, motricidad, regulación sensorial...)</span>
+          <span>
+            {easyReadMode
+              ? 'Otras necesidades (comunicación, alimentación, movilidad...)'
+              : 'Necesidades funcionales observables (comunicación, deglución, motricidad, regulación sensorial...)'}
+          </span>
           {activeProfileDef && (
             <span className="text-[11px] text-emerald-800 font-semibold">
               · {displayedFunctionalNeeds.length} relevantes
@@ -771,7 +802,6 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                   key={need.id}
                   type="button"
                   aria-pressed={isSelected}
-                  aria-label={`Filtrar por necesidad funcional: ${need.label}`}
                   onClick={() => toggleFunctionalNeed(need.id)}
                   className={`p-2 rounded-md border text-left text-xs transition-colors cursor-pointer ${
                     isSelected
@@ -912,7 +942,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
           )}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <span className="text-xs font-mono font-bold text-stone-900">
             {totalResults} {totalResults === 1 ? 'recurso oficial' : 'recursos oficiales'}
           </span>
@@ -924,7 +954,15 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
             <RotateCcw className="w-3 h-3" aria-hidden="true" />
             <span>Limpiar filtros</span>
           </button>
+          <button
+            type="button"
+            onClick={scrollToResults}
+            className="md:hidden px-3 py-1.5 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-stone-800 transition-colors cursor-pointer"
+          >
+            Ver {totalResults} resultados
+          </button>
         </div>
+      </div>
       </div>
     </div>
   );

@@ -7,7 +7,7 @@
  * Cumple estrictamente con el Prompt Maestro v1.8 y la Universal Frontend Design Constitution
  */
 
-import React, { useState, useMemo, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useMemo, useEffect, useRef, Suspense, lazy } from 'react';
 import { 
   SpecializedCentre,
   SearchQueryState, 
@@ -94,7 +94,7 @@ function validateAndParseUrlParams(): { query: SearchQueryState; errors: string[
   const validNets = ['all', 'public_network', 'private_authorised'];
   const validCombs = ['any_support', 'all_supports_same_centre'];
   const validLocs = ['all', 'municipality', 'browser'];
-  const validAccess = ['wheelchair_access', 'sign_language', 'tactile_signage', 'braille_signage', 'magnetic_loops'];
+  const validAccess = ['wheelchair_access', 'sign_language', 'tactile_signage', 'magnetic_loops'];
 
   let profile: ProfileId | null = null;
   if (rawProfile !== null && rawProfile !== '') {
@@ -227,6 +227,16 @@ export default function App() {
 
   // Pestañas de Madrid Apoyo Especializado: 'search' | 'map' | 'comparator' | 'what_changed' | 'governance' | 'tests'
   const [activeTab, setActiveTab] = useState<string>(initialTab);
+  const isFirstTabRender = useRef(true);
+  useEffect(() => {
+    if (isFirstTabRender.current) {
+      isFirstTabRender.current = false;
+      return;
+    }
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+  }, [activeTab]);
 
   // Estado accesible
   const [easyReadMode, setEasyReadMode] = useState<boolean>(false);
@@ -384,7 +394,7 @@ export default function App() {
         return prev.filter(cId => cId !== id);
       }
       if (prev.length >= 3) {
-        setCompareLimitNotice('Puede comparar un máximo de 3 centros a la vez (§15). Quite uno del comparador antes de añadir otro.');
+        setCompareLimitNotice('Puede comparar un máximo de 3 centros a la vez. Quite uno del comparador antes de añadir otro.');
         return prev;
       }
       setCompareLimitNotice(null);
@@ -422,6 +432,7 @@ export default function App() {
         openSavedSearches={() => setIsSavedSearchesOpen(true)}
         openGlossary={() => setIsGlossaryOpen(true)}
         onOpenWhatChanged={() => setActiveTab('what_changed')}
+        snapshotDate={dynamicState?.timestamp?.slice(0, 10)}
       />
 
       {/* Alerta de validación de URL cuando hay parámetros rechazados */}
@@ -480,7 +491,7 @@ export default function App() {
                     aria-label="Cerrar aviso"
                     className="px-2 py-1 text-stone-600 hover:text-stone-900 cursor-pointer"
                   >
-                    ×
+                    <span aria-hidden="true">×</span>
                   </button>
                 </div>
               </div>
@@ -505,6 +516,7 @@ export default function App() {
               centres={activeCentres}
               onOpenDisambiguation={(term) => setIsDisambiguationOpen(term)}
               onResetFilters={resetAllFilters}
+              easyReadMode={easyReadMode}
             />
 
             {(dynamicState?.used_fallback || dynamicState?.error) && (
@@ -547,9 +559,9 @@ export default function App() {
                 <div className="w-12 h-12 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto text-amber-700">
                   <AlertTriangle className="w-6 h-6" aria-hidden="true" />
                 </div>
-                <h3 className="text-base font-bold text-stone-900">
+                <h2 className="text-base font-bold text-stone-900">
                   Búsqueda pausada por parámetros de URL no reconocidos
-                </h3>
+                </h2>
                 <p className="text-xs text-stone-600 leading-relaxed max-w-md mx-auto">
                   La dirección de enlace introducida contiene filtros que no pertenecen al catálogo de taxonomías ni al registro oficial de la Comunidad de Madrid. Para evitar presentar resultados engañosos, el buscador no muestra resultados parciales.
                 </p>
@@ -621,7 +633,7 @@ export default function App() {
                   Mapa territorial sincronizado con los filtros
                 </h2>
                 <p className="text-xs text-stone-600 mt-0.5">
-                  Los marcadores reflejan exactamente los recursos filtrados. La cercanía nunca sitúa un resultado C por delante de un nivel A (§63).
+                  Los marcadores reflejan exactamente los recursos filtrados. La cercanía nunca sitúa un resultado C por delante de un nivel A.
                 </p>
               </div>
               <button
@@ -771,6 +783,7 @@ export default function App() {
             </div>
             <p className="text-stone-500 max-w-2xl leading-relaxed">
               DATAMAD 2026: Buscador independiente basado en los registros oficiales de Atención Social del Ayuntamiento de Madrid y la Comunidad de Madrid. Orientación verificable (sin finalidad diagnóstica). Código abierto bajo licencia Apache-2.0. Sin telemetría ni almacenamiento de datos de salud.
+              {dynamicState?.loaded && dynamicState.timestamp ? ` · Última captura oficial verificada: ${dynamicState.timestamp.slice(0, 10)}.` : ''}
             </p>
           </div>
 
@@ -778,7 +791,6 @@ export default function App() {
             <button
               type="button"
               onClick={() => setActiveTab('governance')}
-              aria-label="Ver sección de Gobernanza Taxonómica"
               className="hover:text-stone-950 underline underline-offset-2 cursor-pointer"
             >
               Gobernanza Taxonómica
@@ -786,7 +798,6 @@ export default function App() {
             <button
               type="button"
               onClick={() => setActiveTab('what_changed')}
-              aria-label="Ver histórico de cambios entre snapshots del registro"
               className="hover:text-stone-950 underline underline-offset-2 cursor-pointer"
             >
               Histórico de Cambios
@@ -794,7 +805,6 @@ export default function App() {
             <button
               type="button"
               onClick={() => setActiveTab('tests')}
-              aria-label="Ver batería canónica de validación"
               className="hover:text-stone-950 underline underline-offset-2 font-mono cursor-pointer"
             >
               Suite Canónica de Validación

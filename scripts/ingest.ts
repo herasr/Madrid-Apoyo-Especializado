@@ -144,6 +144,7 @@ interface NormalizedRowSummary {
   address: string;
   places: string;
   accessibility: string;
+  coords: string;
 }
 
 function summarizeSourceRows(sourceId: OfficialSourceSpec['source_id'], rows: string[][]): Map<string, NormalizedRowSummary> {
@@ -160,19 +161,25 @@ function summarizeSourceRows(sourceId: OfficialSourceSpec['source_id'], rows: st
     const viaNameI = idx('nombre-via');
     const numI = idx('num');
     const accI = idx('accesibilidad');
+    const latI = idx('latitud');
+    const lonI = idx('longitud');
 
     for (let i = 1; i < rows.length; i++) {
       const r = rows[i];
       const pk = r[pkI]?.trim();
       if (!pk) continue;
       const addr = [r[viaClaseI], r[viaNameI], r[numI]].filter(Boolean).join(' ').trim();
+      const lat = latI >= 0 ? (r[latI] || '').trim() : '';
+      const lon = lonI >= 0 ? (r[lonI] || '').trim() : '';
+      const coords = lat || lon ? `${lat},${lon}` : '';
       map.set(`MAD-PK${pk}`, {
         id: `MAD-PK${pk}`,
         name: r[nameI] || `PK ${pk}`,
         phone: (r[phoneI] || '').trim(),
         address: addr,
         places: '',
-        accessibility: (r[accI] || '').trim()
+        accessibility: (r[accI] || '').trim(),
+        coords
       });
     }
   } else {
@@ -183,6 +190,8 @@ function summarizeSourceRows(sourceId: OfficialSourceSpec['source_id'], rows: st
     const viaNameI = idx('direccion_via_nombre');
     const portalI = idx('direccion_portal');
     const plazasI = idx('plazas_autorizadas_numero');
+    const coorXI = idx('direccion_coor_x');
+    const coorYI = idx('direccion_coor_y');
     const prefix = sourceId === 'cam_centros' ? 'CAM-' : 'CAM-SRV-';
 
     for (let i = 1; i < rows.length; i++) {
@@ -190,20 +199,24 @@ function summarizeSourceRows(sourceId: OfficialSourceSpec['source_id'], rows: st
       const regId = r[idI]?.trim();
       if (!regId) continue;
       const addr = [r[viaTipoI], r[viaNameI], r[portalI]].filter(Boolean).join(' ').trim();
+      const cx = coorXI >= 0 ? (r[coorXI] || '').trim() : '';
+      const cy = coorYI >= 0 ? (r[coorYI] || '').trim() : '';
+      const coords = cx || cy ? `${cx},${cy}` : '';
       map.set(`${prefix}${regId}`, {
         id: `${prefix}${regId}`,
         name: r[nameI] || regId,
         phone: (r[phoneI] || '').trim(),
         address: addr,
         places: plazasI >= 0 ? (r[plazasI] || '').trim() : '',
-        accessibility: ''
+        accessibility: '',
+        coords
       });
     }
   }
   return map;
 }
 
-function computeDiffs(
+export function computeDiffs(
   sourceId: OfficialSourceSpec['source_id'],
   prevRows: string[][] | null,
   currRows: string[][],
@@ -242,19 +255,31 @@ function computeDiffs(
       if (prev.phone !== curr.phone) changes.push(`Teléfono: "${prev.phone || 'N/D'}" -> "${curr.phone || 'N/D'}"`);
       if (prev.address !== curr.address) changes.push(`Dirección: "${prev.address}" -> "${curr.address}"`);
       if (prev.places !== curr.places) changes.push(`Plazas autorizadas: "${prev.places || 'N/D'}" -> "${curr.places || 'N/D'}"`);
-      if (prev.accessibility !== curr.accessibility) changes.push(`Accesibilidad código: "${prev.accessibility}" -> "${curr.accessibility}"`);
+      if (prev.accessibility !== curr.accessibility) changes.push(`Accesibilidad código: "${prev.accessibility || 'N/D'}" -> "${curr.accessibility || 'N/D'}"`);
+      if (prev.coords !== curr.coords) changes.push(`Coordenadas: "${prev.coords || 'N/D'}" -> "${curr.coords || 'N/D'}"`);
 
       if (changes.length > 0) {
+        const onlyAccessChanged =
+          prev.accessibility !== curr.accessibility &&
+          prev.name === curr.name &&
+          prev.phone === curr.phone &&
+          prev.address === curr.address &&
+          prev.places === curr.places;
         diffs.push({
           change_id: `DIFF-${sourceId.toUpperCase()}-UPD-${seq++}`,
-          change_type: prev.name !== curr.name ? 'centre_renamed' : 'service_added',
+          change_type:
+            prev.name !== curr.name
+              ? 'centre_renamed'
+              : onlyAccessChanged
+              ? 'access_route_changed'
+              : 'service_added',
           centre_id: id,
           centre_name: curr.name,
           previous_snapshot: prevDate,
           current_snapshot: currDate,
           detail: `Cambio registral real (${sourceTag}): ${changes.join(' · ')}.`,
           reason: `Comparación directa fila a fila entre descargas oficiales de ${sourceTag}.`,
-          category: 'servicio'
+          category: onlyAccessChanged ? 'acceso' : 'servicio'
         });
       }
     }
@@ -323,10 +348,16 @@ export async function runIngestionProcess() {
   const metadataPath = path.join(snapshotsDir, 'snapshot-metadata.json');
 
   let prevTimestamp: string | null = null;
+  let prevMetaSourcesMap: Record<string, string> = {};
   if (fs.existsSync(metadataPath)) {
     try {
       const prevMeta = JSON.parse(fs.readFileSync(metadataPath, 'utf-8'));
       if (prevMeta?.timestamp) prevTimestamp = prevMeta.timestamp;
+      if (Array.isArray(prevMeta?.sources)) {
+        prevMetaSourcesMap = Object.fromEntries(
+          prevMeta.sources.map((s: any) => [s.source_id, s.sha256_hash])
+        );
+      }
     } catch {
       prevTimestamp = null;
     }
@@ -371,30 +402,35 @@ export async function runIngestionProcess() {
     downloaded.push({ spec, buffer, sha256, rows, prevRows });
   }
 
-  // Fase 1.5: Verificación idempotente. Si todos los hashes SHA-256 coinciden con los ficheros en disco y catalog-classified.json existe, omitir ingesta salvo --force.
+  // Fase 1.5: Verificación idempotente contra la última captura publicada (disco + snapshot-metadata.json).
+  // Si todas las huellas coinciden, NO sobrescribir snapshot-diffs.json ni metadata salvo --force.
   const forceIngest = process.argv.includes('--force');
   const classifiedPath = path.join(snapshotsDir, 'catalog-classified.json');
-  const allHashesMatchExisting = downloaded.every(item => {
+  const allHashesMatchPublished = downloaded.every(item => {
     const latestPath = path.join(snapshotsDir, item.spec.latest_file);
     if (!fs.existsSync(latestPath)) return false;
     const existingBuf = fs.readFileSync(latestPath);
     const existingHash = crypto.createHash('sha256').update(existingBuf).digest('hex');
-    return existingHash === item.sha256;
+    const metaHash = prevMetaSourcesMap[item.spec.source_id];
+    return existingHash === item.sha256 && (!metaHash || metaHash === item.sha256);
   });
 
-  if (!forceIngest && allHashesMatchExisting && fs.existsSync(classifiedPath) && fs.existsSync(metadataPath)) {
-    console.log('✓ Registros oficiales sin cambios (SHA-256 idéntico en todas las fuentes). Ingesta omitida de forma idempotente.');
+  if (!forceIngest && allHashesMatchPublished && fs.existsSync(classifiedPath) && fs.existsSync(metadataPath)) {
+    console.log('✓ Registros oficiales sin cambios respecto a la huella publicada en snapshot-metadata.json. Informe snapshot-diffs.json preservado.');
     try {
       const existingMeta = JSON.parse(fs.readFileSync(metadataPath, 'utf-8'));
       return existingMeta;
     } catch {}
   }
 
-  // Fase 2: Guardar buffers crudos exactos sin re-codificación y comprobar hash en disco
+  // Fase 2: Calcular diffs ANTES de sobrescribir -latest.csv y verificar hash en disco
   const allDiffs: RealSnapshotDiff[] = [];
   const prevDateLabel = prevTimestamp ? prevTimestamp.slice(0, 10) : dateStr;
 
   for (const item of downloaded) {
+    const sourceDiffs = computeDiffs(item.spec.source_id, item.prevRows, item.rows, prevDateLabel, dateStr);
+    allDiffs.push(...sourceDiffs);
+
     const latestPath = path.join(snapshotsDir, item.spec.latest_file);
     fs.writeFileSync(latestPath, item.buffer);
 
@@ -403,31 +439,35 @@ export async function runIngestionProcess() {
     if (diskHash !== item.sha256) {
       throw new Error(`Fallo de integridad SHA-256 en disco para ${item.spec.latest_file}: esperado ${item.sha256}, obtenido ${diskHash}`);
     }
-
-    const sourceDiffs = computeDiffs(item.spec.source_id, item.prevRows, item.rows, prevDateLabel, dateStr);
-    allDiffs.push(...sourceDiffs);
   }
 
-  // Fase 3: Guardar diferencias reales en snapshot-diffs.json (preservando histórico si no hay cambios nuevos)
+  // Fase 3: Solo actualizar snapshot-diffs.json si hubo cambios reales detectados o no existía el informe;
+  // si todas las huellas coinciden (--force sin cambios reales), no borrar el último informe válido (#2).
   const diffsPath = path.join(snapshotsDir, 'snapshot-diffs.json');
-  let finalDiffs = allDiffs;
-  if (allDiffs.length === 0 && fs.existsSync(diffsPath)) {
-    try {
-      const existingDiffs = JSON.parse(fs.readFileSync(diffsPath, 'utf-8'));
-      if (Array.isArray(existingDiffs?.diffs) && existingDiffs.diffs.length > 0) {
-        finalDiffs = existingDiffs.diffs;
-      }
-    } catch {}
-  }
+  if (allDiffs.length > 0 || !fs.existsSync(diffsPath) || !allHashesMatchPublished) {
+    let finalDiffs = allDiffs;
+    let prevForReport = prevDateLabel;
+    let currForReport = dateStr;
+    if (allDiffs.length === 0 && fs.existsSync(diffsPath)) {
+      try {
+        const existingDiffs = JSON.parse(fs.readFileSync(diffsPath, 'utf-8'));
+        if (Array.isArray(existingDiffs?.diffs) && existingDiffs.diffs.length > 0) {
+          finalDiffs = existingDiffs.diffs;
+          prevForReport = existingDiffs.previous_snapshot || prevDateLabel;
+          currForReport = existingDiffs.current_snapshot || dateStr;
+        }
+      } catch {}
+    }
 
-  const diffsPayload = {
-    generated_at: timestamp,
-    previous_snapshot: prevDateLabel,
-    current_snapshot: dateStr,
-    total_changes: finalDiffs.length,
-    diffs: finalDiffs
-  };
-  fs.writeFileSync(diffsPath, JSON.stringify(diffsPayload, null, 2), 'utf-8');
+    const diffsPayload = {
+      generated_at: timestamp,
+      previous_snapshot: prevForReport,
+      current_snapshot: currForReport,
+      total_changes: finalDiffs.length,
+      diffs: finalDiffs
+    };
+    fs.writeFileSync(diffsPath, JSON.stringify(diffsPayload, null, 2), 'utf-8');
+  }
 
   // Fase 4: Guardar metadatos de auditoría multi-fuente
   const primary = downloaded.find(d => d.spec.source_id === 'madrid_municipal')!;
@@ -556,8 +596,14 @@ export function generatePreclassifiedCatalogFile(params: {
 
 const isDirectExecution = process.argv[1] && path.resolve(process.argv[1]).endsWith('ingest.ts');
 if (isDirectExecution) {
-  runIngestionProcess().catch(err => {
-    console.error('ERROR CRÍTICO DE INGESTA (proceso detenido sin corromper datos):', err?.message || err);
-    process.exit(1);
-  });
+  if (process.argv.includes('--only-classify')) {
+    const snapshotsDir = path.resolve(process.cwd(), 'public/data/snapshots');
+    const payload = generatePreclassifiedCatalogFile({ snapshotsDir });
+    console.log(`✓ catalog-classified.json regenerado sin descarga: ${payload.active_centres_count} recursos.`);
+  } else {
+    runIngestionProcess().catch(err => {
+      console.error('ERROR CRÍTICO DE INGESTA (proceso detenido sin corromper datos):', err?.message || err);
+      process.exit(1);
+    });
+  }
 }

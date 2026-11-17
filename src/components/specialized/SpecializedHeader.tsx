@@ -13,7 +13,8 @@ import {
   AlertCircle,
   X,
   ExternalLink,
-  ShieldCheck
+  ShieldCheck,
+  Menu
 } from 'lucide-react';
 import { PWAInstallButton } from '../pwa/PWAInstallButton';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
@@ -28,6 +29,7 @@ interface SpecializedHeaderProps {
   openSavedSearches: () => void;
   openGlossary: () => void;
   onOpenWhatChanged?: () => void;
+  snapshotDate?: string;
 }
 
 export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
@@ -39,42 +41,47 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
   comparedCount = 0,
   openSavedSearches,
   openGlossary,
-  onOpenWhatChanged
+  onOpenWhatChanged,
+  snapshotDate
 }) => {
   const [isSourcesModalOpen, setIsSourcesModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const sourcesModalRef = useRef<HTMLDivElement>(null);
   useFocusTrap(sourcesModalRef, isSourcesModalOpen);
 
   useEffect(() => {
-    if (!isSourcesModalOpen) return;
+    if (!isSourcesModalOpen && !isMobileMenuOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsSourcesModalOpen(false);
+      if (e.key === 'Escape') {
+        setIsSourcesModalOpen(false);
+        setIsMobileMenuOpen(false);
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [isSourcesModalOpen]);
+  }, [isSourcesModalOpen, isMobileMenuOpen]);
 
   return (
     <>
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xs border-b border-stone-200 no-print">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-4 h-14">
-            {/* Zona 1: Brand Wordmark limpio y monolítico */}
-            <div className="flex items-center shrink-0 min-w-0">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between gap-2 sm:gap-4 h-14 min-w-0">
+            {/* Zona 1: Brand Wordmark limpio con h1 semántico único */}
+            <div className="flex items-center min-w-0 flex-1 md:flex-initial">
               <button
                 type="button"
                 onClick={() => setActiveTab('search')}
-                aria-label="Volver al inicio de búsqueda de Madrid Apoyo Especializado"
-                className="text-left group cursor-pointer rounded-md py-1 whitespace-nowrap"
+                aria-label="Madrid Apoyo Especializado · Volver a búsqueda"
+                className="text-left group cursor-pointer rounded-md py-1 min-w-0"
               >
-                <span className="text-base sm:text-lg font-extrabold tracking-tight text-stone-900 group-hover:text-stone-700 transition-colors">
+                <h1 className="text-sm sm:text-lg font-extrabold tracking-tight text-stone-900 group-hover:text-stone-700 transition-colors truncate">
                   Madrid Apoyo Especializado
-                </span>
+                </h1>
               </button>
             </div>
 
-            {/* Zona 2: Navegación principal limpia sin contenedor cápsula */}
-            <nav aria-label="Navegación principal" className="hidden md:flex items-center gap-6 h-full text-xs font-semibold">
+            {/* Zona 2: Navegación principal limpia */}
+            <nav aria-label="Navegación principal" className="hidden md:flex items-center gap-6 h-full text-xs font-semibold shrink-0">
               {[
                 { id: 'search', label: 'Búsqueda' },
                 { id: 'map', label: 'Mapa' },
@@ -104,14 +111,13 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
               })}
             </nav>
 
-            {/* Zona 3: Utilidades esenciales */}
-            <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+            {/* Zona 3 (Escritorio): Utilidades esenciales */}
+            <div className="hidden md:flex items-center gap-2 shrink-0">
               <button
                 type="button"
                 aria-pressed={easyReadMode}
                 onClick={() => setEasyReadMode(prev => !prev)}
                 title="Lectura fácil"
-                aria-label="Activar o desactivar modo de lectura fácil"
                 className={`px-2.5 py-1.5 text-xs font-medium rounded-lg border transition-colors flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
                   easyReadMode
                     ? 'bg-amber-100 border-amber-400 text-amber-950 font-semibold'
@@ -119,7 +125,7 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
                 }`}
               >
                 <Eye className="w-3.5 h-3.5 text-stone-600 shrink-0" aria-hidden="true" />
-                <span className="hidden sm:inline">Lectura fácil</span>
+                <span>Lectura fácil</span>
               </button>
 
               <PWAInstallButton />
@@ -128,11 +134,10 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
                 type="button"
                 onClick={openSavedSearches}
                 title="Búsquedas guardadas"
-                aria-label={`Ver búsquedas guardadas en el navegador${savedSearchesCount > 0 ? ` (${savedSearchesCount})` : ''}`}
                 className="px-2.5 py-1.5 text-xs font-medium rounded-lg border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 transition-colors flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
               >
                 <Bookmark className="w-3.5 h-3.5 text-stone-600 shrink-0" aria-hidden="true" />
-                <span className="hidden sm:inline">Guardadas</span>
+                <span>Guardadas</span>
                 {savedSearchesCount > 0 && (
                   <span className="text-xs font-mono font-semibold text-stone-900 tabular-nums">
                     ({savedSearchesCount})
@@ -144,7 +149,7 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
                 type="button"
                 onClick={openGlossary}
                 title="Glosario en lectura fácil"
-                aria-label="Abrir glosario en lectura fácil y siglas oficiales"
+                aria-label="Glosario en lectura fácil"
                 className="p-2 text-stone-600 hover:text-stone-900 rounded-lg hover:bg-stone-100 transition-colors cursor-pointer"
               >
                 <BookOpen className="w-4 h-4" aria-hidden="true" />
@@ -153,14 +158,103 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
               <button
                 type="button"
                 onClick={() => setIsSourcesModalOpen(true)}
-                title="Verificar fuentes oficiales y reportar discrepancia registral"
-                aria-label="Abrir diálogo de verificación de fuentes oficiales y reporte de discrepancias"
+                title="Verificar fuentes oficiales"
+                aria-label="Verificar fuentes oficiales"
                 className="p-2 text-stone-600 hover:text-stone-900 rounded-lg hover:bg-stone-100 transition-colors cursor-pointer"
               >
                 <AlertCircle className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
+
+            {/* Zona 3 (Móvil): Botón compacto de menú para evitar desbordamiento horizontal (#4) */}
+            <div className="flex md:hidden items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                aria-expanded={isMobileMenuOpen}
+                aria-controls="mobile-utilities-menu"
+                onClick={() => setIsMobileMenuOpen(prev => !prev)}
+                className="px-2.5 py-2 text-xs font-semibold rounded-lg border border-stone-300 bg-white text-stone-800 hover:bg-stone-50 flex items-center gap-1.5 cursor-pointer"
+              >
+                {isMobileMenuOpen ? (
+                  <X className="w-4 h-4 shrink-0" aria-hidden="true" />
+                ) : (
+                  <Menu className="w-4 h-4 shrink-0" aria-hidden="true" />
+                )}
+                <span>Menú</span>
+              </button>
+            </div>
           </div>
+
+          {/* Panel desplegable móvil con utilidades (Lectura fácil, Instalar iOS/PWA, Guardadas, Glosario, Fuentes) */}
+          {isMobileMenuOpen && (
+            <div
+              id="mobile-utilities-menu"
+              className="md:hidden py-3 border-t border-stone-200 flex flex-col gap-2 text-xs"
+            >
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  aria-pressed={easyReadMode}
+                  onClick={() => {
+                    setEasyReadMode(prev => !prev);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`flex-1 min-w-[140px] px-3 py-2 font-medium rounded-lg border flex items-center justify-center gap-1.5 cursor-pointer ${
+                    easyReadMode
+                      ? 'bg-amber-100 border-amber-400 text-amber-950 font-semibold'
+                      : 'bg-white border-stone-300 text-stone-800'
+                  }`}
+                >
+                  <Eye className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                  <span>Lectura fácil {easyReadMode ? '(Activa)' : ''}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    openSavedSearches();
+                  }}
+                  className="flex-1 min-w-[140px] px-3 py-2 font-medium rounded-lg border border-stone-300 bg-white text-stone-800 flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Bookmark className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                  <span>
+                    Guardadas{savedSearchesCount > 0 ? ` (${savedSearchesCount})` : ''}
+                  </span>
+                </button>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    openGlossary();
+                  }}
+                  className="flex-1 min-w-[140px] px-3 py-2 font-medium rounded-lg border border-stone-300 bg-white text-stone-800 flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <BookOpen className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                  <span>Glosario</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    setIsSourcesModalOpen(true);
+                  }}
+                  className="flex-1 min-w-[140px] px-3 py-2 font-medium rounded-lg border border-stone-300 bg-white text-stone-800 flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                  <span>Verificar fuentes</span>
+                </button>
+              </div>
+
+              <div className="flex items-center justify-start pt-0.5">
+                <PWAInstallButton />
+              </div>
+            </div>
+          )}
 
           {/* Barra móvil compacta para pestañas principales */}
           <nav aria-label="Navegación móvil" className="md:hidden flex items-center justify-around border-t border-stone-100 text-xs font-semibold">
@@ -230,7 +324,8 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
 
             <div className="p-6 space-y-4 text-xs text-stone-700 leading-relaxed">
               <p>
-                Todos los datos de centros y servicios proceden exclusivamente de los tres registros públicos abiertos de <strong>Atención Social</strong> descargados sin alterar su codificación original y contrastados por suma <strong>SHA-256</strong>:
+                Todos los datos de centros y servicios proceden exclusivamente de los tres registros públicos abiertos de <strong>Atención Social</strong> descargados sin alterar su codificación original y contrastados por suma <strong>SHA-256</strong>
+                {snapshotDate ? ` (captura vigente: ${snapshotDate})` : ''}:
               </p>
 
               <ul className="space-y-2 bg-stone-50 p-3.5 rounded-xl border border-stone-200">

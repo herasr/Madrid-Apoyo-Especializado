@@ -133,7 +133,7 @@ export const WhyAppearsModal: React.FC<WhyAppearsModalProps> = ({ item, onClose 
                 <Building2 className="w-4 h-4 text-stone-600" />
                 <span>Comprobación de apoyos en esta sede física ({centre.centre_id})</span>
               </h3>
-              <div className="border border-stone-200 rounded-lg overflow-hidden">
+              <div className="border border-stone-200 rounded-lg overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-stone-100 text-stone-700 font-semibold border-b border-stone-200">
@@ -185,7 +185,7 @@ export const WhyAppearsModal: React.FC<WhyAppearsModalProps> = ({ item, onClose 
             <h3 className="font-bold text-stone-900 mb-2 text-sm">
               Matriz de adecuación criterio por criterio
             </h3>
-            <div className="border border-stone-200 rounded-lg overflow-hidden">
+            <div className="border border-stone-200 rounded-lg overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-stone-100 text-stone-700 font-semibold border-b border-stone-200">
@@ -228,10 +228,10 @@ export const WhyAppearsModal: React.FC<WhyAppearsModalProps> = ({ item, onClose 
           {/* 4. Tabla de Procedencia por Atributo (§14) */}
           <div>
             <h3 className="font-bold text-stone-900 mb-2 text-sm flex items-center justify-between">
-              <span>Procedencia por atributo y trazabilidad institucional (§14)</span>
-              <span className="text-[11px] font-normal text-stone-500">100% fuentes públicas verificadas</span>
+              <span>Procedencia por atributo y trazabilidad institucional</span>
+              <span className="text-[11px] font-normal text-stone-500">Fuentes: registros públicos oficiales</span>
             </h3>
-            <div className="border border-stone-200 rounded-lg overflow-hidden">
+            <div className="border border-stone-200 rounded-lg overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-stone-100 text-stone-700 font-semibold border-b border-stone-200 text-[11px]">

@@ -30,7 +30,7 @@ const GLOSSARY_TERMS: GlossaryEntry[] = [
   {
     term: 'Nivel A2 · Lo declara la entidad titular',
     simple: 'La asociación o fundación dueña del centro sí está especializada en esa condición (por ejemplo TEA), pero el nombre individual del centro no lo especifica. Conviene llamar para confirmar esa sede concreta.',
-    technical: 'Especialización declarada en el campo registral entidad_denominacion y diferenciada del nivel A1 del centro concreto (#8).'
+    technical: 'Especialización declarada en el campo registral entidad_denominacion y diferenciada del nivel A1 del centro concreto.'
   },
   {
     term: 'Nivel A2 (Especialización publicada, apoyo a confirmar)',
@@ -83,14 +83,14 @@ const GLOSSARY_TERMS: GlossaryEntry[] = [
     technical: 'Centro Regional de Coordinación y Valoración Infantil de la Comunidad de Madrid.'
   },
   {
-    term: 'Misma sede (centre_id)',
+    term: 'Misma sede (mismo edificio)',
     simple: 'Todos los servicios están dentro del mismo edificio o dirección. No tiene que viajar a otro sitio para hacer la logopedia o la fisioterapia.',
     technical: 'Identificador físico unívoco de establecimiento, diferenciado de la entidad gestora o proveedor.'
   },
   {
     term: 'Titularidad no especificada (datos.madrid.es)',
     simple: 'Cuando un centro solo aparece en el catálogo municipal del Ayuntamiento sin ficha enlazada en la Comunidad de Madrid, la fuente no dice si tiene plazas públicas concertadas o si es privado. La app lo indica claramente para que lo confirme al llamar.',
-    technical: 'Estado public_private_status = no_especificado para evitar atribuir concierto o titularidad sin respaldo registral.'
+    technical: 'Marcado como «Titularidad no especificada» para evitar atribuir concierto o titularidad sin respaldo registral.'
   },
   {
     term: 'REGCESS (futuro interoperable)',

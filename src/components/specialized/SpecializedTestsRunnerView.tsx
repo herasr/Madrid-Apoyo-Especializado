@@ -45,9 +45,9 @@ export const SpecializedTestsRunnerView: React.FC = () => {
           <div className="text-[11px] font-mono uppercase tracking-widest text-stone-500">
             Suite Canónica v1.8 · {suiteResult.total} Casos de Prueba Oficiales
           </div>
-          <h1 className="text-xl font-bold text-stone-900 mt-1">
-            Matriz de Validación y Pruebas Críticas (§31, §44, §79, §90)
-          </h1>
+          <h2 className="text-xl font-bold text-stone-900 mt-1">
+            Matriz de Validación y Pruebas Críticas
+          </h2>
           <p className="text-xs text-stone-600 mt-1 max-w-2xl leading-relaxed">
             Ejecuta en vivo el conjunto de pruebas canónicas que verifican la ausencia de inferencias prohibidas, la separación de sedes físicas, la no confusión de plazas y el orden lexicográfico.
           </p>
@@ -107,7 +107,7 @@ export const SpecializedTestsRunnerView: React.FC = () => {
           <div className="text-2xl font-mono font-bold text-stone-900 mt-1">
             {suiteResult.executionTimeMs.toFixed(1)} ms
           </div>
-          <div className="text-[11px] text-stone-500 mt-0.5">&lt; 3 seg (Cumple umbral MVP §22)</div>
+          <div className="text-[11px] text-stone-500 mt-0.5">&lt; 3 seg (umbral interactivo)</div>
         </div>
       </div>
 
@@ -119,7 +119,6 @@ export const SpecializedTestsRunnerView: React.FC = () => {
             key={cat.id}
             type="button"
             aria-pressed={selectedCategory === cat.id}
-            aria-label={`Filtrar pruebas por categoría: ${cat.label}`}
             onClick={() => setSelectedCategory(cat.id)}
             className={`px-3 py-1.5 rounded-lg border whitespace-nowrap transition-colors font-medium cursor-pointer ${
               selectedCategory === cat.id
@@ -133,7 +132,7 @@ export const SpecializedTestsRunnerView: React.FC = () => {
       </div>
 
       {/* Tabla detallada de casos de prueba */}
-      <div className="bg-white rounded-xl border border-stone-200 overflow-hidden shadow-xs text-xs">
+      <div className="bg-white rounded-xl border border-stone-200 overflow-x-auto shadow-xs text-xs">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-stone-100 text-stone-800 font-bold border-b border-stone-200 text-[11px]">

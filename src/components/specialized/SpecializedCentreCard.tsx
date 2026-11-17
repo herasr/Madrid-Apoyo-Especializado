@@ -42,17 +42,36 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
   const { centre, evidence_level, evidence_sublevel, suitability, distance_label, transit_time_label } = item;
   const auditResult = useMemo(() => auditCentreAgainstSnapshot(centre), [centre]);
 
-  const a2Label =
-    evidence_sublevel === 'A2_entity'
+  const a2Label = easyReadMode
+    ? evidence_sublevel === 'A2_entity'
+      ? 'La entidad atiende este perfil (confirmar sede)'
+      : 'Centro especializado (confirmar este servicio)'
+    : evidence_sublevel === 'A2_entity'
       ? 'Nivel A2 · Lo declara la entidad titular'
       : 'Nivel A2 · Confirme el apoyo';
 
   const evidenceConfig: Record<string, { label: string; textClass: string; Icon: React.ComponentType<{ className?: string }> }> = {
-    A1: { label: 'Nivel A1 · Especialización publicada', textClass: 'text-emerald-800', Icon: ShieldCheck },
+    A1: {
+      label: easyReadMode ? 'Especialización confirmada en el registro' : 'Nivel A1 · Especialización publicada',
+      textClass: 'text-emerald-800',
+      Icon: ShieldCheck
+    },
     A2: { label: a2Label, textClass: 'text-teal-800', Icon: ShieldCheck },
-    B1: { label: 'Nivel B1 · Servicios relacionados', textClass: 'text-sky-800', Icon: Layers },
-    B2: { label: 'Nivel B2 · Posible recurso', textClass: 'text-indigo-800', Icon: Layers },
-    C:  { label: 'Nivel C · Orientación general', textClass: 'text-stone-700', Icon: Compass }
+    B1: {
+      label: easyReadMode ? 'Servicios parecidos (preguntar antes)' : 'Nivel B1 · Servicios relacionados',
+      textClass: 'text-sky-800',
+      Icon: Layers
+    },
+    B2: {
+      label: easyReadMode ? 'Posible recurso (preguntar antes)' : 'Nivel B2 · Posible recurso',
+      textClass: 'text-indigo-800',
+      Icon: Layers
+    },
+    C: {
+      label: easyReadMode ? 'Recurso general (preguntar al llamar)' : 'Nivel C · Orientación general',
+      textClass: 'text-stone-700',
+      Icon: Compass
+    }
   };
 
   const evInfo = evidenceConfig[evidence_level] || evidenceConfig.C;
@@ -122,59 +141,63 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
         </label>
       </div>
 
-      {/* 2. Franja editorial de evidencia, adecuación y procedencia CSV (Disciplina Zero-Pill) */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs pt-2.5 border-t border-stone-100">
+      {/* 2. Franja editorial de evidencia, adecuación y procedencia (Disciplina Zero-Pill) */}
+      <div className={`flex flex-wrap items-center gap-x-3 gap-y-1.5 pt-2.5 border-t border-stone-100 ${easyReadMode ? 'text-sm' : 'text-xs'}`}>
         <span className={`inline-flex items-center gap-1.5 font-bold ${evInfo.textClass}`}>
           <EvidenceIcon className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
           <span>{evInfo.label}</span>
         </span>
 
-        <span aria-hidden="true" className="text-stone-300">·</span>
-
-        <span className="inline-flex items-center gap-1 text-stone-700 font-medium">
-          {suitability === 'complete' && <Check className="w-3.5 h-3.5 text-emerald-700 shrink-0" aria-hidden="true" />}
-          <span>
-            {suitability === 'complete' ? 'Coincidencia completa' : suitability === 'partial' ? 'Coincidencia parcial' : 'Orientación general'}
-          </span>
-        </span>
-
-        {auditResult.audit_status === 'verified_official' && (
+        {!easyReadMode && (
           <>
             <span aria-hidden="true" className="text-stone-300">·</span>
-            <span className="inline-flex items-center gap-1 text-emerald-900 font-medium" title={auditResult.audit_note}>
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-700 shrink-0" aria-hidden="true" />
-              <span>CSV oficial (datos.madrid.es)</span>
-            </span>
-          </>
-        )}
 
-        {auditResult.audit_status === 'verified_regional' && (
-          <>
-            <span aria-hidden="true" className="text-stone-300">·</span>
-            <span className="inline-flex items-center gap-1 text-sky-900 font-medium" title={auditResult.audit_note}>
-              <ShieldCheck className="w-3.5 h-3.5 text-sky-700 shrink-0" aria-hidden="true" />
-              <span>CSV oficial (Comunidad de Madrid)</span>
+            <span className="inline-flex items-center gap-1 text-stone-700 font-medium">
+              {suitability === 'complete' && <Check className="w-3.5 h-3.5 text-emerald-700 shrink-0" aria-hidden="true" />}
+              <span>
+                {suitability === 'complete' ? 'Coincidencia completa' : suitability === 'partial' ? 'Coincidencia parcial' : 'Orientación general'}
+              </span>
             </span>
-          </>
-        )}
 
-        {auditResult.audit_status === 'discrepancy' && (
-          <>
-            <span aria-hidden="true" className="text-stone-300">·</span>
-            <span className="inline-flex items-center gap-1 text-rose-800 font-semibold" title={auditResult.audit_note}>
-              <AlertTriangle className="w-3.5 h-3.5 text-rose-700 shrink-0" aria-hidden="true" />
-              <span>Discrepancia CSV: {auditResult.discrepancies.join(', ')}</span>
-            </span>
-          </>
-        )}
+            {auditResult.audit_status === 'verified_official' && (
+              <>
+                <span aria-hidden="true" className="text-stone-300">·</span>
+                <span className="inline-flex items-center gap-1 text-emerald-900 font-medium" title={auditResult.audit_note}>
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-700 shrink-0" aria-hidden="true" />
+                  <span>Registro Ayuntamiento de Madrid</span>
+                </span>
+              </>
+            )}
 
-        {auditResult.audit_status === 'unverified' && (
-          <>
-            <span aria-hidden="true" className="text-stone-300">·</span>
-            <span className="inline-flex items-center gap-1 text-amber-900 font-semibold" title={auditResult.audit_note}>
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-700 shrink-0" aria-hidden="true" />
-              <span>No proviene del CSV oficial</span>
-            </span>
+            {auditResult.audit_status === 'verified_regional' && (
+              <>
+                <span aria-hidden="true" className="text-stone-300">·</span>
+                <span className="inline-flex items-center gap-1 text-sky-900 font-medium" title={auditResult.audit_note}>
+                  <ShieldCheck className="w-3.5 h-3.5 text-sky-700 shrink-0" aria-hidden="true" />
+                  <span>Registro Comunidad de Madrid</span>
+                </span>
+              </>
+            )}
+
+            {auditResult.audit_status === 'discrepancy' && (
+              <>
+                <span aria-hidden="true" className="text-stone-300">·</span>
+                <span className="inline-flex items-center gap-1 text-rose-800 font-semibold" title={auditResult.audit_note}>
+                  <AlertTriangle className="w-3.5 h-3.5 text-rose-700 shrink-0" aria-hidden="true" />
+                  <span>Discrepancia registral: {auditResult.discrepancies.join(', ')}</span>
+                </span>
+              </>
+            )}
+
+            {auditResult.audit_status === 'unverified' && (
+              <>
+                <span aria-hidden="true" className="text-stone-300">·</span>
+                <span className="inline-flex items-center gap-1 text-amber-900 font-semibold" title={auditResult.audit_note}>
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-700 shrink-0" aria-hidden="true" />
+                  <span>Pendiente de enlace con registro vivo</span>
+                </span>
+              </>
+            )}
           </>
         )}
 
@@ -201,10 +224,10 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
       </div>
 
       {/* 3. Vía de acceso oficial */}
-      <div className="text-xs text-stone-700 bg-stone-50/90 p-2.5 rounded-lg border border-stone-200 flex items-start gap-2">
+      <div className={`${easyReadMode ? 'text-sm p-3' : 'text-xs p-2.5'} text-stone-700 bg-stone-50/90 rounded-lg border border-stone-200 flex items-start gap-2`}>
         <ArrowRight className="w-3.5 h-3.5 text-stone-500 shrink-0 mt-0.5" aria-hidden="true" />
         <div className="leading-relaxed">
-          <span className="font-semibold text-stone-900">Acceso: </span>
+          <span className="font-semibold text-stone-900">{easyReadMode ? 'Cómo pedir acceso: ' : 'Acceso: '}</span>
           {centre.access_route.next_step_action}
         </div>
       </div>
@@ -230,7 +253,7 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
           <button
             type="button"
             onClick={() => onWhyAppears(item)}
-            aria-label={`¿Por qué aparece ${centre.official_name}? Ver informe de trazabilidad y nivel de evidencia`}
+            aria-label={`¿Por qué aparece? Ver informe de trazabilidad de ${centre.official_name}`}
             className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-stone-900 text-white hover:bg-stone-800 transition-colors cursor-pointer"
           >
             ¿Por qué aparece?

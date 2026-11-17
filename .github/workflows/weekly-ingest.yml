@@ -37,6 +37,9 @@ jobs:
           npm run build
 
       - name: Commit y push de capturas e informe de cambios
+        # Política de retención unificada: solo se versionan los ficheros -latest.csv,
+        # snapshot-metadata.json, snapshot-diffs.json y catalog-classified.json;
+        # la evolución semanal queda trazada en el historial de commits de Git.
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"

@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 520" width="960" height="520" role="img" aria-label="Vista de mapa territorial agrupado de Madrid Apoyo Especializado">
+  <rect width="960" height="520" fill="#FBF9F5"/>
+  <!-- Top Bar -->
+  <rect width="960" height="56" fill="#FFFFFF" stroke="#E7E5E4"/>
+  <text x="28" y="34" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="800" fill="#1C1917">Madrid Apoyo Especializado</text>
+  <text x="290" y="33" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#57534E">Búsqueda</text>
+  <text x="372" y="33" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" fill="#1C1917">Mapa</text>
+  <line x1="370" y1="54" x2="408" y2="54" stroke="#1C1917" stroke-width="2.5"/>
+  <text x="424" y="33" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#57534E">Comparador</text>
+
+  <!-- Map Canvas -->
+  <rect x="28" y="76" width="600" height="416" rx="12" fill="#EFECE6" stroke="#D6D3D1"/>
+  <!-- Stylized Madrid road rings -->
+  <ellipse cx="328" cy="284" rx="185" ry="135" fill="none" stroke="#E2DFD7" stroke-width="6"/>
+  <ellipse cx="328" cy="284" rx="95" ry="70" fill="none" stroke="#E2DFD7" stroke-width="4"/>
+  <line x1="110" y1="284" x2="560" y2="284" stroke="#E2DFD7" stroke-width="3"/>
+  <line x1="328" y1="110" x2="328" y2="465" stroke="#E2DFD7" stroke-width="3"/>
+  <circle cx="328" cy="284" r="145" fill="#1C1917" fill-opacity="0.04" stroke="#1C1917" stroke-width="1.5" stroke-dasharray="5,5"/>
+
+  <!-- Leaflet.markercluster Clusters -->
+  <circle cx="328" cy="276" r="24" fill="#1C1917" fill-opacity="0.18"/>
+  <circle cx="328" cy="276" r="17" fill="#1C1917" stroke="#FFFFFF" stroke-width="2"/>
+  <text x="328" y="281" text-anchor="middle" font-family="ui-monospace, monospace" font-size="12" font-weight="700" fill="#FFFFFF">148</text>
+
+  <circle cx="242" cy="235" r="20" fill="#1C1917" fill-opacity="0.18"/>
+  <circle cx="242" cy="235" r="15" fill="#1C1917" stroke="#FFFFFF" stroke-width="2"/>
+  <text x="242" y="240" text-anchor="middle" font-family="ui-monospace, monospace" font-size="11" font-weight="700" fill="#FFFFFF">42</text>
+
+  <circle cx="430" cy="318" r="20" fill="#1C1917" fill-opacity="0.18"/>
+  <circle cx="430" cy="318" r="15" fill="#1C1917" stroke="#FFFFFF" stroke-width="2"/>
+  <text x="430" y="323" text-anchor="middle" font-family="ui-monospace, monospace" font-size="11" font-weight="700" fill="#FFFFFF">36</text>
+
+  <!-- Individual Verified A1/B1 Pins -->
+  <circle cx="366" cy="212" r="8" fill="#059669" stroke="#FFFFFF" stroke-width="2"/>
+  <circle cx="290" cy="356" r="8" fill="#059669" stroke="#FFFFFF" stroke-width="2"/>
+  <circle cx="478" cy="216" r="7" fill="#0284C7" stroke="#FFFFFF" stroke-width="2"/>
+  <circle cx="195" cy="340" r="7" fill="#57534E" stroke="#FFFFFF" stroke-width="2"/>
+
+  <!-- Origin Marker -->
+  <circle cx="328" cy="284" r="5" fill="#1C1917" stroke="#FFFFFF" stroke-width="2"/>
+
+  <!-- Map Caption Pill -->
+  <rect x="44" y="450" width="380" height="28" rx="6" fill="#FFFFFF" fill-opacity="0.95" stroke="#D6D3D1"/>
+  <text x="56" y="468" font-family="system-ui, -apple-system, sans-serif" font-size="10.5" font-weight="600" fill="#1C1917">Agrupación zonal automática (Leaflet.markercluster)</text>
+
+  <!-- Right Side Synced List -->
+  <rect x="644" y="76" width="288" height="416" rx="12" fill="#FFFFFF" stroke="#E7E5E4"/>
+  <rect x="644" y="76" width="288" height="42" rx="12" fill="#FAF9F7"/>
+  <text x="660" y="101" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" fill="#1C1917">Recursos georreferenciados</text>
+
+  <rect x="658" y="130" width="260" height="96" rx="8" fill="#F0FDF4" stroke="#A7F3D0"/>
+  <text x="670" y="150" font-family="system-ui, -apple-system, sans-serif" font-size="11.5" font-weight="700" fill="#1C1917">Centro Base N.º 1 de Atención a</text>
+  <text x="670" y="165" font-family="system-ui, -apple-system, sans-serif" font-size="11.5" font-weight="700" fill="#1C1917">Personas con Discapacidad</text>
+  <text x="670" y="183" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#57534E">Madrid · C. de Maqueda, 48 · Accesible (Cód. 1)</text>
+  <text x="670" y="203" font-family="ui-monospace, monospace" font-size="10" font-weight="700" fill="#065F46">Nivel A1 · 4,8 km · ~19 min (TP orientativo)</text>
+
+  <rect x="658" y="238" width="260" height="84" rx="8" fill="#FFFFFF" stroke="#E7E5E4"/>
+  <text x="670" y="258" font-family="system-ui, -apple-system, sans-serif" font-size="11.5" font-weight="700" fill="#1C1917">Fundación Bobath, Atención Temprana</text>
+  <text x="670" y="276" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#57534E">Madrid · Red Concertada · Menores (0-6)</text>
+  <text x="670" y="296" font-family="ui-monospace, monospace" font-size="10" font-weight="700" fill="#065F46">Nivel A1 · 3,9 km · ~16 min (TP orientativo)</text>
+
+  <rect x="658" y="334" width="260" height="84" rx="8" fill="#FFFFFF" stroke="#E7E5E4"/>
+  <text x="670" y="354" font-family="system-ui, -apple-system, sans-serif" font-size="11.5" font-weight="700" fill="#1C1917">CEPRI La Peineta, Centro de Día</text>
+  <text x="670" y="372" font-family="system-ui, -apple-system, sans-serif" font-size="10" fill="#57534E">Madrid · San Blas-Canillejas · TEA</text>
+  <text x="670" y="392" font-family="ui-monospace, monospace" font-size="10" font-weight="700" fill="#0F766E">Nivel A2 entidad · 6,4 km · ~25 min</text>
+</svg>

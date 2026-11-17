@@ -50,11 +50,7 @@ export const ACCESSIBILITY_MAP: Record<string, { label: string; keywords: string
   },
   tactile_signage: {
     label: 'Señalización podotáctil (Cód. 5)',
-    keywords: ['código 5', 'codigo 5', 'podotáctil', 'podotactil', 'braille']
-  },
-  braille_signage: {
-    label: 'Señalización podotáctil / braille (Cód. 5)',
-    keywords: ['código 5', 'codigo 5', 'podotáctil', 'podotactil', 'braille']
+    keywords: ['código 5', 'codigo 5', 'podotáctil', 'podotactil']
   },
   magnetic_loops: {
     label: 'Bucle magnético (Cód. 6)',
@@ -342,7 +338,9 @@ export function evaluateCentre(
         note: 'Lo declara la entidad titular; confirmar atención en este centro concreto.'
       });
     } else {
-      // Reglas negativas (§26.1, §44)
+      // Reglas negativas: limitan el nivel de evidencia (como mucho B2, nunca A1/A2/B1) sin excluir del listado (#1)
+      let forbiddenMaxLevel: 'B2' | 'C' = 'C';
+
       if (query.profile === 'autism') {
         const mentionsDI =
           centre.subtype?.toLowerCase().includes('discapacidad intelectual') ||
@@ -350,7 +348,9 @@ export function evaluateCentre(
           centre.related_services.some(s => s.toLowerCase().includes('discapacidad intelectual'));
         if (mentionsDI) {
           isForbiddenInference = true;
-          suitability_reasons.push('Regla negativa NEG-003: Discapacidad Intelectual no infiere TEA.');
+          forbiddenMaxLevel = 'C';
+          suitability_reasons.push('Regla negativa NEG-003: Discapacidad Intelectual no infiere TEA (limitado a nivel C).');
+          does_not_confirm.push('Especialización en TEA: el centro consta en el sector de discapacidad intelectual, no en autismo específico.');
         }
       }
 
@@ -370,7 +370,9 @@ export function evaluateCentre(
           lowSectorSub.includes('discapacidad fisica');
         if (hasGenFisio) {
           isForbiddenInference = true;
-          suitability_reasons.push('Regla negativa NEG-002: Fisioterapia o discapacidad física general no demuestra lesión medular ni parálisis cerebral.');
+          forbiddenMaxLevel = 'C';
+          suitability_reasons.push('Regla negativa NEG-002: Fisioterapia o discapacidad física general no demuestra lesión medular ni parálisis cerebral (limitado a nivel C).');
+          does_not_confirm.push('Especialización específica en parálisis cerebral o lesión medular (consta únicamente como recurso general de discapacidad física).');
         }
       }
 
@@ -378,7 +380,11 @@ export function evaluateCentre(
         const lowAT = `${centre.official_name} ${centre.sector} ${centre.subtype} ${centre.related_services.join(' ')}`.toLowerCase();
         if (lowAT.includes('atención temprana') || lowAT.includes('atencion temprana') || lowAT.includes('estimulación')) {
           isForbiddenInference = true;
-          suitability_reasons.push('Regla negativa NEG-007: Atención temprana genérica no infiere psicomotricidad específica sin mención literal.');
+          forbiddenMaxLevel = 'B2';
+          hasRelatedServicesOnly = true;
+          because.push('Centro de Atención Temprana registrado; no cita literalmente psicomotricidad específica en el catálogo oficial (confirmar con el equipo).');
+          suitability_reasons.push('Regla negativa NEG-007: Atención temprana genérica no infiere psicomotricidad específica sin mención literal (limitado a nivel B2).');
+          does_not_confirm.push('Psicomotricidad específica en atención temprana (no figura literalmente en el registro; confirmar telefónicamente).');
         }
       }
 
@@ -388,11 +394,21 @@ export function evaluateCentre(
         const lowMental = `${centre.sector} ${centre.subtype}`.toLowerCase();
         if (lowMental.includes('enfermedad mental')) {
           isForbiddenInference = true;
-          suitability_reasons.push('Regla negativa NEG-008: Centro registrado para enfermedad mental crónica; no acredita especialización neurológica ni neurodegenerativa.');
+          forbiddenMaxLevel = 'C';
+          const reasonMsg =
+            query.profile === 'autism'
+              ? 'Regla negativa NEG-006: Centro registrado para enfermedad mental crónica; no acredita especialización en TEA (limitado a nivel C).'
+              : 'Regla negativa NEG-008: Centro registrado para enfermedad mental crónica; no acredita especialización neurológica ni neurodegenerativa (limitado a nivel C).';
+          suitability_reasons.push(reasonMsg);
+          does_not_confirm.push(
+            query.profile === 'autism'
+              ? 'Especialización en TEA (el registro oficial clasifica este centro en enfermedad mental crónica).'
+              : 'Especialización neurológica o neurodegenerativa (el registro clasifica este centro en enfermedad mental crónica).'
+          );
         }
       }
 
-      // Comprobar si al menos tiene servicios relacionados
+      // Comprobar si al menos tiene servicios relacionados cuando no aplica regla negativa
       if (profileDef && !isForbiddenInference) {
         const matchedServices = profileDef.related_services.filter(rel => 
           centre.related_services.some(cRel => cRel.toLowerCase().includes(rel.toLowerCase())) ||
@@ -412,7 +428,11 @@ export function evaluateCentre(
         criterion_label: `Perfil: ${profileLabel}`,
         requested: true,
         status: hasRelatedServicesOnly ? 'confirm_required' : 'not_stated',
-        note: hasRelatedServicesOnly ? 'Servicio relacionado presente; especialización no confirmada' : 'Especialización no declarada en el registro'
+        note: isForbiddenInference
+          ? `Tope máximo ${forbiddenMaxLevel} por regla de no extrapolación; confirmar directamente con el centro.`
+          : hasRelatedServicesOnly
+          ? 'Servicio relacionado presente; especialización no confirmada'
+          : 'Especialización no declarada en el registro'
       });
     }
   }
@@ -460,7 +480,7 @@ export function evaluateCentre(
         criterion_label: `Etapa vital: ${stageLabel}`,
         requested: true,
         status: 'confirmed',
-        note: 'Etapa vital admitida por la acreditación oficial del centro.'
+        note: 'La denominación o el sector oficial del registro menciona esta etapa.'
       });
     } else if (centre.allowed_life_stages.length === 0) {
       // #3: Cuando el registro no publica edad admitida, marcar "no consta, confirmar" sin excluir
@@ -578,7 +598,16 @@ export function evaluateCentre(
   } else if (hasEntityDeclaredProfile && !isForbiddenInference) {
     evidence_level = 'A2';
     evidence_sublevel = 'A2_entity';
-  } else if (hasRelatedServicesOnly && !isForbiddenInference) {
+  } else if (isForbiddenInference) {
+    // Reglas negativas: topan en B2 (si tiene relación asistencial directa, como Atención Temprana) o C, sin subir a A/B1 (#1)
+    if (query.profile === 'psychomotor_early_support' && hasRelatedServicesOnly) {
+      evidence_level = 'B2';
+      evidence_sublevel = 'B2';
+    } else {
+      evidence_level = 'C';
+      evidence_sublevel = 'C';
+    }
+  } else if (hasRelatedServicesOnly) {
     const isGeneralNeurologyOnly = query.profile === 'acquired_brain_injury' && 
       centre.related_services.some(s => s.toLowerCase().includes('neurolog')) && 
       !hasExplicitProfile;
@@ -600,7 +629,7 @@ export function evaluateCentre(
     because.push('Orientación general: el centro pertenece al sector asistencial pero no declara la especialización concreta en fuentes estructuradas.');
   }
 
-  // 7. Adecuación a la búsqueda (§70)
+  // 7. Adecuación a la búsqueda (solo excluyen edad incompatible o accesibilidad solicitada no acreditada)
   let suitability: SuitabilityStatus = 'complete';
   const hasRequestedSupportsMissing =
     query.support_types.length > 0 &&
@@ -615,9 +644,10 @@ export function evaluateCentre(
     (query.network_preference === 'private_authorised' &&
       centre.public_private_status === 'privado_autorizado');
 
-  if (!lifeStageCompatible || isForbiddenInference || !accessibilityCompatible) {
+  if (!lifeStageCompatible || !accessibilityCompatible) {
     suitability = 'incompatible';
   } else if (
+    isForbiddenInference ||
     hasEntityDeclaredProfile ||
     lifeStageUnstated ||
     accessibilityPartial ||
@@ -850,25 +880,34 @@ function findMatchingSourceMeta(
   return null;
 }
 
-function findCsvRecordForCentre(
+function findCsvRecordsForCentre(
   centre: SpecializedCentre,
   liveIndex: Map<string, SnapshotCentreRecord>
-): SnapshotCentreRecord | null {
+): SnapshotCentreRecord[] {
+  const records: SnapshotCentreRecord[] = [];
+  const seen = new Set<string>();
+  const addRecord = (rec: SnapshotCentreRecord | undefined) => {
+    if (rec && !seen.has(rec.registry_key)) {
+      seen.add(rec.registry_key);
+      records.push(rec);
+    }
+  };
+
   if (liveIndex.has(centre.centre_id)) {
-    return liveIndex.get(centre.centre_id)!;
+    addRecord(liveIndex.get(centre.centre_id));
   }
   for (const prov of centre.provenance_records) {
     const pkMatch = prov.source_dataset.match(/PK\s+(\d+)/);
-    if (pkMatch && liveIndex.has(`MAD-PK${pkMatch[1]}`)) {
-      return liveIndex.get(`MAD-PK${pkMatch[1]}`)!;
+    if (pkMatch) {
+      addRecord(liveIndex.get(`MAD-PK${pkMatch[1]}`));
     }
     const camMatch = prov.source_dataset.match(/\(([CS]\d+)\)/);
     if (camMatch) {
       const key = camMatch[1].startsWith('S') ? `CAM-SRV-${camMatch[1]}` : `CAM-${camMatch[1]}`;
-      if (liveIndex.has(key)) return liveIndex.get(key)!;
+      addRecord(liveIndex.get(key));
     }
   }
-  return null;
+  return records;
 }
 
 /**
@@ -917,8 +956,9 @@ export function auditCentreAgainstSnapshot(
   let matchedInLiveCsv = false;
 
   if (liveCsvIndex && liveCsvIndex.size > 0) {
-    const csvRec = findCsvRecordForCentre(centre, liveCsvIndex);
-    if (csvRec) {
+    const csvRecords = findCsvRecordsForCentre(centre, liveCsvIndex);
+    const primaryRec = csvRecords[0];
+    if (primaryRec) {
       matchedInLiveCsv = true;
 
       if (centre.is_individual_practitioner) {
@@ -926,23 +966,24 @@ export function auditCentreAgainstSnapshot(
         address_verified = true;
       } else {
         const cPhone = normalizePhoneComparable(centre.phone);
-        const rPhone = normalizePhoneComparable(csvRec.phone);
-        phone_verified = cPhone === rPhone;
+        phone_verified = csvRecords.some(r => normalizePhoneComparable(r.phone) === cPhone);
         if (!phone_verified) {
-          discrepancies.push(`Teléfono ("${centre.phone || 'vacío'}" vs CSV "${csvRec.phone || 'vacío'}")`);
+          discrepancies.push(`Teléfono ("${centre.phone || 'vacío'}" vs CSV "${primaryRec.phone || 'vacío'}")`);
         }
 
         const cAddr = normalizeAddressComparable(centre.address);
-        const rAddr = normalizeAddressComparable(csvRec.address);
-        address_verified = Boolean(cAddr && rAddr && cAddr === rAddr);
+        address_verified = csvRecords.some(r => {
+          const rAddr = normalizeAddressComparable(r.address);
+          return Boolean(cAddr && rAddr && cAddr === rAddr);
+        });
         if (!address_verified) {
-          discrepancies.push(`Dirección ("${centre.address}" vs CSV "${csvRec.address}")`);
+          discrepancies.push(`Dirección ("${centre.address}" vs CSV "${primaryRec.address}")`);
         }
       }
 
-      places_verified = centre.availability.authorised_places === csvRec.authorised_places;
+      places_verified = primaryRec.authorised_places === centre.availability.authorised_places;
       if (!places_verified) {
-        discrepancies.push(`Plazas (${centre.availability.authorised_places ?? 'null'} vs CSV ${csvRec.authorised_places ?? 'null'})`);
+        discrepancies.push(`Plazas (${centre.availability.authorised_places ?? 'null'} vs CSV ${primaryRec.authorised_places ?? 'null'})`);
       }
     } else {
       discrepancies.push('Identificador registral no localizado en la descarga CSV oficial activa.');

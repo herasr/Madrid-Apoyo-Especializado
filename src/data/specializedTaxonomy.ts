@@ -148,7 +148,7 @@ export const CORE_PROFILES: Record<CoreProfileId, TaxonomyProfileDefinition> = {
     explicit_terms: ['parálisis cerebral', 'patologías afines', 'encefalopatía motora'],
     synonyms: ['PC', 'PCI'],
     excluded_terms: ['discapacidad física genérica sin especificar', 'geriatría general'],
-    related_services: ['rehabilitación', 'fisioterapia especializada', 'logopedia y deglución', 'terapia ocupacional', 'atención diurna', 'residencia'],
+    related_services: ['rehabilitación', 'fisioterapia especializada', 'logopedia y deglución', 'terapia ocupacional'],
     allowed_life_stages: ['early_childhood', 'minor', 'adult', 'older_adult'],
     typical_supports: ['rehabilitation', 'speech_therapy', 'occupational_therapy', 'day_care', 'residential_care'],
     typical_needs: ['mobility', 'fine_gross_motor', 'swallowing', 'communication', 'daily_autonomy', 'family_respite'],
@@ -174,7 +174,7 @@ export const CORE_PROFILES: Record<CoreProfileId, TaxonomyProfileDefinition> = {
     explicit_terms: ['esclerosis múltiple', 'enfermedades neurodegenerativas', 'enfermedades degenerativas'],
     synonyms: ['EM', 'patologías neurodegenerativas'],
     excluded_terms: ['electromedicina', 'urgencias hospitalarias generales'],
-    related_services: ['neurología', 'fisioterapia motora', 'terapia ocupacional', 'rehabilitación neurológica', 'atención diurna'],
+    related_services: ['neurología', 'fisioterapia motora', 'terapia ocupacional', 'rehabilitación neurológica'],
     allowed_life_stages: ['adult', 'older_adult'],
     typical_supports: ['rehabilitation', 'occupational_therapy', 'day_care', 'psychological_support', 'speech_therapy'],
     typical_needs: ['mobility', 'fine_gross_motor', 'cognition_memory', 'daily_autonomy', 'swallowing', 'family_respite'],
@@ -613,12 +613,12 @@ export const FORBIDDEN_INFERENCES = [
   {
     id: 'NEG-002',
     rule: 'Centro de discapacidad física genérica no demuestra lesión medular ni parálisis cerebral.',
-    consequence: 'Máximo nivel C (Orientación general; no consta especialización).'
+    consequence: 'Limitado a nivel C (orientación general; no alcanza nivel A ni B sin mención expresa, sin excluir del listado).'
   },
   {
     id: 'NEG-003',
     rule: 'Discapacidad intelectual no implica ni infiere Trastorno del Espectro del Autismo (TEA).',
-    consequence: 'Bloqueado. 0 falsos positivos de especialización TEA.'
+    consequence: 'Limitado a nivel C (0 falsos positivos como especializado en TEA, manteniendo visible el recurso con aviso).'
   },
   {
     id: 'NEG-004',
@@ -632,13 +632,13 @@ export const FORBIDDEN_INFERENCES = [
   },
   {
     id: 'NEG-006',
-    rule: 'Salud mental no se infiere desde neurodivergencia ni TEA.',
-    consequence: 'Separación estricta de catálogos y recursos.'
+    rule: 'Salud mental crónica no se infiere hacia TEA ni hacia trastornos neurológicos o neurodegenerativos.',
+    consequence: 'Limitado a nivel C con aviso de confirmación; nunca nivel A ni B.'
   },
   {
     id: 'NEG-007',
-    rule: 'Atención temprana no implica psicomotricidad si no consta literalmente.',
-    consequence: 'No afirmar psicomotricidad sin mención explícita en el registro.'
+    rule: 'Atención temprana no implica psicomotricidad específica si no consta literalmente.',
+    consequence: 'Limitado como máximo a nivel B2 (servicio relacionado pendiente de confirmar con el centro, sin excluir).'
   },
   {
     id: 'NEG-008',

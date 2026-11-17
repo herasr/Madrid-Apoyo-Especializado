@@ -208,9 +208,9 @@ export const SavedSearchesModal: React.FC<SavedSearchesModalProps> = ({
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h4 className="font-bold text-stone-900 text-sm">
+                    <h3 className="font-bold text-stone-900 text-sm">
                       {s.name}
-                    </h4>
+                    </h3>
                     <div className="text-[11px] text-stone-500 font-mono mt-0.5">
                       Versión taxonomía: {s.taxonomy_version} · Guardado el {new Date(s.created_at).toLocaleDateString('es-ES')}
                     </div>
@@ -302,7 +302,7 @@ export const SavedSearchesModal: React.FC<SavedSearchesModalProps> = ({
             className="font-semibold text-stone-900 hover:text-stone-700 flex items-center gap-1.5 cursor-pointer"
           >
             <History className="w-3.5 h-3.5 text-stone-600" aria-hidden="true" />
-            <span>Ver qué ha cambiado en el conjunto de datos (§84)</span>
+            <span>Ver qué ha cambiado en el conjunto de datos</span>
           </button>
 
           {savedSearches.length > 0 && (
