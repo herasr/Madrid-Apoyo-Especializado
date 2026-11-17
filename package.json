@@ -2,6 +2,16 @@
   "name": "madrid-apoyo-especializado",
   "private": true,
   "version": "1.8.0",
+  "description": "Buscador ciudadano basado en datos abiertos oficiales para localizar recursos de atención social autorizados en la Comunidad de Madrid y el Ayuntamiento de Madrid.",
+  "license": "Apache-2.0",
+  "homepage": "https://herasr.github.io/Madrid-Apoyo-Especializado/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/herasr/Madrid-Apoyo-Especializado.git"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
@@ -9,6 +19,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "ingest": "tsx scripts/ingest.ts",
+    "generate:icons": "node scripts/generate-icons.mjs",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit"
   },

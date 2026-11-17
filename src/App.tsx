@@ -176,10 +176,10 @@ function validateAndParseUrlParams(): { query: SearchQueryState; errors: string[
     }
   }
 
-  let location_mode: 'all' | 'municipality' | 'browser' = municipality ? 'municipality' : 'all';
+  let location_mode: SearchQueryState['location_mode'] = municipality ? 'municipality' : 'all';
   if (rawLoc !== null && rawLoc !== '') {
     if (validLocs.includes(rawLoc)) {
-      location_mode = rawLoc as any;
+      location_mode = rawLoc as SearchQueryState['location_mode'];
     } else {
       errors.push(`Modo de ubicación no válido: "${rawLoc}"`);
     }
@@ -306,21 +306,26 @@ export default function App() {
   const [activeCentres, setActiveCentres] = useState<SpecializedCentre[]>([]);
   const [isCatalogLoading, setIsCatalogLoading] = useState<boolean>(true);
   const [isRetryingCatalog, setIsRetryingCatalog] = useState<boolean>(false);
+  const [catalogFatalError, setCatalogFatalError] = useState<string | null>(null);
   const [dynamicState, setDynamicState] = useState<DynamicIngestionState | null>(null);
 
   const fetchCatalog = (isRetry = false) => {
     if (isRetry) setIsRetryingCatalog(true);
+    setCatalogFatalError(null);
     let cancelled = false;
     loadLiveSnapshotData()
       .then(({ centres: liveCentres, state }) => {
         if (cancelled) return;
         setActiveCentres(liveCentres);
         setDynamicState(state);
+        setCatalogFatalError(null);
         setIsCatalogLoading(false);
         setIsRetryingCatalog(false);
       })
-      .catch(() => {
+      .catch((err) => {
         if (!cancelled) {
+          const message = err instanceof Error ? err.message : 'Error desconocido al cargar los ficheros del catálogo.';
+          setCatalogFatalError(message);
           setIsCatalogLoading(false);
           setIsRetryingCatalog(false);
         }
@@ -606,6 +611,32 @@ export default function App() {
                     <div className="h-8 bg-stone-50 rounded border border-stone-100" />
                   </div>
                 ))}
+              </div>
+            ) : catalogFatalError && activeCentres.length === 0 ? (
+              <div
+                role="alert"
+                className="bg-white rounded-xl border border-red-200 p-6 shadow-xs text-center max-w-xl mx-auto my-8 space-y-3"
+              >
+                <div className="w-11 h-11 rounded-full bg-red-50 border border-red-200 flex items-center justify-center mx-auto text-red-700">
+                  <AlertTriangle className="w-5 h-5" aria-hidden="true" />
+                </div>
+                <h2 className="text-base font-bold text-stone-900">
+                  No se pudo inicializar el catálogo de recursos
+                </h2>
+                <p className="text-xs text-stone-600 leading-relaxed max-w-md mx-auto">
+                  Se produjo un fallo inesperado al cargar tanto los snapshots oficiales como la copia local de respaldo ({catalogFatalError}).
+                </p>
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    disabled={isRetryingCatalog}
+                    onClick={() => fetchCatalog(true)}
+                    className="px-4 py-2 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-stone-800 transition-colors inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
+                    <span>{isRetryingCatalog ? 'Reintentando carga...' : 'Reintentar carga'}</span>
+                  </button>
+                </div>
               </div>
             ) : (
               <SpecializedResultsList

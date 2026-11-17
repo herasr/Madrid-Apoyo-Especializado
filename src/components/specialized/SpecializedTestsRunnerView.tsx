@@ -38,7 +38,7 @@ export const SpecializedTestsRunnerView: React.FC = () => {
     : suiteResult.results.filter(t => t.category === selectedCategory);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div className="space-y-6">
       {/* Cabecera y métricas globales */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200 pb-5">
         <div>

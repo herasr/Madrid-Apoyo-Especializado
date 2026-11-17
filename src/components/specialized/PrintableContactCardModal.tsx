@@ -110,7 +110,14 @@ export const PrintableContactCardModal: React.FC<PrintableContactCardProps> = ({
           <div className="grid grid-cols-2 gap-3 p-3 bg-stone-50 rounded-lg border border-stone-200">
             <div>
               <span className="font-semibold text-stone-600 block">Dirección oficial:</span>
-              <span className="font-medium">{centre.address}, {centre.postal_code} {centre.municipality}</span>
+              <span className="font-medium">
+                {[
+                  centre.address,
+                  [centre.postal_code, centre.municipality].filter(Boolean).join(' ')
+                ]
+                  .filter(Boolean)
+                  .join(', ')}
+              </span>
               {item.distance_label && (
                 <div className="text-[11px] text-stone-600 mt-1">
                   Distancia lineal orientativa: <strong>{item.distance_label}</strong>

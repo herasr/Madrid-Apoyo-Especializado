@@ -185,7 +185,7 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
 
     const originHtml = `
       <div style="position: relative; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">
-        <span style="position: absolute; width: 28px; height: 28px; border-radius: 50%; background: rgba(59, 130, 246, 0.25); animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;"></span>
+        <span class="animate-ping" style="position: absolute; width: 28px; height: 28px; border-radius: 50%; background: rgba(59, 130, 246, 0.25);"></span>
         <div style="width: 18px; height: 18px; border-radius: 50%; background: #2563eb; border: 3px solid #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; z-index: 2;">
           <div style="width: 5px; height: 5px; border-radius: 50%; background: #ffffff;"></div>
         </div>

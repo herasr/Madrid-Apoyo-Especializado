@@ -259,8 +259,8 @@ export function computeDiffs(
       if (prev.coords !== curr.coords) changes.push(`Coordenadas: "${prev.coords || 'N/D'}" -> "${curr.coords || 'N/D'}"`);
 
       if (changes.length > 0) {
-        const onlyAccessChanged =
-          prev.accessibility !== curr.accessibility &&
+        const onlyAccessOrCoordsChanged =
+          (prev.accessibility !== curr.accessibility || prev.coords !== curr.coords) &&
           prev.name === curr.name &&
           prev.phone === curr.phone &&
           prev.address === curr.address &&
@@ -270,7 +270,7 @@ export function computeDiffs(
           change_type:
             prev.name !== curr.name
               ? 'centre_renamed'
-              : onlyAccessChanged
+              : onlyAccessOrCoordsChanged
               ? 'access_route_changed'
               : 'service_added',
           centre_id: id,
@@ -279,7 +279,7 @@ export function computeDiffs(
           current_snapshot: currDate,
           detail: `Cambio registral real (${sourceTag}): ${changes.join(' · ')}.`,
           reason: `Comparación directa fila a fila entre descargas oficiales de ${sourceTag}.`,
-          category: onlyAccessChanged ? 'acceso' : 'servicio'
+          category: onlyAccessOrCoordsChanged ? 'acceso' : 'servicio'
         });
       }
     }

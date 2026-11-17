@@ -219,15 +219,47 @@ export function formatOfficialSpanishName(raw: string): string {
   // Solo normalizar cuando la cadena viene mayoritariamente en mayúsculas (>60%)
   if (upperCount / letters.length <= 0.6) return s;
 
-  const parts = s.split(/(\s+|[-/(),."“”«»])/);
+  const parts = s.split(/(\s+|[-/,()"“”«»])/);
   let seenWord = false;
   let prevSeparator = '';
   let prevLowerWord = '';
 
+  const formatSingleWord = (word: string): string => {
+    if (!word) return '';
+    const cleanUpper = word.toLocaleUpperCase('es-ES');
+    if (PRESERVED_SPANISH_ACRONYMS.has(cleanUpper)) {
+      seenWord = true;
+      prevSeparator = '';
+      prevLowerWord = cleanUpper.toLocaleLowerCase('es-ES');
+      return cleanUpper;
+    }
+
+    const lower = word.toLocaleLowerCase('es-ES');
+    const allowConnectorLowercase =
+      seenWord &&
+      prevSeparator !== '(' &&
+      prevSeparator !== '«' &&
+      prevSeparator !== '"' &&
+      (LOWERCASE_SPANISH_PREPOSITIONS.has(lower) ||
+        (LOWERCASE_SPANISH_ARTICLES.has(lower) &&
+          (LOWERCASE_SPANISH_PREPOSITIONS.has(prevLowerWord) || prevLowerWord === 'o')));
+
+    if (allowConnectorLowercase) {
+      prevSeparator = '';
+      prevLowerWord = lower;
+      return lower;
+    }
+
+    seenWord = true;
+    prevSeparator = '';
+    prevLowerWord = lower;
+    return lower.charAt(0).toLocaleUpperCase('es-ES') + lower.slice(1);
+  };
+
   return parts
     .map((part) => {
       if (!part) return '';
-      if (/^(\s+|[-/(),."“”«»])$/.test(part)) {
+      if (/^(\s+|[-/,()"“”«»])$/.test(part)) {
         if (!/^\s+$/.test(part)) {
           prevSeparator = part;
         }
@@ -235,34 +267,41 @@ export function formatOfficialSpanishName(raw: string): string {
       }
 
       const cleanUpper = part.toLocaleUpperCase('es-ES');
-      const isDottedAcronym = /^(?:[A-ZÁÉÍÓÚÜÑ]{1,2}\.){2,}$/.test(cleanUpper);
-      if (PRESERVED_SPANISH_ACRONYMS.has(cleanUpper) || isDottedAcronym) {
+      const dottedPrefixMatch = cleanUpper.match(
+        /^((?:[A-ZÁÉÍÓÚÜÑ]\.){2,}(?:[A-ZÁÉÍÓÚÜÑ](?=$))?|(?:[A-ZÁÉÍÓÚÜÑ]\.)+[A-ZÁÉÍÓÚÜÑ](?=$))(.*)$/
+      );
+      if (dottedPrefixMatch) {
+        const [, dottedAcronym, restUpper] = dottedPrefixMatch;
         seenWord = true;
         prevSeparator = '';
-        prevLowerWord = cleanUpper.toLocaleLowerCase('es-ES');
-        return cleanUpper;
+        prevLowerWord = dottedAcronym.toLocaleLowerCase('es-ES');
+        if (!restUpper) {
+          return dottedAcronym;
+        }
+        const restOffset = dottedAcronym.length;
+        const formattedRest = part
+          .slice(restOffset)
+          .split(/(\.)/)
+          .map((sub) => (sub === '.' ? '.' : formatSingleWord(sub)))
+          .join('');
+        return dottedAcronym + formattedRest;
       }
 
-      const lower = part.toLocaleLowerCase('es-ES');
-      const allowConnectorLowercase =
-        seenWord &&
-        prevSeparator !== '(' &&
-        prevSeparator !== '«' &&
-        prevSeparator !== '"' &&
-        (LOWERCASE_SPANISH_PREPOSITIONS.has(lower) ||
-          (LOWERCASE_SPANISH_ARTICLES.has(lower) &&
-            (LOWERCASE_SPANISH_PREPOSITIONS.has(prevLowerWord) || prevLowerWord === 'o')));
-
-      if (allowConnectorLowercase) {
-        prevSeparator = '';
-        prevLowerWord = lower;
-        return lower;
+      if (part.includes('.')) {
+        return part
+          .split(/(\.)/)
+          .map((sub) => {
+            if (!sub) return '';
+            if (sub === '.') {
+              prevSeparator = '.';
+              return '.';
+            }
+            return formatSingleWord(sub);
+          })
+          .join('');
       }
 
-      seenWord = true;
-      prevSeparator = '';
-      prevLowerWord = lower;
-      return lower.charAt(0).toLocaleUpperCase('es-ES') + lower.slice(1);
+      return formatSingleWord(part);
     })
     .join('');
 }

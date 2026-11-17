@@ -1,8 +1,13 @@
 # Madrid Apoyo Especializado v1.8 (DATAMAD 2026)
 
+[![Despliegue en GitHub Pages](https://github.com/herasr/Madrid-Apoyo-Especializado/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/herasr/Madrid-Apoyo-Especializado/actions/workflows/deploy-pages.yml)
+[![Ingesta Registral Semanal](https://github.com/herasr/Madrid-Apoyo-Especializado/actions/workflows/weekly-ingest.yml/badge.svg)](https://github.com/herasr/Madrid-Apoyo-Especializado/actions/workflows/weekly-ingest.yml)
+[![Licencia Apache 2.0](https://img.shields.io/badge/Licencia-Apache_2.0-088893.svg)](LICENSE)
+![Versión v1.8.0](https://img.shields.io/badge/Versi%C3%B3n-1.8.0-1C1917.svg)
+
 Buscador ciudadano basado en datos abiertos oficiales para localizar **recursos de atención social autorizados** en la Comunidad de Madrid y el Ayuntamiento de Madrid, con trazabilidad registro a registro y explicabilidad algorítmica.
 
-- **Demo publicada (GitHub Pages):** `https://<tu-usuario>.github.io/<tu-repositorio>/` *(despliegue automático en cada actualización de `main` mediante [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml))*.
+- **Demo publicada (GitHub Pages):** [https://herasr.github.io/Madrid-Apoyo-Especializado/](https://herasr.github.io/Madrid-Apoyo-Especializado/) *(despliegue automático en cada actualización de `main` mediante [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml))*.
 - **Licencia de código abierto:** [Apache License 2.0](LICENSE) (`SPDX-License-Identifier: Apache-2.0`).
 
 ## Capturas de la Aplicación
@@ -13,7 +18,7 @@ Buscador ciudadano basado en datos abiertos oficiales para localizar **recursos 
 
 ## Método de Clasificación: Niveles de Evidencia y Reglas Negativas
 
-El motor ordena los resultados de forma estrictamente lexicográfica (`A1 > A2 apoyo > A2 entidad > B1 > B2 > C`) para que **la cercanía geográfica nunca sitúe un recurso genérico por delante de un centro especializado confirmado**:
+El motor ordena los resultados de forma estrictamente lexicográfica (`sort_rank`: `evidencia > adecuación > combinación en sede > preferencia de red > subnivel A2 > distancia Haversine`), respetando la jerarquía de evidencia `A1 > A2 apoyo > A2 entidad > B1 > B2 > C` para que **la cercanía geográfica nunca sitúe un recurso genérico por delante de un centro especializado confirmado**:
 
 1. **Niveles de Evidencia:**
    - **`A1` (Especialización publicada):** El centro o su registro oficial declara expresamente el perfil o condición y el servicio de apoyo buscado.

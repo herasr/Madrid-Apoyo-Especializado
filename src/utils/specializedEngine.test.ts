@@ -558,7 +558,7 @@ describe('Specialized Search Engine (Funciones Puras)', () => {
         location_mode: 'browser'
       });
       expect(jsonPayload.total_results).toBe(1);
-      expect((jsonPayload.query as any).user_ephemeral_location).toBeUndefined();
+      expect('user_ephemeral_location' in jsonPayload.query).toBe(false);
     });
 
     it('sincroniza al 100% las categorías de la batería canónica con el visor de pruebas', () => {
@@ -625,10 +625,15 @@ describe('Specialized Search Engine (Funciones Puras)', () => {
       expect(evAmafeTea.suitability).toBe('partial');
       expect(evAmafeTea.match_assessment.suitability_reasons.some(r => r.includes('TEA') && !r.includes('neurológica'))).toBe(true);
 
-      // #13 Title Case preservando siglas
+      // #13 Title Case preservando siglas y siglas con puntos
       expect(formatOfficialSpanishName('CEPRI LA PEINETA, CENTRO DE DIA')).toBe('CEPRI La Peineta, Centro de Dia');
       expect(formatOfficialSpanishName('ASOCIACION DE PADRES DE PERSONAS CON AUTISMO-APNA')).toBe('Asociacion de Padres de Personas con Autismo-APNA');
       expect(formatOfficialSpanishName('CENTRO DE ATENCION TEMPRANA ASPACE-TEA')).toBe('Centro de Atencion Temprana ASPACE-TEA');
+      expect(formatOfficialSpanishName('GRUPO 5 ACCION Y GESTION SOCIAL S.A.U.')).toBe('Grupo 5 Accion y Gestion Social S.A.U.');
+      expect(formatOfficialSpanishName('EDUKATEK SOCIOSANITARIO, S.L.U')).toBe('Edukatek Sociosanitario, S.L.U');
+      expect(formatOfficialSpanishName('ASOCIACION "A.F.A. ALCALÁ"')).toBe('Asociacion "A.F.A. Alcalá"');
+      expect(formatOfficialSpanishName('C.I.A.N. GRUPO 5')).toBe('C.I.A.N. Grupo 5');
+      expect(formatOfficialSpanishName('ASOCIACION A.D.E.M.MADRID')).toBe('Asociacion A.D.E.M.Madrid');
 
       // #2 Diffs detectan cambios de accesibilidad (Cód. 3 -> 1) y coordenadas
       const prevRows = [
@@ -641,8 +646,22 @@ describe('Specialized Search Engine (Funciones Puras)', () => {
       ];
       const diffs = computeDiffs('madrid_municipal', prevRows, currRows, '2026-11-15', '2026-11-17');
       expect(diffs.length).toBe(1);
+      expect(diffs[0].change_type).toBe('access_route_changed');
       expect(diffs[0].detail).toContain('Accesibilidad código');
       expect(diffs[0].detail).toContain('Coordenadas');
+
+      const coordsOnlyDiff = computeDiffs(
+        'madrid_municipal',
+        prevRows,
+        [
+          ['PK', 'NOMBRE', 'TELEFONO', 'CLASE-VIAL', 'NOMBRE-VIA', 'NUM', 'ACCESIBILIDAD', 'LATITUD', 'LONGITUD'],
+          ['11906', 'Centro Base 1', '910000001', 'CALLE', 'Maqueda', '1', '3', '40.4012', '-3.7510']
+        ],
+        '2026-11-15',
+        '2026-11-17'
+      );
+      expect(coordsOnlyDiff[0].change_type).toBe('access_route_changed');
+      expect(coordsOnlyDiff[0].category).toBe('acceso');
     });
 
     it('auditoría profunda DATAMAD: cruce multi-fuente sin falsas discrepancias y CentrosServiciosSociales sin apoyos residenciales/diurnos falsos', () => {

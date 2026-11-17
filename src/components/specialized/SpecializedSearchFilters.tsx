@@ -40,10 +40,10 @@ import {
 } from 'lucide-react';
 
 const ACCESSIBILITY_FEATURES = [
-  { id: 'wheelchair_access', label: 'Acceso silla de ruedas (Cód. 1 / 2)', icon: Accessibility },
-  { id: 'sign_language', label: 'Lengua de signos (Cód. 4)', icon: MessageCircle },
-  { id: 'tactile_signage', label: 'Señalización podotáctil (Cód. 5)', icon: Type },
-  { id: 'magnetic_loops', label: 'Bucle magnético (Cód. 6)', icon: Ear }
+  { id: 'wheelchair_access', label: 'Acceso silla de ruedas (Cód. 1 / Cód. 2 parcial)', easyLabel: 'Acceso en silla de ruedas', icon: Accessibility },
+  { id: 'sign_language', label: 'Lengua de signos (Cód. 4)', easyLabel: 'Lengua de signos', icon: MessageCircle },
+  { id: 'tactile_signage', label: 'Señalización podotáctil (Cód. 5)', easyLabel: 'Suelo táctil (personas ciegas)', icon: Type },
+  { id: 'magnetic_loops', label: 'Bucle magnético (Cód. 6)', easyLabel: 'Bucle magnético (audífonos)', icon: Ear }
 ];
 
 import { MADRID_MUNICIPALITIES } from '../../data/municipalitiesData';
@@ -705,7 +705,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                   key={r}
                   type="button"
                   aria-pressed={query.radius_km === r}
-                  aria-label={`Radio de ${r} kilómetros`}
+                  aria-label={`Radio de búsqueda: ${r} km`}
                   onClick={() => setQuery(prev => ({ ...prev, radius_km: r }))}
                   className={`px-2 py-1 rounded text-xs transition-colors cursor-pointer ${
                     query.radius_km === r
@@ -727,7 +727,9 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                   ? 'Tu ubicación actual (GPS efímero)'
                   : query.municipality
                   ? `${query.municipality} (centroide oficial)`
-                  : 'Comunidad de Madrid (sin filtro de origen · mostrando todos)'}
+                  : query.radius_km < 25
+                  ? `Madrid centro (Km 0 · radio ≤ ${query.radius_km} km)`
+                  : 'Comunidad de Madrid (desde Km 0 · toda la región)'}
               </span>
             </div>
           </div>
@@ -760,7 +762,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                 }`}
               >
                 <feat.icon className="w-4 h-4 shrink-0" aria-hidden="true" />
-                <span>{feat.label}</span>
+                <span>{easyReadMode ? feat.easyLabel : feat.label}</span>
               </button>
             );
           })}
@@ -823,13 +825,15 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
       {/* 6. Barra resumen de criterios activos y reset (§62.1) */}
       <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-stone-200">
         <div className="flex items-center gap-2 flex-wrap text-xs">
-          <span className="font-bold text-stone-800">Criterios acumulativos activos:</span>
+          <span className="font-bold text-stone-800">{easyReadMode ? 'Filtros elegidos:' : 'Criterios acumulativos activos:'}</span>
           {query.profile && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-stone-100 text-stone-800 border border-stone-200">
-              {CORE_PROFILES[query.profile as keyof typeof CORE_PROFILES]?.preferred_label || 
-               EXPERIMENTAL_PROFILES[query.profile as keyof typeof EXPERIMENTAL_PROFILES]?.preferred_label || 
-               PENDING_PROFILES[query.profile as keyof typeof PENDING_PROFILES]?.preferred_label || 
-               query.profile}
+              {(CORE_PROFILES[query.profile as keyof typeof CORE_PROFILES]?.preferred_label || 
+                EXPERIMENTAL_PROFILES[query.profile as keyof typeof EXPERIMENTAL_PROFILES]?.preferred_label || 
+                PENDING_PROFILES[query.profile as keyof typeof PENDING_PROFILES]?.preferred_label || 
+                query.profile)
+                .replace(' (Reserva/Experimental)', '')
+                .replace(' (Experimental)', '')}
               <button 
                 type="button"
                 aria-label="Eliminar filtro de perfil o condición"
@@ -899,12 +903,13 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
 
           {query.accessibility_needs.map(accId => {
             const feat = ACCESSIBILITY_FEATURES.find(f => f.id === accId);
+            const accLabel = feat ? (easyReadMode ? feat.easyLabel : feat.label) : accId;
             return (
               <span key={accId} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-stone-100 text-stone-800 border border-stone-200">
-                <span>{feat?.label || accId}</span>
+                <span>{accLabel}</span>
                 <button
                   type="button"
-                  aria-label={`Eliminar filtro de accesibilidad: ${feat?.label || accId}`}
+                  aria-label={`Eliminar filtro de accesibilidad: ${accLabel}`}
                   onClick={() => setQuery(prev => ({
                     ...prev,
                     accessibility_needs: prev.accessibility_needs.filter(id => id !== accId)
