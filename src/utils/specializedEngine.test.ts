@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import fc from 'fast-check';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -800,6 +801,200 @@ describe('Specialized Search Engine (Funciones Puras)', () => {
       const tdahLevelA = tdahRes.results.filter(r => r.evidence_level === 'A1' || r.evidence_level === 'A2');
       expect(tdahLevelA.length).toBe(0);
     });
+
+    it('radius_km = 0 actúa como distancia ilimitada y fusiona multi-fuente preservando ambos provenances y prioridad UTM > municipal', () => {
+      const unlimitedRes = runSpecializedSearch({ ...DEFAULT_QUERY, radius_km: 0 }, parsed.centres, null);
+      const limitedRes = runSpecializedSearch({ ...DEFAULT_QUERY, radius_km: 10 }, parsed.centres, null);
+      expect(unlimitedRes.total_results).toBe(parsed.centres.length - unlimitedRes.incompatible_results.length);
+      expect(unlimitedRes.total_results).toBeGreaterThan(limitedRes.total_results);
+
+      // Fusión determinista CAM <-> datos.madrid.es
+      const madridCsvWithAndWithoutCam = [
+        'PK;NOMBRE;CLASE-VIAL;NOMBRE-VIA;NUM;CODIGO-POSTAL;DISTRITO;LATITUD;LONGITUD;TELEFONO;EMAIL;ACCESIBILIDAD;CONTENT-URL;EQUIPAMIENTO;TRANSPORTE;TIPO',
+        '99001;CENTRO TEST TEA SOL;CALLE;MAYOR;10;28013;CENTRO;40.420000;-3.710000;915551122;a@test.es;1;https://madrid.es/1;Autismo;Metro Sol;/contenido/centros',
+        '99002;CENTRO TEST TEA SIN UTM CAM;CALLE;ALCALA;50;28009;RETIRO;40.421500;-3.681500;915553344;b@test.es;1;https://madrid.es/2;Autismo;Metro Retiro;/contenido/centros'
+      ].join('\n');
+
+      const camCentrosCsv = [
+        'numero_registro;sector;tipo;subtipo;denominacion;plazas_autorizadas_numero;municipio_nombre;direccion_via_tipo;direccion_via_nombre;direccion_portal;direccion_codigo_postal;direccion_distrito;direccion_coor_x;direccion_coor_y;contacto_telefono;contacto_correo;entidad_denominacion;entidad_nif;tipo_gestion',
+        'C9901;Personas con discapacidad;CENTROS DE DÍA;CENTROS DE DÍA PARA PERSONAS CON AUTISMO;CENTRO TEST TEA SOL;25;Madrid;CALLE;MAYOR;10;28013;CENTRO;440320;4474200;915551122;cam@test.es;ASOCIACION TEA TEST;G12345678;CONCERTADA',
+        'C9902;Personas con discapacidad;CENTROS DE DÍA;CENTROS DE DÍA PARA PERSONAS CON AUTISMO;CENTRO TEST TEA SIN UTM CAM;20;Madrid;CALLE;ALCALA;50;28009;RETIRO;;;915553344;cam2@test.es;ASOCIACION TEA TEST;G12345678;PRIVADA'
+      ].join('\n');
+
+      const merged = buildCentresFromOfficialCSVs({
+        madridCsvText: madridCsvWithAndWithoutCam,
+        camCentrosCsvText: camCentrosCsv,
+        snapshotDate: '2026-11-18'
+      });
+
+      expect(merged.centres.length).toBe(2);
+      const withCamUtm = merged.centres.find(c => c.centre_id === 'CAM-C9901')!;
+      const fallbackToMad = merged.centres.find(c => c.centre_id === 'CAM-C9902')!;
+
+      expect(withCamUtm.provenance_records.some(p => p.source_dataset.includes('Registro de Centros'))).toBe(true);
+      expect(withCamUtm.provenance_records.some(p => p.source_dataset.includes('datos.madrid.es PK 99001'))).toBe(true);
+      // Coordenada UTM CAM prioritaria (~40.4168, -3.7038) sobre lat/lon municipal (40.42, -3.71)
+      expect(withCamUtm.coordinates![0]).not.toBe(40.42);
+      // Si falta UTM CAM, recurre determinísticamente a las coordenadas de datos.madrid.es
+      expect(fallbackToMad.coordinates).toEqual([40.4215, -3.6815]);
+      expect(fallbackToMad.provenance_records.some(p => p.source_dataset.includes('datos.madrid.es PK 99002'))).toBe(true);
+    });
+
+    it('formatOfficialSpanishName respeta formas jurídicas (S.L./S.A.), tildes mayúsculas, romanos y partículas', () => {
+      expect(formatOfficialSpanishName('ÁREA DE ATENCIÓN TEMPRANA S.L.')).toBe('Área de Atención Temprana S.L.');
+      expect(formatOfficialSpanishName('RESIDENCIA REINA SOFÍA II Y IV')).toBe('Residencia Reina Sofía II y IV');
+      expect(formatOfficialSpanishName('CENTRO DE DÍA DEL HENARES DE LA VEGA')).toBe('Centro de Día del Henares de la Vega');
+      expect(formatOfficialSpanishName('ÍNDICE DE APOYO XXI S.A.')).toBe('Índice de Apoyo XXI S.A.');
+      expect(formatOfficialSpanishName('Asociación Mixta TEA Madrid')).toBe('Asociación Mixta TEA Madrid');
+    });
+  });
+
+  describe('Property-Based Testing (fast-check, 1000 ejecuciones)', () => {
+    const profileArb = fc.constantFrom<SearchQueryState['profile']>(
+      'autism',
+      'acquired_brain_injury',
+      'cerebral_palsy',
+      'neurodegenerative_diseases',
+      'spinal_cord_injury',
+      'als',
+      'parkinson',
+      'alzheimer',
+      'psychomotor_early_support'
+    );
+    const supportsArb = fc.subarray(
+      ['day_care', 'residential_care', 'occupational_therapy', 'speech_therapy', 'rehabilitation', 'psychological_support'] as const,
+      { maxLength: 3 }
+    );
+    const networkArb = fc.constantFrom<SearchQueryState['network_preference']>(
+      'all',
+      'public_network',
+      'private_authorised'
+    );
+    const suitabilityOrder: Record<string, number> = {
+      complete: 0,
+      partial: 1,
+      unknown: 2,
+      incompatible: 3
+    };
+    const evidenceOrder: Record<string, number> = {
+      A1: 0,
+      A2: 1,
+      B1: 2,
+      B2: 3,
+      C: 4
+    };
+
+    const centreArb = fc.record({
+      id: fc.string({ minLength: 2, maxLength: 8 }),
+      explicit: fc.subarray(['autism', 'acquired_brain_injury', 'neurodegenerative_diseases', 'als', 'parkinson', 'alzheimer'] as const, { maxLength: 2 }),
+      entitySpecs: fc.subarray(['autism', 'acquired_brain_injury'] as const, { maxLength: 1 }),
+      supports: fc.subarray(['day_care', 'residential_care', 'occupational_therapy', 'speech_therapy', 'rehabilitation', 'psychological_support'] as const, { maxLength: 3 }),
+      net: fc.constantFrom<SpecializedCentre['public_private_status']>(
+        'red_publica',
+        'concertado',
+        'privado_autorizado',
+        'no_especificado'
+      ),
+      coords: fc.tuple(
+        fc.double({ min: 40.0, max: 40.8, noNaN: true }),
+        fc.double({ min: -4.2, max: -3.2, noNaN: true })
+      )
+    });
+
+    it('invariante lexicográfico: ningún peso subordinado voltea evidencia(A1 < A2 < B1 < B2 < C) ni adecuación dentro del mismo nivel', () => {
+      fc.assert(
+        fc.property(
+          profileArb,
+          supportsArb,
+          networkArb,
+          fc.constantFrom<'any_support' | 'all_supports_same_centre'>('any_support', 'all_supports_same_centre'),
+          centreArb,
+          centreArb,
+          (profile, support_types, network_preference, support_combination_mode, specA, specB) => {
+            const makeCentre = (spec: typeof specA, suffix: string): SpecializedCentre => ({
+              ...MOCK_CENTRE_TEA,
+              centre_id: `FC-${suffix}`,
+              explicit_specialisations: [...spec.explicit],
+              entity_declared_specialisations: spec.entitySpecs.filter(s => !spec.explicit.includes(s as any)),
+              supports: [...spec.supports],
+              related_services: ['Atención diurna', 'Neurología', 'Logopedia', 'Atención temprana'],
+              public_private_status: spec.net,
+              coordinates: spec.coords,
+              has_valid_coordinates: true,
+              allowed_life_stages: ['minor', 'adult']
+            });
+
+            const cA = makeCentre(specA, 'A');
+            const cB = makeCentre(specB, 'B');
+            const q: SearchQueryState = {
+              ...DEFAULT_QUERY,
+              profile,
+              support_types: [...support_types],
+              support_combination_mode,
+              network_preference
+            };
+
+            const rA = evaluateCentre(cA, q, [cA, cB]);
+            const rB = evaluateCentre(cB, q, [cA, cB]);
+
+            if (rA.suitability !== 'incompatible' && rB.suitability !== 'incompatible') {
+              const evDiff = evidenceOrder[rA.evidence_level] - evidenceOrder[rB.evidence_level];
+              if (evDiff < 0) {
+                expect(rA.sort_rank).toBeLessThan(rB.sort_rank);
+              } else if (evDiff === 0) {
+                const suitDiff = suitabilityOrder[rA.suitability] - suitabilityOrder[rB.suitability];
+                if (suitDiff < 0) {
+                  expect(rA.sort_rank).toBeLessThan(rB.sort_rank);
+                }
+              }
+            }
+          }
+        ),
+        { numRuns: 1000 }
+      );
+    });
+
+    it('invariante de reglas negativas: un recurso genérico marcado con patrón negativo sin especialización explícita ni de entidad nunca obtiene A1 ni A2', () => {
+      fc.assert(
+        fc.property(
+          fc.constantFrom<'autism' | 'acquired_brain_injury' | 'psychomotor_early_support' | 'neurodegenerative_diseases'>(
+            'autism',
+            'acquired_brain_injury',
+            'psychomotor_early_support',
+            'neurodegenerative_diseases'
+          ),
+          supportsArb,
+          fc.constantFrom(
+            'Personas con discapacidad intelectual',
+            'Personas con enfermedad mental crónica',
+            'Atención Temprana general',
+            'Centro Ocupacional de inserción'
+          ),
+          (profile, support_types, negativeSector) => {
+            const genericCentre: SpecializedCentre = {
+              ...MOCK_CENTRE_TEA,
+              centre_id: 'FC-NEG',
+              official_name: negativeSector,
+              subtype: negativeSector,
+              sector: negativeSector,
+              explicit_specialisations: [],
+              entity_declared_specialisations: [],
+              related_services: [negativeSector],
+              supports: [...support_types]
+            };
+
+            const res = evaluateCentre(
+              genericCentre,
+              { ...DEFAULT_QUERY, profile, support_types: [...support_types] },
+              [genericCentre]
+            );
+            expect(['A1', 'A2']).not.toContain(res.evidence_level);
+          }
+        ),
+        { numRuns: 1000 }
+      );
+    });
   });
 });
+
 

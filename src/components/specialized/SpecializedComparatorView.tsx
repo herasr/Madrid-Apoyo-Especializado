@@ -252,28 +252,36 @@ export const SpecializedComparatorView: React.FC<ComparatorViewProps> = ({
       </div>
 
       {/* Matriz comparativa */}
-      <div className="bg-white rounded-xl border border-stone-200 shadow-xs overflow-x-auto">
+      <div
+        className="bg-white rounded-xl border border-stone-200 shadow-xs overflow-x-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-stone-900"
+        tabIndex={0}
+        role="region"
+        aria-label="Tabla comparativa de centros con desplazamiento horizontal"
+      >
         <table className="w-full text-left border-collapse text-xs">
+          <caption className="sr-only">
+            Comparativa objetiva de centros autorizados seleccionados por nivel de evidencia, adecuación, apoyos, titularidad, vía de acceso y contacto
+          </caption>
           <thead>
             <tr className="bg-stone-50 border-b border-stone-200">
-              <th className="p-4 w-1/4 min-w-[180px] font-bold text-stone-900 uppercase tracking-wider text-[11px]">
+              <th scope="col" className="p-4 w-1/4 min-w-[180px] font-bold text-stone-900 uppercase tracking-wider text-[11px]">
                 Dimensión objetiva
               </th>
               {comparedCentres.map((item) => (
-                <th key={item.centre.centre_id} className="p-4 w-1/3 min-w-[240px] align-top">
+                <th scope="col" key={item.centre.centre_id} className="p-4 w-1/3 min-w-[240px] align-top">
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <h3 className="font-bold text-stone-900 text-sm leading-snug">
                         {item.centre.official_name}
                       </h3>
-                      <div className="text-[11px] text-stone-500 mt-0.5 font-mono">
+                      <div className="text-[11px] text-stone-600 mt-0.5 font-mono">
                         {item.centre.municipality} · {item.centre.centre_id}
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => onRemoveFromCompare(item.centre.centre_id)}
-                      className="text-stone-500 hover:text-stone-800 p-1 cursor-pointer no-print"
+                      className="text-stone-600 hover:text-stone-900 p-1 cursor-pointer no-print"
                       title="Quitar del comparador"
                       aria-label={`Quitar ${item.centre.official_name} del comparador`}
                     >
@@ -290,11 +298,11 @@ export const SpecializedComparatorView: React.FC<ComparatorViewProps> = ({
                 </th>
               ))}
               {comparedCentres.length < 3 && (
-                <th className="p-4 bg-stone-50/50 border-l border-dashed border-stone-200 text-center align-middle no-print">
+                <th scope="col" className="p-4 bg-stone-50/50 border-l border-dashed border-stone-200 text-center align-middle no-print">
                   <button
                     type="button"
                     onClick={onGoToSearch}
-                    className="p-4 rounded-lg border border-dashed border-stone-300 text-stone-500 hover:text-stone-800 hover:border-stone-400 text-center inline-flex flex-col items-center gap-1 transition-colors cursor-pointer"
+                    className="p-4 rounded-lg border border-dashed border-stone-300 text-stone-600 hover:text-stone-900 hover:border-stone-400 text-center inline-flex flex-col items-center gap-1 transition-colors cursor-pointer"
                   >
                     <Plus className="w-5 h-5" aria-hidden="true" />
                     <span>Añadir 3er centro</span>
@@ -306,9 +314,9 @@ export const SpecializedComparatorView: React.FC<ComparatorViewProps> = ({
           <tbody className="divide-y divide-stone-200">
             {dimensions.map((dim, idx) => (
               <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-stone-50/30'}>
-                <td className="p-4 font-bold text-stone-800 bg-stone-50/60 border-r border-stone-200">
+                <th scope="row" className="p-4 text-left font-bold text-stone-800 bg-stone-50/60 border-r border-stone-200 align-top">
                   {dim.title}
-                </td>
+                </th>
                 {comparedCentres.map((item) => (
                   <td key={item.centre.centre_id} className="p-4 align-top">
                     {dim.render(item)}

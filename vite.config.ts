@@ -22,7 +22,7 @@ export default defineConfig(() => {
       react(),
       tailwindcss(),
       VitePWA({
-        registerType: 'autoUpdate',
+        registerType: 'prompt',
         includeAssets: ['apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png', 'pwa-maskable-512x512.png', 'og-image.png'],
         workbox: {
           maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,

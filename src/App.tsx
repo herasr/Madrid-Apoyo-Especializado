@@ -25,6 +25,7 @@ import { PrintableContactCardModal } from './components/specialized/PrintableCon
 import { SavedSearchesModal } from './components/specialized/SavedSearchesModal';
 import { EasyReadGlossaryModal } from './components/specialized/EasyReadGlossaryModal';
 import { LifeStageTransitionBanner } from './components/specialized/LifeStageTransitionBanner';
+import { PWAUpdatePrompt } from './components/pwa/PWAUpdatePrompt';
 
 const SpecializedMapView = lazy(() =>
   import('./components/specialized/SpecializedMapView').then(m => ({ default: m.SpecializedMapView }))
@@ -836,6 +837,8 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      <PWAUpdatePrompt />
     </div>
   );
 }
