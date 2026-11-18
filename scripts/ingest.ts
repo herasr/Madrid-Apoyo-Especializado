@@ -335,6 +335,62 @@ function assertValidCsvPayload(spec: OfficialSourceSpec, buffer: Buffer): string
   return rows;
 }
 
+export function writeFileAtomicSync(targetPath: string, data: string | Buffer, encoding?: BufferEncoding): void {
+  const dir = path.dirname(targetPath);
+  const base = path.basename(targetPath);
+  const tmpPath = path.join(dir, `.${base}.tmp.${process.pid}.${Date.now()}`);
+  try {
+    if (typeof data === 'string') {
+      fs.writeFileSync(tmpPath, data, encoding || 'utf-8');
+    } else {
+      fs.writeFileSync(tmpPath, data);
+    }
+    fs.renameSync(tmpPath, targetPath);
+  } catch (err) {
+    try {
+      if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath);
+    } catch {
+      // noop
+    }
+    throw err;
+  }
+}
+
+export function verifyBaselineIntegrity(params: {
+  sourceId: OfficialSourceSpec['source_id'];
+  latestPath: string;
+  expectedSha256?: string;
+  gitFallbackLoader?: () => Buffer | null;
+}): Buffer | null {
+  const { sourceId, latestPath, expectedSha256, gitFallbackLoader } = params;
+  if (!fs.existsSync(latestPath)) {
+    return null;
+  }
+  const prevBuf = fs.readFileSync(latestPath);
+  if (!expectedSha256) {
+    return prevBuf;
+  }
+  const actualSha = crypto.createHash('sha256').update(prevBuf).digest('hex');
+  if (actualSha === expectedSha256) {
+    return prevBuf;
+  }
+
+  if (gitFallbackLoader) {
+    const recovered = gitFallbackLoader();
+    if (recovered) {
+      const recoveredSha = crypto.createHash('sha256').update(recovered).digest('hex');
+      if (recoveredSha === expectedSha256) {
+        console.warn(`⚠️ [${sourceId}] Base mutable en disco incoherente; recuperada desde Git HEAD (${expectedSha256.slice(0, 12)}...).`);
+        return recovered;
+      }
+    }
+  }
+
+  throw new Error(
+    `[${sourceId}] Integridad de línea base comprometida: el fichero ${path.basename(latestPath)} en disco (${actualSha.slice(0, 12)}...) no coincide con snapshot-metadata.json (${expectedSha256.slice(0, 12)}...). Proceso detenido para no emitir un informe falso de 0 cambios.`
+  );
+}
+
 export async function runIngestionProcess() {
   console.log('=== INICIANDO PROCESO DE INGESTA REGISTRAL MULTI-FUENTE ===');
 
@@ -355,7 +411,7 @@ export async function runIngestionProcess() {
       if (prevMeta?.timestamp) prevTimestamp = prevMeta.timestamp;
       if (Array.isArray(prevMeta?.sources)) {
         prevMetaSourcesMap = Object.fromEntries(
-          prevMeta.sources.map((s: any) => [s.source_id, s.sha256_hash])
+          prevMeta.sources.map((s: { source_id: string; sha256_hash: string }) => [s.source_id, s.sha256_hash])
         );
       }
     } catch {
@@ -369,10 +425,21 @@ export async function runIngestionProcess() {
     sha256: string;
     rows: string[][];
     prevRows: string[][] | null;
+    prevHash: string | null;
   }[] = [];
 
-  // Fase 1: Descargar y validar TODAS las fuentes antes de modificar archivos existentes en disco
+  // Fase 1: Descargar y validar TODAS las fuentes + integridad estricta de la línea base
   for (const spec of OFFICIAL_SOURCES) {
+    const latestPath = path.join(snapshotsDir, spec.latest_file);
+    const expectedPrevSha = prevMetaSourcesMap[spec.source_id];
+    const prevBuf = verifyBaselineIntegrity({
+      sourceId: spec.source_id,
+      latestPath,
+      expectedSha256: expectedPrevSha
+    });
+    const prevRows = prevBuf ? parseCSV(new TextDecoder(spec.encoding).decode(prevBuf)) : null;
+    const prevHash = prevBuf ? crypto.createHash('sha256').update(prevBuf).digest('hex') : null;
+
     console.log(`Descargando [${spec.source_id}]: ${spec.source_url}`);
     const response = await fetch(spec.source_url, {
       headers: {
@@ -388,18 +455,11 @@ export async function runIngestionProcess() {
     const rows = assertValidCsvPayload(spec, buffer);
     const sha256 = crypto.createHash('sha256').update(buffer).digest('hex');
 
-    const latestPath = path.join(snapshotsDir, spec.latest_file);
-    let prevRows: string[][] | null = null;
-    if (fs.existsSync(latestPath)) {
-      const prevBuf = fs.readFileSync(latestPath);
-      prevRows = parseCSV(new TextDecoder(spec.encoding).decode(prevBuf));
-    }
-
     console.log(
       `✓ [${spec.source_id}] ${rows.length - 1} registros válidos (${buffer.length} bytes, SHA-256: ${sha256.slice(0, 12)}...)`
     );
 
-    downloaded.push({ spec, buffer, sha256, rows, prevRows });
+    downloaded.push({ spec, buffer, sha256, rows, prevRows, prevHash });
   }
 
   // Fase 1.5: Verificación idempotente contra la última captura publicada (disco + snapshot-metadata.json).
@@ -407,12 +467,8 @@ export async function runIngestionProcess() {
   const forceIngest = process.argv.includes('--force');
   const classifiedPath = path.join(snapshotsDir, 'catalog-classified.json');
   const allHashesMatchPublished = downloaded.every(item => {
-    const latestPath = path.join(snapshotsDir, item.spec.latest_file);
-    if (!fs.existsSync(latestPath)) return false;
-    const existingBuf = fs.readFileSync(latestPath);
-    const existingHash = crypto.createHash('sha256').update(existingBuf).digest('hex');
     const metaHash = prevMetaSourcesMap[item.spec.source_id];
-    return existingHash === item.sha256 && (!metaHash || metaHash === item.sha256);
+    return item.prevHash === item.sha256 && (!metaHash || metaHash === item.sha256);
   });
 
   if (!forceIngest && allHashesMatchPublished && fs.existsSync(classifiedPath) && fs.existsSync(metadataPath)) {
@@ -423,7 +479,7 @@ export async function runIngestionProcess() {
     } catch {}
   }
 
-  // Fase 2: Calcular diffs ANTES de sobrescribir -latest.csv y verificar hash en disco
+  // Fase 2: Preparar diffs y escrituras atómicas en disco (todo o nada mediante ficheros temporales)
   const allDiffs: RealSnapshotDiff[] = [];
   const prevDateLabel = prevTimestamp ? prevTimestamp.slice(0, 10) : dateStr;
 
@@ -432,7 +488,7 @@ export async function runIngestionProcess() {
     allDiffs.push(...sourceDiffs);
 
     const latestPath = path.join(snapshotsDir, item.spec.latest_file);
-    fs.writeFileSync(latestPath, item.buffer);
+    writeFileAtomicSync(latestPath, item.buffer);
 
     // Verificación estricta de que el SHA-256 del archivo en disco coincide byte a byte
     const diskHash = crypto.createHash('sha256').update(fs.readFileSync(latestPath)).digest('hex');
@@ -441,8 +497,7 @@ export async function runIngestionProcess() {
     }
   }
 
-  // Fase 3: Solo actualizar snapshot-diffs.json si hubo cambios reales detectados o no existía el informe;
-  // si todas las huellas coinciden (--force sin cambios reales), no borrar el último informe válido (#2).
+  // Fase 3: Solo actualizar snapshot-diffs.json si hubo cambios reales detectados o no existía el informe
   const diffsPath = path.join(snapshotsDir, 'snapshot-diffs.json');
   if (allDiffs.length > 0 || !fs.existsSync(diffsPath) || !allHashesMatchPublished) {
     let finalDiffs = allDiffs;
@@ -466,10 +521,10 @@ export async function runIngestionProcess() {
       total_changes: finalDiffs.length,
       diffs: finalDiffs
     };
-    fs.writeFileSync(diffsPath, JSON.stringify(diffsPayload, null, 2), 'utf-8');
+    writeFileAtomicSync(diffsPath, JSON.stringify(diffsPayload, null, 2), 'utf-8');
   }
 
-  // Fase 4: Guardar metadatos de auditoría multi-fuente
+  // Fase 4: Guardar metadatos de auditoría multi-fuente atómicamente
   const primary = downloaded.find(d => d.spec.source_id === 'madrid_municipal')!;
   const sourcesMeta: SourceIngestionRecord[] = downloaded.map(d => ({
     source_id: d.spec.source_id,
@@ -499,7 +554,7 @@ export async function runIngestionProcess() {
     sources: sourcesMeta
   };
 
-  fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2), 'utf-8');
+  writeFileAtomicSync(metadataPath, JSON.stringify(metadata, null, 2), 'utf-8');
 
   // Fase 5: Generar catálogo pre-clasificado JSON para carga instantánea y soporte offline PWA (#7)
   const classifiedPayload = generatePreclassifiedCatalogFile({
@@ -586,7 +641,7 @@ export function generatePreclassifiedCatalogFile(params: {
     centres: built.centres
   };
 
-  fs.writeFileSync(
+  writeFileAtomicSync(
     path.join(snapshotsDir, 'catalog-classified.json'),
     JSON.stringify(payload),
     'utf-8'

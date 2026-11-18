@@ -19,6 +19,11 @@ import {
 import { CORE_PROFILES, SUPPORT_TYPES, LIFE_STAGES, FUNCTIONAL_NEEDS } from '../../data/specializedTaxonomy';
 import { getProfileDefinition, ACCESSIBILITY_MAP } from '../../utils/specializedEngine';
 
+import {
+  loadValidatedSavedSearches,
+  persistSavedSearches
+} from '../../utils/savedSearchesStorage';
+
 interface SavedSearchesModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -27,9 +32,6 @@ interface SavedSearchesModalProps {
   onOpenWhatChanged: () => void;
   datasetSnapshot?: string;
 }
-
-const STORAGE_KEY = 'madrid_apoyo_saved_searches_v18';
-const LEGACY_STORAGE_KEY = 'madrid_apoyo_saved_searches_v17';
 
 export const SavedSearchesModal: React.FC<SavedSearchesModalProps> = ({
   isOpen,
@@ -43,23 +45,14 @@ export const SavedSearchesModal: React.FC<SavedSearchesModalProps> = ({
   const [newSearchName, setNewSearchName] = useState('');
   const [confirmClearAll, setConfirmClearAll] = useState(false);
 
-  // Cargar búsquedas locales del navegador (migrando desde v1.7 si existe)
+  // Cargar y validar búsquedas locales del navegador (migrando desde v1.7 si existe)
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
-        if (raw) {
-          setSavedSearches(JSON.parse(raw));
-        }
-      } catch (err) {}
-    }
+    setSavedSearches(loadValidatedSavedSearches());
   }, [isOpen]);
 
   const saveSearchesToStorage = (list: SavedSearch[]) => {
     setSavedSearches(list);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-    } catch (e) {}
+    persistSavedSearches(list);
   };
 
   const handleSaveCurrent = (e: React.FormEvent) => {

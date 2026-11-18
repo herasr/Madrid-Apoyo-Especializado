@@ -17,12 +17,13 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout del repositorio
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Configurar Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 20
           cache: 'npm'
@@ -30,9 +31,9 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
-      - name: Ejecutar pruebas unitarias y comprobación de tipos
+      - name: Ejecutar pruebas unitarias con cobertura y comprobación de tipos
         run: |
-          npm run test
+          npm run test:coverage
           npm run lint
 
       - name: Compilar sitio estático para GitHub Pages
@@ -40,11 +41,22 @@ jobs:
           VITE_BASE_PATH: '/${{ github.event.repository.name }}/'
         run: npm run build
 
-      - name: Configurar GitHub Pages
-        uses: actions/configure-pages@v5
+      - name: Instalar navegador Chromium para pruebas E2E
+        run: npx playwright install chromium
+
+      - name: Ejecutar smoke tests E2E sobre compilación de producción
+        env:
+          VITE_BASE_PATH: '/${{ github.event.repository.name }}/'
+          PLAYWRIGHT_BASE_URL: 'http://127.0.0.1:4173/${{ github.event.repository.name }}/'
+        run: npm run test:e2e
+
+      - name: Configurar GitHub Pages (activación declarativa si falta)
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+        with:
+          enablement: true
 
       - name: Subir artefacto dist
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:
           path: dist
 
@@ -57,4 +69,4 @@ jobs:
     steps:
       - name: Desplegar en GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

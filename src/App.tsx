@@ -7,7 +7,7 @@
  * Cumple estrictamente con el Prompt Maestro v1.8 y la Universal Frontend Design Constitution
  */
 
-import React, { useState, useMemo, useEffect, useRef, Suspense, lazy } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useDeferredValue, Suspense, lazy } from 'react';
 import { 
   SpecializedCentre,
   SearchQueryState, 
@@ -15,6 +15,7 @@ import {
 } from './types/specialized';
 import { runSpecializedSearch, evaluateCentre } from './utils/specializedEngine';
 import { loadLiveSnapshotData, DynamicIngestionState } from './utils/liveSnapshotParser';
+import { loadValidatedSavedSearches } from './utils/savedSearchesStorage';
 import { resolveSearchOrigin, OriginReference } from './data/municipalitiesData';
 import { SpecializedHeader } from './components/specialized/SpecializedHeader';
 import { SpecializedSearchFilters } from './components/specialized/SpecializedSearchFilters';
@@ -353,29 +354,30 @@ export default function App() {
   const [isGlossaryOpen, setIsGlossaryOpen] = useState(false);
   const [dismissedTransition, setDismissedTransition] = useState(false);
 
-  // Contador de búsquedas guardadas (v1.8 con lectura retrocompatible de v1.7)
+  // Contador de búsquedas guardadas (validación estricta de esquema en localStorage)
   const [savedCount, setSavedCount] = useState(0);
   useEffect(() => {
-    try {
-      const raw =
-        localStorage.getItem('madrid_apoyo_saved_searches_v18') ||
-        localStorage.getItem('madrid_apoyo_saved_searches_v17');
-      if (raw) setSavedCount(JSON.parse(raw).length);
-    } catch (e) {}
+    setSavedCount(loadValidatedSavedSearches().length);
   }, [isSavedSearchesOpen]);
+
+  const deferredQuery = useDeferredValue(query);
 
   // Origen de coordenadas para cálculo de distancia garantizado (§67)
   const resolvedOrigin = useMemo<OriginReference>(() => {
-    return resolveSearchOrigin(query.user_ephemeral_location, query.municipality, query.location_mode);
-  }, [query.user_ephemeral_location, query.municipality, query.location_mode]);
+    return resolveSearchOrigin(
+      deferredQuery.user_ephemeral_location,
+      deferredQuery.municipality,
+      deferredQuery.location_mode
+    );
+  }, [deferredQuery.user_ephemeral_location, deferredQuery.municipality, deferredQuery.location_mode]);
 
   // Ejecución del motor de búsqueda verificable (§27, §41, §78)
   const searchOutput = useMemo(() => {
     if (isUrlBlocked) {
       return { results: [], incompatible_results: [], total_results: 0 };
     }
-    return runSpecializedSearch(query, activeCentres, resolvedOrigin.coordinates);
-  }, [isUrlBlocked, query, activeCentres, resolvedOrigin]);
+    return runSpecializedSearch(deferredQuery, activeCentres, resolvedOrigin.coordinates);
+  }, [isUrlBlocked, deferredQuery, activeCentres, resolvedOrigin]);
 
   // Centros en el comparador (mantiene los seleccionados independientemente de filtros de radio o estado)
   const comparedCentres = useMemo(() => {
@@ -386,11 +388,11 @@ export default function App() {
     const missingIds = comparedCentreIds.filter(id => !matched.some(m => m.centre.centre_id === id));
     const missingEvaluated = missingIds.map(id => {
       const raw = activeCentres.find(c => c.centre_id === id);
-      return raw ? evaluateCentre(raw, query, activeCentres, resolvedOrigin.coordinates) : null;
+      return raw ? evaluateCentre(raw, deferredQuery, activeCentres, resolvedOrigin.coordinates) : null;
     }).filter(Boolean) as EvaluatedCentreResult[];
 
     return [...matched, ...missingEvaluated];
-  }, [searchOutput.results, searchOutput.incompatible_results, comparedCentreIds, query, activeCentres, resolvedOrigin]);
+  }, [searchOutput.results, searchOutput.incompatible_results, comparedCentreIds, deferredQuery, activeCentres, resolvedOrigin]);
 
   const toggleCompare = (id: string) => {
     setComparedCentreIds(prev => {

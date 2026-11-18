@@ -48,11 +48,13 @@ El servidor estará disponible en `http://localhost:3000`.
 ## Comandos Disponibles
 
 - `npm run dev`: Inicia el servidor de desarrollo en el puerto 3000.
-- `npm run ingest`: Descarga los 3 CSV oficiales abiertos, verifica sus firmas SHA-256 byte a byte en disco, calcula diferencias reales (`snapshot-diffs.json`, comparando contra la última captura publicada antes de sobrescribir y conservando el informe si las huellas coinciden) y regenera `catalog-classified.json`.
+- `npm run ingest`: Descarga los 3 CSV oficiales abiertos, verifica sus firmas SHA-256 byte a byte en disco, comprueba la integridad de la línea base (`verifyBaselineIntegrity`) antes de sobrescribir, calcula diferencias reales (`snapshot-diffs.json`) con escritura atómica y regenera `catalog-classified.json`.
 - `npx tsx scripts/ingest.ts --only-classify`: Re-clasifica offline los 3 CSV vigentes en disco sin descargar ni alterar las capturas ni sus huellas SHA-256.
-- `npm test`: Ejecuta la batería automatizada de pruebas de Vitest sobre el motor y el catálogo oficial real.
+- `npm test`: Ejecuta la batería automatizada de pruebas de Vitest sobre el motor, el parser y el catálogo oficial real.
+- `npm run test:coverage`: Ejecuta las pruebas con informe de cobertura V8 y umbrales mínimos de calidad (`@vitest/coverage-v8`).
+- `npm run test:e2e`: Ejecuta las pruebas de navegador real de extremo a extremo con Playwright sobre la compilación de producción (`vite preview`).
 - `npm run lint`: Comprobación estricta de tipos TypeScript (`tsc --noEmit`).
-- `npm run build`: Compila la aplicación web y el Service Worker PWA offline en `dist/`.
+- `npm run build`: Compila la aplicación web, inyecta la política `Content-Security-Policy` de producción y genera el Service Worker PWA offline en `dist/`.
 - `npm run preview`: Previsualiza la compilación de producción.
 
 ## Atribución de Datos Abiertos, Fechas y Licencias de Reutilización
@@ -74,6 +76,15 @@ Este proyecto reutiliza exclusivamente conjuntos de datos públicos oficiales pu
 2. **Accesibilidad física literal (Ayuntamiento de Madrid):** El filtro distingue estrictamente por los códigos oficiales de la ficha de estructura municipal: `1` (accesible), `2` (parcialmente accesible), `4` (lengua de signos), `5` (señalización podotáctil) y `6` (bucle magnético); el código `3` (*sin información*) nunca se considera accesible.
 3. **Distancias y Tiempos Orientativos:** Las distancias se calculan mediante fórmula Haversine desde el origen elegido (GPS efímero, centroide municipal oficial o Madrid Centro por defecto) y el tiempo en transporte público mostrado es una estimación matemática orientativa en función de la distancia lineal, **no** una consulta en tiempo real a horarios CRTM/Metro/EMT.
 4. **Privacidad Efímera y Cero Telemetría (RGPD):** Sin cuentas, sin fuentes externas ni Google Fonts (tipografías servidas localmente desde el propio paquete), sin telemetría de consultas ni almacenamiento de datos de salud o coordenadas en servidor; anonimización de titulares personas físicas en servicios individuales sin NIF jurídico.
+
+## Documentación Técnica y Gobernanza Open Source
+
+- **Arquitectura técnica e ingesta atómica:** [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+- **Metodología formal de clasificación (`sort_rank`, evidencia y reglas negativas):** [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md)
+- **Guía de contribución:** [`CONTRIBUTING.md`](CONTRIBUTING.md)
+- **Política de seguridad y privacidad:** [`SECURITY.md`](SECURITY.md)
+- **Registro de versiones:** [`CHANGELOG.md`](CHANGELOG.md)
+- **Citación académica y bibliográfica:** [`CITATION.cff`](CITATION.cff)
 
 ## Licencia del Código
 

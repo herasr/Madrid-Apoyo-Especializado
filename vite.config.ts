@@ -10,6 +10,15 @@ export default defineConfig(() => {
   return {
     base,
     plugins: [
+      {
+        name: 'inject-production-csp',
+        apply: 'build',
+        transformIndexHtml(html) {
+          const cspMeta =
+            '    <meta http-equiv="Content-Security-Policy" content="default-src \'self\'; img-src \'self\' data: blob: https://tile.openstreetmap.org https://*.tile.openstreetmap.org; style-src \'self\' \'unsafe-inline\'; connect-src \'self\'; font-src \'self\'; worker-src \'self\'; manifest-src \'self\'" />';
+          return html.replace('<meta name="viewport"', `${cspMeta}\n    <meta name="viewport"`);
+        },
+      },
       react(),
       tailwindcss(),
       VitePWA({

@@ -20,11 +20,14 @@ import {
   mapCamMunicipalityName,
   utm30NToWgs84
 } from './officialRegistryParser';
-import { computeDiffs } from '../../scripts/ingest';
+import os from 'node:os';
+import { computeDiffs, verifyBaselineIntegrity, writeFileAtomicSync } from '../../scripts/ingest';
 import { findMunicipalityByName, MADRID_MUNICIPALITIES } from '../data/municipalitiesData';
 import { CORE_PROFILES } from '../data/specializedTaxonomy';
 import { runAllCanonicalTests, TEST_SUITE_CATEGORIES } from './specializedTestsSuite';
 import { loadLiveSnapshotData } from './liveSnapshotParser';
+import { parseValidatedSavedSearchesJson, validateSavedSearchRecord } from './savedSearchesStorage';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 import { escapeCsvCell, buildResultsCsv, buildResultsJsonPayload } from '../components/specialized/SpecializedResultsList';
 import { SpecializedCentre, SearchQueryState } from '../types/specialized';
 
@@ -691,6 +694,90 @@ describe('Specialized Search Engine (Funciones Puras)', () => {
       const neuroSearch = runSpecializedSearch({ ...DEFAULT_QUERY, profile: 'neurodegenerative_diseases' }, parsed.centres, null);
       const neuroMaravillas = neuroSearch.results.find(r => r.centre.centre_id === 'MAD-PK174917');
       expect(neuroMaravillas?.evidence_level).toBe('C');
+    });
+
+    it('P0/P1: verifyBaselineIntegrity bloquea discrepancias SHA-256 silenciosas y writeFileAtomicSync escribe sin temporales residuales', () => {
+      const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'datamad-ingest-test-'));
+      try {
+        const csvPath = path.join(tmpDir, 'snapshot-latest.csv');
+        const payload = Buffer.from('PK;NOMBRE;ACCESIBILIDAD\n11906;Centro Base 1;1\n', 'utf-8');
+        writeFileAtomicSync(csvPath, payload);
+
+        const remainingFiles = fs.readdirSync(tmpDir);
+        expect(remainingFiles).toEqual(['snapshot-latest.csv']);
+
+        const validSha = crypto.createHash('sha256').update(payload).digest('hex');
+        const verified = verifyBaselineIntegrity({
+          sourceId: 'madrid_municipal',
+          latestPath: csvPath,
+          expectedSha256: validSha
+        });
+        expect(verified?.equals(payload)).toBe(true);
+
+        expect(() =>
+          verifyBaselineIntegrity({
+            sourceId: 'madrid_municipal',
+            latestPath: csvPath,
+            expectedSha256: '0'.repeat(64)
+          })
+        ).toThrow(/Integridad de línea base comprometida/);
+
+        const stalePayload = Buffer.from('PK;NOMBRE;ACCESIBILIDAD\n11906;Centro Base 1;3\n', 'utf-8');
+        writeFileAtomicSync(csvPath, stalePayload);
+
+        const recoveredBuf = verifyBaselineIntegrity({
+          sourceId: 'madrid_municipal',
+          latestPath: csvPath,
+          expectedSha256: validSha,
+          gitFallbackLoader: () => payload
+        });
+        expect(recoveredBuf?.equals(payload)).toBe(true);
+      } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      }
+    });
+
+    it('P1: valida esquema estricto de búsquedas guardadas en localStorage y ErrorBoundary captura errores', () => {
+      expect(parseValidatedSavedSearchesJson(null)).toEqual([]);
+      expect(parseValidatedSavedSearchesJson('{corrupto')).toEqual([]);
+      expect(parseValidatedSavedSearchesJson('{"not":"array"}')).toEqual([]);
+
+      const validEntry = {
+        saved_search_id: 'search-1',
+        name: 'Búsqueda TEA Madrid',
+        created_at: '2026-11-18T10:00:00.000Z',
+        updated_at: '2026-11-18T10:00:00.000Z',
+        taxonomy_version: '1.8.0',
+        dataset_snapshot: '2026-11-17',
+        filters: {
+          profile: 'autism',
+          functional_needs: ['communication'],
+          support_types: ['day_care'],
+          support_combination_mode: 'any_support',
+          life_stage: 'minor',
+          municipality: 'Madrid',
+          radius_km: 25,
+          network_preference: 'public_network',
+          accessibility_needs: ['wheelchair_access']
+        }
+      };
+
+      const invalidEntry = {
+        saved_search_id: 999,
+        name: '',
+        filters: { radius_km: 9999 }
+      };
+
+      expect(validateSavedSearchRecord(validEntry)).not.toBeNull();
+      expect(validateSavedSearchRecord(invalidEntry)).toBeNull();
+
+      const parsedSaved = parseValidatedSavedSearchesJson(JSON.stringify([validEntry, invalidEntry]));
+      expect(parsedSaved.length).toBe(1);
+      expect(parsedSaved[0].saved_search_id).toBe('search-1');
+      expect('user_ephemeral_location' in parsedSaved[0].filters).toBe(false);
+
+      const errState = ErrorBoundary.getDerivedStateFromError();
+      expect(errState.hasError).toBe(true);
     });
   });
 });

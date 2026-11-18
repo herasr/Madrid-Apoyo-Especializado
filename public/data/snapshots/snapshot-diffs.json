@@ -1,7 +1,96 @@
 {
-  "generated_at": "2026-11-17T10:01:21.346Z",
+  "generated_at": "2026-11-18T10:17:10.487Z",
   "previous_snapshot": "2026-11-15",
   "current_snapshot": "2026-11-17",
-  "total_changes": 0,
-  "diffs": []
+  "total_changes": 8,
+  "diffs": [
+    {
+      "change_id": "DIFF-MADRID_MUNICIPAL-UPD-1",
+      "change_type": "access_route_changed",
+      "centre_id": "MAD-PK11906",
+      "centre_name": "Centro Base N.º 1 de atención a personas con discapacidad",
+      "previous_snapshot": "2026-11-15",
+      "current_snapshot": "2026-11-17",
+      "detail": "Cambio registral real (datos.madrid.es): Accesibilidad código: \"3\" -> \"1\".",
+      "reason": "Comparación directa fila a fila entre descargas oficiales de datos.madrid.es.",
+      "category": "acceso"
+    },
+    {
+      "change_id": "DIFF-MADRID_MUNICIPAL-UPD-2",
+      "change_type": "access_route_changed",
+      "centre_id": "MAD-PK11907",
+      "centre_name": "Centro Base N.º 2 de atención a personas con discapacidad",
+      "previous_snapshot": "2026-11-15",
+      "current_snapshot": "2026-11-17",
+      "detail": "Cambio registral real (datos.madrid.es): Accesibilidad código: \"3\" -> \"1\".",
+      "reason": "Comparación directa fila a fila entre descargas oficiales de datos.madrid.es.",
+      "category": "acceso"
+    },
+    {
+      "change_id": "DIFF-MADRID_MUNICIPAL-UPD-3",
+      "change_type": "access_route_changed",
+      "centre_id": "MAD-PK11908",
+      "centre_name": "Centro Base N.º 3 de atención a personas con discapacidad",
+      "previous_snapshot": "2026-11-15",
+      "current_snapshot": "2026-11-17",
+      "detail": "Cambio registral real (datos.madrid.es): Coordenadas: \"40.39764644998692,-3.696106928104793\" -> \"40.39859317217796,-3.6927686677838736\".",
+      "reason": "Comparación directa fila a fila entre descargas oficiales de datos.madrid.es.",
+      "category": "acceso"
+    },
+    {
+      "change_id": "DIFF-MADRID_MUNICIPAL-UPD-4",
+      "change_type": "access_route_changed",
+      "centre_id": "MAD-PK11909",
+      "centre_name": "Centro Base N.º 5 de atención a personas con discapacidad",
+      "previous_snapshot": "2026-11-15",
+      "current_snapshot": "2026-11-17",
+      "detail": "Cambio registral real (datos.madrid.es): Accesibilidad código: \"3\" -> \"1\".",
+      "reason": "Comparación directa fila a fila entre descargas oficiales de datos.madrid.es.",
+      "category": "acceso"
+    },
+    {
+      "change_id": "DIFF-MADRID_MUNICIPAL-UPD-5",
+      "change_type": "access_route_changed",
+      "centre_id": "MAD-PK11920",
+      "centre_name": "Centro Base N.º 6 de atención a personas con discapacidad",
+      "previous_snapshot": "2026-11-15",
+      "current_snapshot": "2026-11-17",
+      "detail": "Cambio registral real (datos.madrid.es): Accesibilidad código: \"3\" -> \"1\".",
+      "reason": "Comparación directa fila a fila entre descargas oficiales de datos.madrid.es.",
+      "category": "acceso"
+    },
+    {
+      "change_id": "DIFF-MADRID_MUNICIPAL-UPD-6",
+      "change_type": "access_route_changed",
+      "centre_id": "MAD-PK11953",
+      "centre_name": "Centro Base N.º 7 de atención a personas con discapacidad",
+      "previous_snapshot": "2026-11-15",
+      "current_snapshot": "2026-11-17",
+      "detail": "Cambio registral real (datos.madrid.es): Accesibilidad código: \"3\" -> \"1\".",
+      "reason": "Comparación directa fila a fila entre descargas oficiales de datos.madrid.es.",
+      "category": "acceso"
+    },
+    {
+      "change_id": "DIFF-MADRID_MUNICIPAL-UPD-7",
+      "change_type": "access_route_changed",
+      "centre_id": "MAD-PK147099",
+      "centre_name": "Centro Base N.º 8 de atención a personas con discapacidad",
+      "previous_snapshot": "2026-11-15",
+      "current_snapshot": "2026-11-17",
+      "detail": "Cambio registral real (datos.madrid.es): Accesibilidad código: \"3\" -> \"1\".",
+      "reason": "Comparación directa fila a fila entre descargas oficiales de datos.madrid.es.",
+      "category": "acceso"
+    },
+    {
+      "change_id": "DIFF-MADRID_MUNICIPAL-UPD-8",
+      "change_type": "access_route_changed",
+      "centre_id": "MAD-PK11532730",
+      "centre_name": "Centro Regional de Coordinación y Valoración Infantil (CRECOVI)",
+      "previous_snapshot": "2026-11-15",
+      "current_snapshot": "2026-11-17",
+      "detail": "Cambio registral real (datos.madrid.es): Accesibilidad código: \"3\" -> \"1\".",
+      "reason": "Comparación directa fila a fila entre descargas oficiales de datos.madrid.es.",
+      "category": "acceso"
+    }
+  ]
 }
