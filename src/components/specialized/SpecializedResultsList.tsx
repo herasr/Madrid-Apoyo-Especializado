@@ -219,7 +219,7 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
         <div className="p-4 bg-stone-50 rounded-xl border border-stone-200 text-left text-xs space-y-2 text-stone-700">
           <div className="font-bold text-stone-800">Alternativas recomendadas:</div>
           <ul className="list-disc list-inside space-y-1 text-stone-600 pl-1">
-            {query.radius_km < 50 && (
+            {query.radius_km < 80 && (
               <li>Ampliar el radio geográfico de búsqueda (actualmente en {query.radius_km} km).</li>
             )}
             {query.support_combination_mode === 'all_supports_same_centre' && (

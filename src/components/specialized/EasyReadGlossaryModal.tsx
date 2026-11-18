@@ -148,7 +148,7 @@ export const EasyReadGlossaryModal: React.FC<EasyReadGlossaryModalProps> = ({ is
             type="button"
             onClick={onClose} 
             aria-label="Cerrar modal"
-            className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg cursor-pointer"
+            className="p-1.5 text-stone-500 hover:text-stone-800 rounded-lg cursor-pointer"
           >
             <X className="w-5 h-5" aria-hidden="true" />
           </button>
@@ -157,7 +157,7 @@ export const EasyReadGlossaryModal: React.FC<EasyReadGlossaryModalProps> = ({ is
         {/* Buscador de términos */}
         <div className="p-4 border-b border-stone-200 bg-stone-50/50 space-y-1.5">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" aria-hidden="true" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-500" aria-hidden="true" />
             <input
               type="text"
               aria-label="Buscar término o sigla en el glosario"
@@ -171,7 +171,7 @@ export const EasyReadGlossaryModal: React.FC<EasyReadGlossaryModalProps> = ({ is
                 type="button"
                 onClick={() => setFilter('')}
                 aria-label="Limpiar búsqueda en el glosario"
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-stone-400 hover:text-stone-800 cursor-pointer"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-stone-500 hover:text-stone-900 cursor-pointer"
               >
                 <X className="w-4 h-4" aria-hidden="true" />
               </button>

@@ -94,7 +94,7 @@ export const WhatChangedModal: React.FC<WhatChangedModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Cerrar modal"
-            className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg transition-colors cursor-pointer"
+            className="p-1.5 text-stone-500 hover:text-stone-800 rounded-lg transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" aria-hidden="true" />
           </button>
@@ -176,7 +176,7 @@ export const WhatChangedModal: React.FC<WhatChangedModalProps> = ({
                         </h3>
                       )}
                     </div>
-                    <span className="font-mono text-[11px] text-stone-400 shrink-0">
+                    <span className="font-mono text-[11px] text-stone-500 shrink-0">
                       {diff.change_id}
                     </span>
                   </div>

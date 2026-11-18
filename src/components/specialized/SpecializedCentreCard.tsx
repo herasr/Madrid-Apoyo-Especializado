@@ -135,6 +135,7 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
             type="checkbox"
             checked={isCompared}
             onChange={() => onToggleCompare(centre.centre_id)}
+            aria-label={`Comparar ${centre.official_name}`}
             className="rounded border-stone-300 accent-stone-900 cursor-pointer"
           />
           <span className="select-none font-medium">Comparar</span>

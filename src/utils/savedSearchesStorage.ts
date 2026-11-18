@@ -83,7 +83,7 @@ export function validateSavedSearchRecord(raw: unknown): SavedSearch | null {
 
   const radiusKm = typeof f.radius_km === 'number' && Number.isFinite(f.radius_km) && f.radius_km > 0 && f.radius_km <= 200
     ? f.radius_km
-    : 50;
+    : 80;
 
   const networkPref =
     typeof f.network_preference === 'string' && VALID_NETWORKS.has(f.network_preference as NetworkPreference)

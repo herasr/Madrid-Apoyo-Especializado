@@ -40,10 +40,10 @@ import {
 } from 'lucide-react';
 
 const ACCESSIBILITY_FEATURES = [
-  { id: 'wheelchair_access', label: 'Acceso silla de ruedas (Cód. 1 / Cód. 2 parcial)', easyLabel: 'Acceso en silla de ruedas', icon: Accessibility },
-  { id: 'sign_language', label: 'Lengua de signos (Cód. 4)', easyLabel: 'Lengua de signos', icon: MessageCircle },
-  { id: 'tactile_signage', label: 'Señalización podotáctil (Cód. 5)', easyLabel: 'Suelo táctil (personas ciegas)', icon: Type },
-  { id: 'magnetic_loops', label: 'Bucle magnético (Cód. 6)', easyLabel: 'Bucle magnético (audífonos)', icon: Ear }
+  { id: 'wheelchair_access', label: 'Acceso silla de ruedas', easyLabel: 'Acceso en silla de ruedas', icon: Accessibility },
+  { id: 'sign_language', label: 'Lengua de signos', easyLabel: 'Lengua de signos', icon: MessageCircle },
+  { id: 'tactile_signage', label: 'Señalización podotáctil', easyLabel: 'Suelo táctil (personas ciegas)', icon: Type },
+  { id: 'magnetic_loops', label: 'Bucle magnético', easyLabel: 'Bucle magnético (audífonos)', icon: Ear }
 ];
 
 import { MADRID_MUNICIPALITIES } from '../../data/municipalitiesData';
@@ -61,7 +61,6 @@ interface SearchFiltersProps {
   setQuery: React.Dispatch<React.SetStateAction<SearchQueryState>>;
   totalResults: number;
   centres?: SpecializedCentre[];
-  onOpenDisambiguation: (term: 'neurodivergent' | 'psychomotor') => void;
   onResetFilters: () => void;
   easyReadMode?: boolean;
 }
@@ -71,7 +70,6 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
   setQuery,
   totalResults,
   centres,
-  onOpenDisambiguation,
   onResetFilters,
   easyReadMode = false
 }) => {
@@ -87,6 +85,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
     if (query.life_stage) count++;
     if (query.network_preference !== 'all') count++;
     if (query.municipality || query.location_mode === 'browser') count++;
+    if (query.radius_km < 80) count++;
     count += query.accessibility_needs.length;
     count += query.functional_needs.length;
     return count;
@@ -263,6 +262,19 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
     return counts;
   }, [centres]);
 
+  // Solo ofrecer al público perfiles con evidencia verificable en el catálogo vigente (evita callejones sin salida como TDAH con 0 registros)
+  const selectableProfiles = useMemo(() => {
+    const all = [
+      ...Object.values(CORE_PROFILES),
+      ...Object.values(EXPERIMENTAL_PROFILES),
+      ...Object.values(PENDING_PROFILES)
+    ];
+    if (!centres || centres.length === 0) {
+      return all.filter(prof => prof.id !== 'adhd');
+    }
+    return all.filter(prof => (profileCounts[prof.id]?.total || 0) > 0);
+  }, [centres, profileCounts]);
+
   // Tipos de apoyo dinámicos adaptados a la taxonomía seleccionada
   const displayedSupportTypes = useMemo(() => {
     if (!activeProfileDef || !activeProfileDef.typical_supports || activeProfileDef.typical_supports.length === 0) {
@@ -374,28 +386,10 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
           <h3 className={`font-bold uppercase tracking-wider text-stone-700 ${easyReadMode ? 'text-sm normal-case tracking-normal text-stone-900' : 'text-xs'}`}>
             {easyReadMode ? '¿Qué situación o perfil buscas?' : 'Perfil o condición'}
           </h3>
-          <div className="text-[11px] text-stone-500 flex flex-wrap items-center gap-1.5">
-            <span>{easyReadMode ? '¿Dudas entre términos? Aclarar:' : '¿Buscas un término general?'}</span>
-            <button
-              type="button"
-              onClick={() => onOpenDisambiguation('neurodivergent')}
-              className="underline text-stone-700 hover:text-stone-950 font-medium cursor-pointer"
-            >
-              neurodivergente
-            </button>
-            <span aria-hidden="true">·</span>
-            <button
-              type="button"
-              onClick={() => onOpenDisambiguation('psychomotor')}
-              className="underline text-stone-700 hover:text-stone-950 font-medium cursor-pointer"
-            >
-              psicomotriz
-            </button>
-          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-          {[...Object.values(CORE_PROFILES), ...Object.values(EXPERIMENTAL_PROFILES), ...Object.values(PENDING_PROFILES)].map((prof) => {
+          {selectableProfiles.map((prof) => {
             const isSelected = query.profile === prof.id;
             const visibleLabel = prof.preferred_label.replace(' (Reserva/Experimental)', '').replace(' (Experimental)', '');
             return (
@@ -444,11 +438,20 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
         </div>
 
         {centres && centres.length > 0 && query.profile && (profileCounts[query.profile]?.total || 0) === 0 && (
-          <div className="mt-2 text-xs bg-amber-50 border border-amber-200 rounded-lg p-2.5 text-amber-950 flex items-center gap-2">
-            <Info className="w-4 h-4 text-amber-700 shrink-0" aria-hidden="true" />
-            <span>
-              <strong>Sin mención expresa en los registros oficiales actuales:</strong> Ningún centro o servicio declara literalmente «{activeProfileDef?.preferred_label.replace(' (Reserva/Experimental)', '').replace(' (Experimental)', '') || query.profile}» en los datos vigentes; se muestran recursos relacionados para consultar por teléfono.
-            </span>
+          <div className="mt-2 text-xs bg-amber-50 border border-amber-200 rounded-lg p-2.5 text-amber-950 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Info className="w-4 h-4 text-amber-700 shrink-0" aria-hidden="true" />
+              <span>
+                Los registros públicos actuales no incluyen centros acreditados específicamente para «{activeProfileDef?.preferred_label.replace(' (Reserva/Experimental)', '').replace(' (Experimental)', '') || query.profile}». Consulta los recursos de orientación general abajo o retira este filtro.
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setQuery(prev => ({ ...prev, profile: null }))}
+              className="px-2.5 py-1 rounded bg-stone-900 text-white font-semibold hover:bg-stone-800 cursor-pointer shrink-0"
+            >
+              Quitar filtro de perfil
+            </button>
           </div>
         )}
       </div>
@@ -700,7 +703,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
             {/* Selector de radio en kilómetros */}
             <div className="flex items-center gap-2 text-xs text-stone-600 pt-1" role="group" aria-label="Radio de búsqueda">
               <span className="shrink-0 font-medium">Radio:</span>
-              {[5, 10, 20, 30, 50].map((r) => (
+              {[5, 10, 20, 30, 50, 80].map((r) => (
                 <button
                   key={r}
                   type="button"
@@ -727,7 +730,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
                   ? 'Tu ubicación actual (GPS efímero)'
                   : query.municipality
                   ? `${query.municipality} (centroide oficial)`
-                  : query.radius_km < 25
+                  : query.radius_km < 80
                   ? `Madrid centro (Km 0 · radio ≤ ${query.radius_km} km)`
                   : 'Comunidad de Madrid (desde Km 0 · toda la región)'}
               </span>
@@ -901,6 +904,20 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
             </span>
           )}
 
+          {query.location_mode === 'all' && query.radius_km < 80 && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-stone-100 text-stone-800 border border-stone-200">
+              Radio ≤ {query.radius_km} km (Madrid centro)
+              <button
+                type="button"
+                aria-label="Restablecer radio a toda la región (80 km)"
+                onClick={() => setQuery(prev => ({ ...prev, radius_km: 80 }))}
+                className="hover:text-stone-900 ml-1 cursor-pointer"
+              >
+                <span aria-hidden="true">×</span>
+              </button>
+            </span>
+          )}
+
           {query.accessibility_needs.map(accId => {
             const feat = ACCESSIBILITY_FEATURES.find(f => f.id === accId);
             const accLabel = feat ? (easyReadMode ? feat.easyLabel : feat.label) : accId;
@@ -941,6 +958,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
             !query.life_stage && 
             !query.municipality && 
             !query.user_ephemeral_location &&
+            query.radius_km === 80 &&
             query.accessibility_needs.length === 0 &&
             query.functional_needs.length === 0) && (
             <span className="text-stone-500 italic">Mostrando todos los centros autorizados de la Comunidad de Madrid</span>
@@ -964,7 +982,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
             onClick={scrollToResults}
             className="md:hidden px-3 py-1.5 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-stone-800 transition-colors cursor-pointer"
           >
-            Ver {totalResults} resultados
+            Ver {totalResults} {totalResults === 1 ? 'resultado' : 'resultados'}
           </button>
         </div>
       </div>

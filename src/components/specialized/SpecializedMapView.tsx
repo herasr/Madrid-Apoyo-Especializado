@@ -514,6 +514,7 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
             </div>
             <div className="text-[11px] text-stone-600 mt-0.5">
               Radio: <span className="font-mono font-bold text-stone-900">{radiusKm} km</span>
+              {radiusKm >= 80 && originName.includes('Madrid') && <span> (toda la región)</span>}
             </div>
           </div>
 
@@ -548,7 +549,7 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
                   type="button"
                   onClick={() => setSearchFilterText('')}
                   aria-label="Limpiar filtro de búsqueda en el mapa"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-stone-400 hover:text-stone-800 cursor-pointer"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-stone-500 hover:text-stone-900 cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>

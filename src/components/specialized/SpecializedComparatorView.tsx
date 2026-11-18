@@ -273,7 +273,7 @@ export const SpecializedComparatorView: React.FC<ComparatorViewProps> = ({
                     <button
                       type="button"
                       onClick={() => onRemoveFromCompare(item.centre.centre_id)}
-                      className="text-stone-400 hover:text-stone-700 p-1 cursor-pointer no-print"
+                      className="text-stone-500 hover:text-stone-800 p-1 cursor-pointer no-print"
                       title="Quitar del comparador"
                       aria-label={`Quitar ${item.centre.official_name} del comparador`}
                     >

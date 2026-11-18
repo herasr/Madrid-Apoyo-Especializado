@@ -151,7 +151,7 @@ export const SavedSearchesModal: React.FC<SavedSearchesModalProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Cerrar modal"
-            className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg transition-colors cursor-pointer"
+            className="p-1.5 text-stone-500 hover:text-stone-800 rounded-lg transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" aria-hidden="true" />
           </button>
@@ -190,7 +190,7 @@ export const SavedSearchesModal: React.FC<SavedSearchesModalProps> = ({
         {/* Lista de búsquedas guardadas */}
         <div className="p-6 overflow-y-auto space-y-3 flex-1 text-xs">
           {savedSearches.length === 0 ? (
-            <div className="text-center py-8 text-stone-400">
+            <div className="text-center py-8 text-stone-600">
               No tienes ninguna búsqueda guardada en este navegador.
             </div>
           ) : (
@@ -220,7 +220,7 @@ export const SavedSearchesModal: React.FC<SavedSearchesModalProps> = ({
                     <button
                       type="button"
                       onClick={() => handleDelete(s.saved_search_id)}
-                      className="p-1.5 text-stone-400 hover:text-rose-600 rounded-md transition-colors cursor-pointer"
+                      className="p-1.5 text-stone-500 hover:text-rose-700 rounded-md transition-colors cursor-pointer"
                       title="Eliminar"
                       aria-label={`Eliminar búsqueda guardada ${s.name}`}
                     >

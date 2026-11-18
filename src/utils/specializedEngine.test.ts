@@ -106,7 +106,7 @@ const DEFAULT_QUERY: SearchQueryState = {
   support_combination_mode: 'any_support',
   life_stage: null,
   municipality: null,
-  radius_km: 50,
+  radius_km: 80,
   network_preference: 'all',
   accessibility_needs: [],
   user_ephemeral_location: null,
@@ -778,6 +778,27 @@ describe('Specialized Search Engine (Funciones Puras)', () => {
 
       const errState = ErrorBoundary.getDerivedStateFromError();
       expect(errState.hasError).toBe(true);
+    });
+
+    it('aplica estrictamente el filtro de radio (10, 30, 50 y 80 km) también desde el origen por defecto y verifica 0 registros TDAH', () => {
+      const r10 = runSpecializedSearch({ ...DEFAULT_QUERY, radius_km: 10 }, parsed.centres, null);
+      const r30 = runSpecializedSearch({ ...DEFAULT_QUERY, radius_km: 30 }, parsed.centres, null);
+      const r50 = runSpecializedSearch({ ...DEFAULT_QUERY, radius_km: 50 }, parsed.centres, null);
+      const r80 = runSpecializedSearch({ ...DEFAULT_QUERY, radius_km: 80 }, parsed.centres, null);
+
+      expect(r10.results.every(r => r.distance_km === null || r.distance_km <= 10)).toBe(true);
+      expect(r30.results.every(r => r.distance_km === null || r.distance_km <= 30)).toBe(true);
+      expect(r50.results.every(r => r.distance_km === null || r.distance_km <= 50)).toBe(true);
+      expect(r80.results.every(r => r.distance_km === null || r.distance_km <= 80)).toBe(true);
+
+      expect(r10.total_results).toBeLessThan(r30.total_results);
+      expect(r30.total_results).toBeLessThan(r50.total_results);
+      expect(r50.total_results).toBeLessThan(r80.total_results);
+
+      // Confirmar que TDAH no cuenta con centros explícitos ni por entidad en los CSV oficiales actuales
+      const tdahRes = runSpecializedSearch({ ...DEFAULT_QUERY, profile: 'adhd' }, parsed.centres, null);
+      const tdahLevelA = tdahRes.results.filter(r => r.evidence_level === 'A1' || r.evidence_level === 'A2');
+      expect(tdahLevelA.length).toBe(0);
     });
   });
 });

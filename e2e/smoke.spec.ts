@@ -1,23 +1,47 @@
 import fs from 'node:fs';
 import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 
-test.describe('Madrid Apoyo Especializado — Smoke E2E', () => {
-  test('flujo ciudadano: carga completa, filtro TEA, modal explicable y exportación CSV segura', async ({ page }) => {
+test.describe('Madrid Apoyo Especializado — Smoke E2E y WCAG', () => {
+  test('flujo ciudadano: carga completa, WCAG, filtro TEA, modal explicable y exportación CSV segura', async ({ page }) => {
     const errors: string[] = [];
     page.on('pageerror', (err) => errors.push(err.message));
 
     await page.goto('./');
 
     // Verificar carga del catálogo oficial completo (>1000 recursos)
-    await expect(page.getByText(/Resultados de la búsqueda/i)).toBeVisible({ timeout: 15000 });
-    await expect(page.getByText(/\d+\s+recursos/i)).toBeVisible();
+    await expect(page.getByText(/Resultados de la búsqueda/i).first()).toBeVisible({ timeout: 25000 });
+    await expect(page.getByText(/·\s*\d+\s+recursos/i).first()).toBeVisible();
+
+    // Verificar que se ha retirado el bloque de desambiguación y TDAH (0 registros) del buscador público
+    await expect(page.getByText(/¿Buscas un término general\?/i)).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /TDAH/i })).toHaveCount(0);
+    await expect(page.getByText(/Cód\.\s*[1456]/i)).toHaveCount(0);
+
+    // Auditoría automatizada de accesibilidad WCAG 2.1 A/AA en vista principal
+    const axeHome = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .analyze();
+    expect(axeHome.violations).toEqual([]);
+
+    // Verificar filtrado estricto de radio geográfico (10 km) y sincronización con el mapa
+    const radius10Btn = page.getByRole('button', { name: 'Radio de búsqueda: 10 km' });
+    await radius10Btn.click();
+    await expect(page.getByRole('button', { name: 'Restablecer radio a toda la región (80 km)' })).toBeVisible();
+
+    await page.getByRole('button', { name: /^Mapa$/i }).click();
+    await expect(page.getByText(/Mapa territorial sincronizado con los filtros/i)).toBeVisible();
+    await expect(page.getByText(/Radio:\s*10 km/i)).toBeVisible();
+    await page.getByRole('button', { name: /Volver a la lista/i }).click();
+
+    await page.getByRole('button', { name: 'Radio de búsqueda: 80 km' }).click();
 
     // Seleccionar perfil TEA
     const autismButton = page.getByRole('button', { name: /Trastorno del espectro del autismo/i });
     await expect(autismButton).toBeVisible();
     await autismButton.click();
 
-    await expect(page.getByText(/Especialización Publicada/i)).toBeVisible();
+    await expect(page.getByText(/Especialización Publicada/i).first()).toBeVisible();
 
     // Abrir modal "¿Por qué aparece?" en el primer resultado
     const whyBtn = page.getByRole('button', { name: /¿Por qué aparece\?/i }).first();
@@ -26,6 +50,12 @@ test.describe('Madrid Apoyo Especializado — Smoke E2E', () => {
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
     await expect(dialog.getByText(/Nivel de evidencia asignado/i)).toBeVisible();
+
+    // Auditoría WCAG con el modal explicable abierto
+    const axeDialog = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .analyze();
+    expect(axeDialog.violations).toEqual([]);
 
     // Cerrar modal con el botón accesible
     await dialog.getByRole('button', { name: /Cerrar modal/i }).click();
@@ -51,7 +81,7 @@ test.describe('Madrid Apoyo Especializado — Smoke E2E', () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('./');
 
-    await expect(page.getByText(/Resultados de la búsqueda/i)).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(/Resultados de la búsqueda/i).first()).toBeVisible({ timeout: 25000 });
     const configureBtn = page.getByRole('button', { name: /Configurar filtros/i });
     await expect(configureBtn).toBeVisible();
 

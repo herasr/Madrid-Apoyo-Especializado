@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const baseUrl = process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:4173/';
+const externalUrl = process.env.PLAYWRIGHT_EXTERNAL_URL;
+const baseUrl = externalUrl || process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:4173/Madrid-Apoyo-Especializado/';
 
 export default defineConfig({
   testDir: './e2e',
@@ -19,10 +20,14 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  webServer: {
-    command: 'npm run preview -- --port 4173 --host 127.0.0.1 --strictPort',
-    url: baseUrl,
-    reuseExistingServer: !process.env.CI,
-    timeout: 60000,
-  },
+  ...(externalUrl
+    ? {}
+    : {
+        webServer: {
+          command: 'VITE_BASE_PATH="/Madrid-Apoyo-Especializado/" npm run preview -- --port 4173 --host 127.0.0.1 --strictPort',
+          url: baseUrl,
+          reuseExistingServer: false,
+          timeout: 60000,
+        },
+      }),
 });

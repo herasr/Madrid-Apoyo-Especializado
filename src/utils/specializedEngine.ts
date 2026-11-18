@@ -38,22 +38,22 @@ export type AccessibilityNeedStatus = 'confirmed' | 'partial' | 'not_stated';
 
 export const ACCESSIBILITY_MAP: Record<string, { label: string; keywords: string[] }> = {
   wheelchair_access: {
-    label: 'Acceso silla de ruedas (Cód. 1 / Cód. 2 parcial)',
+    label: 'Acceso silla de ruedas',
     keywords: [
       'código 1', 'codigo 1', 'cota cero', 'rampa', 'elevador', 'planta a nivel',
       'pie llano', 'accesibilidad total', 'accesibilidad universal', 'accesible en silla de ruedas'
     ]
   },
   sign_language: {
-    label: 'Lengua de signos (Cód. 4)',
+    label: 'Lengua de signos',
     keywords: ['código 4', 'codigo 4', 'lengua de signos']
   },
   tactile_signage: {
-    label: 'Señalización podotáctil (Cód. 5)',
+    label: 'Señalización podotáctil',
     keywords: ['código 5', 'codigo 5', 'podotáctil', 'podotactil']
   },
   magnetic_loops: {
-    label: 'Bucle magnético (Cód. 6)',
+    label: 'Bucle magnético',
     keywords: ['código 6', 'codigo 6', 'bucle magnético', 'bucle magnetico', 'bucle']
   }
 };
@@ -261,16 +261,9 @@ export function evaluateCentre(
     transit_time_minutes = transit.minutes;
     transit_time_label = transit.label;
 
-    // Si el usuario eligió un origen específico (GPS o municipio), se aplica el radio estricto
-    if (resolvedOrigin.isCustom) {
-      if (query.radius_km > 0 && distance_km > query.radius_km) {
-        is_in_radius = false;
-      }
-    } else {
-      // Si está en modo global Madrid, se muestran todos los centros salvo que reduzca el radio a menos de 25km
-      if (query.radius_km < 25 && distance_km > query.radius_km) {
-        is_in_radius = false;
-      }
+    // Se aplica el radio estricto configurado siempre que radius_km > 0 desde el origen activo
+    if (query.radius_km > 0 && distance_km > query.radius_km) {
+      is_in_radius = false;
     }
 
     criterion_matrix.push({
@@ -278,7 +271,7 @@ export function evaluateCentre(
       criterion_label: 'Proximidad y traslado estimado',
       requested: true,
       status: 'calculated',
-      note: `Distancia lineal: ${distance_label} · Estimación teórica transp. público: ${transit_time_label} (desde ${resolvedOrigin.name}${resolvedOrigin.isCustom ? `, radio: ${query.radius_km} km` : '; sin consulta de horarios CRTM en tiempo real'})`
+      note: `Distancia lineal: ${distance_label} · Estimación teórica transp. público: ${transit_time_label} (desde ${resolvedOrigin.name}, radio: ${query.radius_km} km; sin consulta de horarios CRTM en tiempo real)`
     });
   } else {
     distance_km = null;
@@ -796,6 +789,7 @@ export function runSpecializedSearch(
   if (query.functional_needs.length > 0) activeFilters += query.functional_needs.length;
   if (query.life_stage) activeFilters++;
   if (query.municipality || (query.location_mode === 'browser' && query.user_ephemeral_location)) activeFilters++;
+  if (query.radius_km < 80) activeFilters++;
   if (query.network_preference !== 'all') activeFilters++;
   if (query.accessibility_needs.length > 0) activeFilters += query.accessibility_needs.length;
 

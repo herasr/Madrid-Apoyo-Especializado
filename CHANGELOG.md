@@ -14,9 +14,9 @@ Todos los cambios relevantes de **Madrid Apoyo Especializado** se documentan en 
   - Validación estricta en tiempo de ejecución de `localStorage` para búsquedas guardadas (`src/utils/savedSearchesStorage.ts`).
   - Meta etiqueta `Content-Security-Policy` restrictiva inyectada en compilación de producción (`vite.config.ts`).
   - Optimización de respuesta al tecleo/filtrado mediante `useDeferredValue(query)` y eliminación de subconjuntos de fuentes `latin-ext` sin uso en idioma español.
-- **Calidad, CI/CD y Documentación Open Source**:
-  - Configuración `vitest.config.ts` con umbrales mínimos de cobertura (`@vitest/coverage-v8`) y suite E2E con Playwright (`playwright.config.ts`, `e2e/smoke.spec.ts`).
-  - Fijación por SHA completo de todas las GitHub Actions, activación declarativa `enablement: true` en GitHub Pages, alerta automática mediante *Issue* ante fallos de ingesta semanal y configuración de `.github/dependabot.yml`.
+- **Calidad, Accesibilidad, CI/CD y Documentación Open Source**:
+  - Configuración `vitest.config.ts` con umbrales mínimos de cobertura (`@vitest/coverage-v8`) y suite E2E con Playwright + `@axe-core/playwright` (`playwright.config.ts`, `e2e/smoke.spec.ts`) verificando WCAG 2.1 A/AA sin violaciones sobre vista principal y modal explicable.
+  - Fijación por SHA completo de todas las GitHub Actions, activación declarativa `enablement: true` en GitHub Pages, subida de trazas en caso de fallo, smoke test `post-deploy-smoke` contra la URL pública publicada, alerta automática mediante *Issue* ante fallos de ingesta semanal y configuración de `.github/dependabot.yml`.
   - Documentación técnica y académica: `docs/ARCHITECTURE.md`, `docs/METHODOLOGY.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CITATION.cff` y `CHANGELOG.md`.
 
 ### Cambiado

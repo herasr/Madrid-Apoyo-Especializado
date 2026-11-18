@@ -23,7 +23,6 @@ import { SpecializedResultsList } from './components/specialized/SpecializedResu
 import { WhyAppearsModal } from './components/specialized/WhyAppearsModal';
 import { PrintableContactCardModal } from './components/specialized/PrintableContactCardModal';
 import { SavedSearchesModal } from './components/specialized/SavedSearchesModal';
-import { DisambiguationModal } from './components/specialized/DisambiguationModal';
 import { EasyReadGlossaryModal } from './components/specialized/EasyReadGlossaryModal';
 import { LifeStageTransitionBanner } from './components/specialized/LifeStageTransitionBanner';
 
@@ -55,7 +54,7 @@ const DEFAULT_QUERY: SearchQueryState = {
   support_combination_mode: 'any_support',
   life_stage: null,
   municipality: null,
-  radius_km: 50,
+  radius_km: 80,
   network_preference: 'all',
   accessibility_needs: [],
   user_ephemeral_location: null,
@@ -275,7 +274,7 @@ export default function App() {
       if (activeTab !== 'search') params.set('tab', activeTab);
       if (query.profile) params.set('profile', query.profile);
       if (query.municipality) params.set('municipality', query.municipality);
-      if (query.radius_km !== 50) params.set('radius', query.radius_km.toString());
+      if (query.radius_km !== DEFAULT_QUERY.radius_km) params.set('radius', query.radius_km.toString());
       if (query.support_types.length > 0) params.set('supports', query.support_types.join(','));
       if (query.functional_needs.length > 0) params.set('needs', query.functional_needs.join(','));
       if (query.life_stage) params.set('stage', query.life_stage);
@@ -350,7 +349,6 @@ export default function App() {
   const [printableContactItem, setPrintableContactItem] = useState<EvaluatedCentreResult | null>(null);
   const [isSavedSearchesOpen, setIsSavedSearchesOpen] = useState(false);
   const [isWhatChangedOpen, setIsWhatChangedOpen] = useState(false);
-  const [isDisambiguationOpen, setIsDisambiguationOpen] = useState<'neurodivergent' | 'psychomotor' | null>(null);
   const [isGlossaryOpen, setIsGlossaryOpen] = useState(false);
   const [dismissedTransition, setDismissedTransition] = useState(false);
 
@@ -521,7 +519,6 @@ export default function App() {
               setQuery={handleSetQuery}
               totalResults={isUrlBlocked ? 0 : searchOutput.total_results}
               centres={activeCentres}
-              onOpenDisambiguation={(term) => setIsDisambiguationOpen(term)}
               onResetFilters={resetAllFilters}
               easyReadMode={easyReadMode}
             />
@@ -795,12 +792,6 @@ export default function App() {
           />
         </Suspense>
       )}
-
-      <DisambiguationModal
-        term={isDisambiguationOpen}
-        onClose={() => setIsDisambiguationOpen(null)}
-        setQuery={setQuery}
-      />
 
       <EasyReadGlossaryModal
         isOpen={isGlossaryOpen}

@@ -68,16 +68,16 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
           <div className="flex items-center justify-between gap-2 sm:gap-4 h-14 min-w-0">
             {/* Zona 1: Brand Wordmark limpio con h1 semántico único */}
             <div className="flex items-center min-w-0 flex-1 md:flex-initial">
-              <button
-                type="button"
-                onClick={() => setActiveTab('search')}
-                aria-label="Madrid Apoyo Especializado · Volver a búsqueda"
-                className="text-left group cursor-pointer rounded-md py-1 min-w-0"
-              >
-                <h1 className="text-sm sm:text-lg font-extrabold tracking-tight text-stone-900 group-hover:text-stone-700 transition-colors truncate">
+              <h1 className="text-sm sm:text-lg font-extrabold tracking-tight text-stone-900 min-w-0 truncate">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('search')}
+                  aria-label="Madrid Apoyo Especializado · Volver a búsqueda"
+                  className="text-left hover:text-stone-700 transition-colors cursor-pointer rounded-md py-1 truncate max-w-full"
+                >
                   Madrid Apoyo Especializado
-                </h1>
-              </button>
+                </button>
+              </h1>
             </div>
 
             {/* Zona 2: Navegación principal limpia */}
@@ -316,7 +316,7 @@ export const SpecializedHeader: React.FC<SpecializedHeaderProps> = ({
                 type="button"
                 onClick={() => setIsSourcesModalOpen(false)}
                 aria-label="Cerrar modal"
-                className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg cursor-pointer"
+                className="p-1.5 text-stone-500 hover:text-stone-800 rounded-lg cursor-pointer"
               >
                 <X className="w-5 h-5" aria-hidden="true" />
               </button>
