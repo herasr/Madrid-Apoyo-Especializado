@@ -21,6 +21,7 @@ import {
   mapCamMunicipalityName,
   utm30NToWgs84
 } from './officialRegistryParser';
+import { extractSpanishPhoneNumbers, formatSpanishPhone } from './phoneUtils';
 import os from 'node:os';
 import { computeDiffs, verifyBaselineIntegrity, writeFileAtomicSync } from '../../scripts/ingest';
 import { findMunicipalityByName, MADRID_MUNICIPALITIES } from '../data/municipalitiesData';
@@ -629,15 +630,16 @@ describe('Specialized Search Engine (Funciones Puras)', () => {
       expect(evAmafeTea.suitability).toBe('partial');
       expect(evAmafeTea.match_assessment.suitability_reasons.some(r => r.includes('TEA') && !r.includes('neurológica'))).toBe(true);
 
-      // #13 Title Case preservando siglas y siglas con puntos
-      expect(formatOfficialSpanishName('CEPRI LA PEINETA, CENTRO DE DIA')).toBe('CEPRI La Peineta, Centro de Dia');
-      expect(formatOfficialSpanishName('ASOCIACION DE PADRES DE PERSONAS CON AUTISMO-APNA')).toBe('Asociacion de Padres de Personas con Autismo-APNA');
-      expect(formatOfficialSpanishName('CENTRO DE ATENCION TEMPRANA ASPACE-TEA')).toBe('Centro de Atencion Temprana ASPACE-TEA');
-      expect(formatOfficialSpanishName('GRUPO 5 ACCION Y GESTION SOCIAL S.A.U.')).toBe('Grupo 5 Accion y Gestion Social S.A.U.');
+      // #13 Title Case preservando siglas, siglas con puntos y tildes españolas restauradas
+      expect(formatOfficialSpanishName('CEPRI LA PEINETA, CENTRO DE DIA')).toBe('CEPRI La Peineta, Centro de Día');
+      expect(formatOfficialSpanishName('ASOCIACION DE PADRES DE PERSONAS CON AUTISMO-APNA')).toBe('Asociación de Padres de Personas con Autismo-APNA');
+      expect(formatOfficialSpanishName('CENTRO DE ATENCION TEMPRANA ASPACE-TEA')).toBe('Centro de Atención Temprana ASPACE-TEA');
+      expect(formatOfficialSpanishName('GRUPO 5 ACCION Y GESTION SOCIAL S.A.U.')).toBe('Grupo 5 Acción y Gestión Social S.A.U.');
       expect(formatOfficialSpanishName('EDUKATEK SOCIOSANITARIO, S.L.U')).toBe('Edukatek Sociosanitario, S.L.U');
-      expect(formatOfficialSpanishName('ASOCIACION "A.F.A. ALCALÁ"')).toBe('Asociacion "A.F.A. Alcalá"');
+      expect(formatOfficialSpanishName('ASOCIACION "A.F.A. ALCALÁ"')).toBe('Asociación "A.F.A. Alcalá"');
       expect(formatOfficialSpanishName('C.I.A.N. GRUPO 5')).toBe('C.I.A.N. Grupo 5');
-      expect(formatOfficialSpanishName('ASOCIACION A.D.E.M.MADRID')).toBe('Asociacion A.D.E.M.Madrid');
+      expect(formatOfficialSpanishName('ASOCIACION A.D.E.M.MADRID')).toBe('Asociación A.D.E.M.Madrid');
+      expect(formatOfficialSpanishName('CIUDAD LINEAL')).toBe('Ciudad Lineal');
 
       // #2 Diffs detectan cambios de accesibilidad (Cód. 3 -> 1) y coordenadas
       const prevRows = [
@@ -995,6 +997,40 @@ describe('Specialized Search Engine (Funciones Puras)', () => {
       );
     });
   });
+
+  describe('Parser de teléfonos españoles y coherencia de Nivel C', () => {
+    it('separa múltiples teléfonos, concatenaciones de 18 dígitos y sufijos abreviados sin generar enlaces inválidos', () => {
+      expect(extractSpanishPhoneNumbers('917345138 - 695424170').validNumbers).toEqual(['917345138', '695424170']);
+      expect(extractSpanishPhoneNumbers('911048988655597499').validNumbers).toEqual(['911048988', '655597499']);
+      expect(extractSpanishPhoneNumbers('91 694 53 05 / 06').validNumbers).toEqual(['916945305', '916945306']);
+      expect(extractSpanishPhoneNumbers('91 383 99 27 / 89 62').validNumbers).toEqual(['913839927', '913838962']);
+      expect(extractSpanishPhoneNumbers('914781011-60886253').validNumbers).toEqual(['914781011']);
+      expect(extractSpanishPhoneNumbers('917 609 840 Esta línea funciona de lunes a viernes').validNumbers).toEqual(['917609840']);
+      expect(extractSpanishPhoneNumbers('60602426').validNumbers).toEqual([]);
+      expect(extractSpanishPhoneNumbers('346272035').validNumbers).toEqual([]);
+      expect(extractSpanishPhoneNumbers('9.6172450').validNumbers).toEqual([]);
+      expect(formatSpanishPhone('917345138')).toBe('917 345 138');
+    });
+
+    it('nunca devuelve suitability "complete" para Nivel C cuando hay un perfil activo', () => {
+      const genericC: SpecializedCentre = {
+        ...MOCK_CENTRE_TEA,
+        centre_id: 'TEST-C-ONLY',
+        official_name: 'Centro de Servicios Sociales General',
+        subtype: 'Centro Municipal de Servicios Sociales',
+        sector: 'Servicios Sociales',
+        explicit_specialisations: [],
+        entity_declared_specialisations: [],
+        related_services: [],
+        supports: []
+      };
+      const evaluated = evaluateCentre(
+        genericC,
+        { ...DEFAULT_QUERY, profile: 'autism' },
+        [genericC]
+      );
+      expect(evaluated.evidence_level).toBe('C');
+      expect(evaluated.suitability).not.toBe('complete');
+    });
+  });
 });
-
-

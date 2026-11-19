@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { EvaluatedCentreResult } from '../../types/specialized';
 import { auditCentreAgainstSnapshot } from '../../utils/specializedEngine';
+import { extractSpanishPhoneNumbers } from '../../utils/phoneUtils';
 import { 
   MapPin, 
   Phone, 
@@ -39,8 +40,13 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
   onToggleCompare,
   easyReadMode
 }) => {
-  const { centre, evidence_level, evidence_sublevel, suitability, distance_label, transit_time_label } = item;
+  const { centre, evidence_level, evidence_sublevel, suitability, distance_label, transit_time_label, criterion_matrix } = item;
   const auditResult = useMemo(() => auditCentreAgainstSnapshot(centre), [centre]);
+  const parsedPhones = useMemo(() => extractSpanishPhoneNumbers(centre.phone || ''), [centre.phone]);
+  const hasProfileCriterion = useMemo(
+    () => criterion_matrix.some(c => c.criterion_id.startsWith('profile.')),
+    [criterion_matrix]
+  );
 
   const a2Label = easyReadMode
     ? evidence_sublevel === 'A2_entity'
@@ -68,7 +74,11 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
       Icon: Layers
     },
     C: {
-      label: easyReadMode ? 'Recurso general (preguntar al llamar)' : 'Nivel C · Orientación general',
+      label: easyReadMode
+        ? 'Recurso general (preguntar al llamar)'
+        : hasProfileCriterion
+        ? 'Nivel C · Orientación general'
+        : 'Catálogo oficial autorizado',
       textClass: 'text-stone-700',
       Icon: Compass
     }
@@ -76,6 +86,23 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
 
   const evInfo = evidenceConfig[evidence_level] || evidenceConfig.C;
   const EvidenceIcon = evInfo.Icon;
+
+  const suitabilityText =
+    evidence_level === 'C'
+      ? hasProfileCriterion
+        ? suitability === 'partial'
+          ? 'Coincidencia parcial (confirmar con el centro)'
+          : 'Sin especialización publicada para este perfil'
+        : suitability === 'complete'
+        ? 'Cumple los filtros aplicados'
+        : suitability === 'partial'
+        ? 'Cumplimiento parcial (confirmar datos)'
+        : null
+      : suitability === 'complete'
+      ? 'Coincidencia completa'
+      : suitability === 'partial'
+      ? 'Coincidencia parcial'
+      : 'Sin datos suficientes';
 
   return (
     <article className="bg-white rounded-xl border border-stone-200 p-4 sm:p-5 shadow-xs transition-shadow hover:shadow-sm space-y-3">
@@ -151,14 +178,15 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
 
         {!easyReadMode && (
           <>
-            <span aria-hidden="true" className="text-stone-300">·</span>
-
-            <span className="inline-flex items-center gap-1 text-stone-700 font-medium">
-              {suitability === 'complete' && <Check className="w-3.5 h-3.5 text-emerald-700 shrink-0" aria-hidden="true" />}
-              <span>
-                {suitability === 'complete' ? 'Coincidencia completa' : suitability === 'partial' ? 'Coincidencia parcial' : 'Orientación general'}
-              </span>
-            </span>
+            {suitabilityText && (
+              <>
+                <span aria-hidden="true" className="text-stone-300">·</span>
+                <span className="inline-flex items-center gap-1 text-stone-700 font-medium">
+                  {suitability === 'complete' && <Check className="w-3.5 h-3.5 text-emerald-700 shrink-0" aria-hidden="true" />}
+                  <span>{suitabilityText}</span>
+                </span>
+              </>
+            )}
 
             {auditResult.audit_status === 'verified_official' && (
               <>
@@ -271,17 +299,35 @@ export const SpecializedCentreCard: React.FC<CentreCardProps> = ({
           </button>
         </div>
 
-        <div className="flex items-center gap-3 text-xs text-stone-600">
-          {centre.phone && (
-            <a 
-              href={`tel:${centre.phone.replace(/\s+/g, '')}`}
-              aria-label={`Llamar a ${centre.official_name} al teléfono ${centre.phone}`}
-              className="flex items-center gap-1 hover:text-stone-950 font-medium font-mono"
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-stone-600">
+          {parsedPhones.validNumbers.length > 0 ? (
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              {parsedPhones.validNumbers.slice(0, 2).map((num, idx) => (
+                <a
+                  key={num}
+                  href={`tel:${num}`}
+                  aria-label={`Llamar a ${centre.official_name} al teléfono ${parsedPhones.formattedNumbers[idx]}`}
+                  className="inline-flex items-center gap-1 hover:text-stone-950 font-medium font-mono underline decoration-stone-300 underline-offset-2"
+                >
+                  {idx === 0 && <Phone className="w-3.5 h-3.5 text-stone-500 shrink-0" aria-hidden="true" />}
+                  <span>{parsedPhones.formattedNumbers[idx]}</span>
+                </a>
+              ))}
+              {parsedPhones.validNumbers.length > 2 && (
+                <span className="text-[11px] text-stone-600">
+                  +{parsedPhones.validNumbers.length - 2} en ficha
+                </span>
+              )}
+            </div>
+          ) : centre.phone ? (
+            <span
+              className="inline-flex items-center gap-1 text-stone-600 font-mono text-[11px]"
+              title="Número incompleto o no estándar en el CSV oficial"
             >
-              <Phone className="w-3.5 h-3.5 text-stone-500" aria-hidden="true" />
-              <span>{centre.phone}</span>
-            </a>
-          )}
+              <Phone className="w-3.5 h-3.5 text-stone-500 shrink-0" aria-hidden="true" />
+              <span>{centre.phone} (formato incompleto en registro)</span>
+            </span>
+          ) : null}
           {centre.website && (
             <a 
               href={centre.website}

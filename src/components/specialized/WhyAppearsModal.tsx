@@ -38,6 +38,8 @@ export const WhyAppearsModal: React.FC<WhyAppearsModalProps> = ({ item, onClose 
 
   const { centre, match_assessment, evidence_level, evidence_sublevel, combination_details, criterion_matrix } = item;
 
+  const hasProfileCriterion = criterion_matrix.some(c => c.criterion_id.startsWith('profile.'));
+
   return (
     <div 
       className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4"
@@ -93,7 +95,7 @@ export const WhyAppearsModal: React.FC<WhyAppearsModalProps> = ({ item, onClose 
                 {evidence_level === 'A2' && evidence_sublevel !== 'A2_entity' && 'Especialización publicada; confirme el apoyo'}
                 {evidence_level === 'B1' && 'Servicios relacionados revisados'}
                 {evidence_level === 'B2' && 'Posible recurso; requiere confirmación'}
-                {evidence_level === 'C'  && 'Orientación general compatible'}
+                {evidence_level === 'C' && (hasProfileCriterion ? 'Orientación general (sin especialización publicada)' : 'Catálogo oficial autorizado')}
               </span>
             </div>
 

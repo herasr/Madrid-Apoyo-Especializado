@@ -14,7 +14,7 @@ Buscador ciudadano basado en datos abiertos oficiales para localizar **recursos 
 
 | Búsqueda y filtros acumulativos | Mapa territorial con agrupación zonal |
 | :---: | :---: |
-| ![Vista de búsqueda y resultados por nivel de evidencia](docs/screenshots/busqueda.svg) | ![Vista de mapa con marcadores agrupados en Madrid](docs/screenshots/mapa.svg) |
+| ![Vista de búsqueda y resultados por nivel de evidencia](docs/screenshots/busqueda.png) | ![Vista de mapa con marcadores agrupados en Madrid](docs/screenshots/mapa.png) |
 
 ## Método de Clasificación: Niveles de Evidencia y Reglas Negativas
 

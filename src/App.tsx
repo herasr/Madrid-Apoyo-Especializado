@@ -378,6 +378,12 @@ export default function App() {
     return runSpecializedSearch(deferredQuery, activeCentres, resolvedOrigin.coordinates);
   }, [isUrlBlocked, deferredQuery, activeCentres, resolvedOrigin]);
 
+  const matchedProfileCount = useMemo(() => {
+    if (!deferredQuery.profile) return searchOutput.total_results;
+    const abCount = searchOutput.results.filter(r => r.evidence_level !== 'C').length;
+    return abCount > 0 ? abCount : searchOutput.total_results;
+  }, [deferredQuery.profile, searchOutput]);
+
   // Centros en el comparador (mantiene los seleccionados independientemente de filtros de radio o estado)
   const comparedCentres = useMemo(() => {
     const allEvaluated = [...searchOutput.results, ...searchOutput.incompatible_results];
@@ -518,7 +524,8 @@ export default function App() {
             <SpecializedSearchFilters
               query={query}
               setQuery={handleSetQuery}
-              totalResults={isUrlBlocked ? 0 : searchOutput.total_results}
+              totalResults={isUrlBlocked ? 0 : matchedProfileCount}
+              hasMatchedProfileSubset={Boolean(deferredQuery.profile) && matchedProfileCount < searchOutput.total_results}
               centres={activeCentres}
               onResetFilters={resetAllFilters}
               easyReadMode={easyReadMode}
@@ -685,6 +692,7 @@ export default function App() {
                 originCoords={resolvedOrigin.coordinates}
                 originName={resolvedOrigin.name}
                 radiusKm={query.radius_km}
+                hasActiveProfile={Boolean(deferredQuery.profile)}
               />
             </Suspense>
           </div>

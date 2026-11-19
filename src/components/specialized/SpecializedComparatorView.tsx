@@ -8,6 +8,7 @@
 import React from 'react';
 import { EvaluatedCentreResult } from '../../types/specialized';
 import { SUPPORT_TYPES, LIFE_STAGES } from '../../data/specializedTaxonomy';
+import { extractSpanishPhoneNumbers } from '../../utils/phoneUtils';
 import { 
   X, 
   Building2, 
@@ -67,21 +68,35 @@ export const SpecializedComparatorView: React.FC<ComparatorViewProps> = ({
                 : 'Especialización publicada (apoyo a confirmar)')}
             {item.evidence_level === 'B1' && 'Servicios relacionados (especialización no confirmada)'}
             {item.evidence_level === 'B2' && 'Posible recurso (requiere confirmación)'}
-            {item.evidence_level === 'C' && 'Orientación general compatible'}
+            {item.evidence_level === 'C' &&
+              (item.criterion_matrix.some(c => c.criterion_id.startsWith('profile.'))
+                ? 'Orientación general (sin especialización publicada)'
+                : 'Catálogo oficial autorizado')}
           </div>
         </div>
       )
     },
     {
       title: 'Adecuación a la búsqueda',
-      render: (item: EvaluatedCentreResult) => (
-        <div>
-          <span className="font-semibold text-stone-800">
-            {item.suitability === 'complete' && 'Coincidencia completa'}
-            {item.suitability === 'partial' && 'Coincidencia parcial'}
-            {item.suitability === 'incompatible' && 'Incompatible'}
-            {item.suitability === 'unknown' && 'Sin datos suficientes'}
-          </span>
+      render: (item: EvaluatedCentreResult) => {
+        const hasProfileCrit = item.criterion_matrix.some(c => c.criterion_id.startsWith('profile.'));
+        return (
+          <div>
+            <span className="font-semibold text-stone-800">
+              {item.evidence_level === 'C' && hasProfileCrit && item.suitability !== 'incompatible'
+                ? item.suitability === 'partial'
+                  ? 'Coincidencia parcial (confirmar)'
+                  : 'Sin especialización publicada'
+                : item.evidence_level === 'C' && item.suitability === 'complete'
+                ? 'Cumple los filtros aplicados'
+                : item.suitability === 'complete'
+                ? 'Coincidencia completa'
+                : item.suitability === 'partial'
+                ? 'Coincidencia parcial'
+                : item.suitability === 'incompatible'
+                ? 'Incompatible'
+                : 'Sin datos suficientes'}
+            </span>
           <div className="text-[11px] font-mono font-medium text-stone-600 mt-0.5 space-y-0.5">
             <div>{item.distance_label}</div>
             {item.transit_time_label && (
@@ -93,8 +108,9 @@ export const SpecializedComparatorView: React.FC<ComparatorViewProps> = ({
               </div>
             )}
           </div>
-        </div>
-      )
+          </div>
+        );
+      }
     },
     {
       title: 'Apoyos confirmados en esta sede',
@@ -188,23 +204,36 @@ export const SpecializedComparatorView: React.FC<ComparatorViewProps> = ({
     },
     {
       title: 'Contacto oficial',
-      render: (item: EvaluatedCentreResult) => (
-        <div className="space-y-1">
-          <div className="font-medium text-stone-800">{item.centre.address}</div>
-          <div className="text-stone-600">{item.centre.phone || 'Teléfono no publicado'}</div>
-          {item.centre.website && (
-            <a 
-              href={item.centre.website}
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-stone-900 underline inline-flex items-center gap-1 hover:text-stone-700"
-            >
-              <span>Sitio web oficial</span>
-              <ExternalLink className="w-3 h-3" aria-hidden="true" />
-            </a>
-          )}
-        </div>
-      )
+      render: (item: EvaluatedCentreResult) => {
+        const parsedPhones = extractSpanishPhoneNumbers(item.centre.phone || '');
+        return (
+          <div className="space-y-1">
+            <div className="font-medium text-stone-800">{item.centre.address}</div>
+            {parsedPhones.validNumbers.length > 0 ? (
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 font-mono text-stone-700">
+                {parsedPhones.validNumbers.map((num, idx) => (
+                  <a key={num} href={`tel:${num}`} className="underline decoration-stone-300 hover:text-stone-950">
+                    {parsedPhones.formattedNumbers[idx]}
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <div className="text-stone-600">{item.centre.phone || 'Teléfono no publicado'}</div>
+            )}
+            {item.centre.website && (
+              <a 
+                href={item.centre.website}
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-stone-900 underline inline-flex items-center gap-1 hover:text-stone-700"
+              >
+                <span>Sitio web oficial</span>
+                <ExternalLink className="w-3 h-3" aria-hidden="true" />
+              </a>
+            )}
+          </div>
+        );
+      }
     }
   ];
 

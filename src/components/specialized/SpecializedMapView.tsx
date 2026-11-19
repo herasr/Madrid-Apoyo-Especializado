@@ -30,6 +30,7 @@ interface MapViewProps {
   originCoords: [number, number];
   originName: string;
   radiusKm: number;
+  hasActiveProfile?: boolean;
 }
 
 function escapeHtml(text: string): string {
@@ -48,7 +49,8 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
   onWhyAppears,
   originCoords,
   originName,
-  radiusKm
+  radiusKm,
+  hasActiveProfile = false
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -59,15 +61,37 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
   const [searchFilterText, setSearchFilterText] = useState('');
   const [showUngeocoded, setShowUngeocoded] = useState(false);
   const [offlineTileError, setOfflineTileError] = useState(false);
+  const [includeGeneralLevelC, setIncludeGeneralLevelC] = useState(false);
+
+  useEffect(() => {
+    setIncludeGeneralLevelC(false);
+  }, [hasActiveProfile]);
+
+  const hasABResults = useMemo(
+    () => results.some(r => r.evidence_level !== 'C'),
+    [results]
+  );
+
+  const generalLevelCCount = useMemo(
+    () => results.filter(r => r.evidence_level === 'C' && r.centre.has_valid_coordinates && r.centre.coordinates).length,
+    [results]
+  );
+
+  const scopedResults = useMemo(() => {
+    if (hasActiveProfile && hasABResults && !includeGeneralLevelC) {
+      return results.filter(r => r.evidence_level !== 'C');
+    }
+    return results;
+  }, [results, hasActiveProfile, hasABResults, includeGeneralLevelC]);
 
   // Separar los que tienen coordenadas de los que no las tienen (§63, GEO-001/002)
   const geocodedResults = useMemo(() => {
-    return results.filter(r => r.centre.has_valid_coordinates && r.centre.coordinates);
-  }, [results]);
+    return scopedResults.filter(r => r.centre.has_valid_coordinates && r.centre.coordinates);
+  }, [scopedResults]);
 
   const withoutCoordinates = useMemo(() => {
-    return results.filter(r => !r.centre.has_valid_coordinates);
-  }, [results]);
+    return scopedResults.filter(r => !r.centre.has_valid_coordinates);
+  }, [scopedResults]);
 
   // Filtrado interno exclusivo por texto de búsqueda en el panel lateral (sin filtros por nivel de evidencia)
   const displayedCentres = useMemo(() => {
@@ -534,6 +558,18 @@ export const SpecializedMapView: React.FC<MapViewProps> = ({
                 Centros en mapa ({displayedCentres.length})
               </span>
             </div>
+
+            {hasActiveProfile && hasABResults && generalLevelCCount > 0 && (
+              <label className="flex items-center gap-1.5 text-[11px] text-stone-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={includeGeneralLevelC}
+                  onChange={(e) => setIncludeGeneralLevelC(e.target.checked)}
+                  className="rounded border-stone-300 accent-stone-900 cursor-pointer"
+                />
+                <span>Incluir catálogo general (Nivel C · {generalLevelCCount})</span>
+              </label>
+            )}
 
             <div className="relative">
               <input

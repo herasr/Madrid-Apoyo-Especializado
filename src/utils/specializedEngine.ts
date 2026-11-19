@@ -651,7 +651,7 @@ export function evaluateCentre(
     (!hasExplicitProfile && hasRelatedServicesOnly)
   ) {
     suitability = 'partial';
-  } else if (query.profile && !hasExplicitProfile && !hasEntityDeclaredProfile && !hasRelatedServicesOnly) {
+  } else if (query.profile && evidence_level === 'C') {
     suitability = 'unknown';
   }
 

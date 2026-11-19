@@ -9,9 +9,19 @@ test.describe('Madrid Apoyo Especializado — Smoke E2E y WCAG', () => {
 
     await page.goto('./');
 
-    // Verificar carga del catálogo oficial completo (>1000 recursos)
+    // Verificar carga del catálogo oficial completo (>1000 recursos) y coherencia sin contradicciones
     await expect(page.getByText(/Resultados de la búsqueda/i).first()).toBeVisible({ timeout: 25000 });
     await expect(page.getByText(/·\s*\d+\s+recursos/i).first()).toBeVisible();
+    await expect(page.getByText(/Nivel C\s*·\s*Orientación general/i)).toHaveCount(0);
+
+    // Verificar que todos los enlaces tel: renderizados son números españoles válidos de 9 dígitos (o 010/012)
+    const initialTelHrefs = await page.locator('a[href^="tel:"]').evaluateAll(els =>
+      els.map(el => el.getAttribute('href') || '')
+    );
+    expect(initialTelHrefs.length).toBeGreaterThan(10);
+    for (const href of initialTelHrefs) {
+      expect(href).toMatch(/^tel:(?:[6789]\d{8}|01[02])$/);
+    }
 
     // Verificar que se ha retirado el bloque de desambiguación y TDAH (0 registros) del buscador público
     await expect(page.getByText(/¿Buscas un término general\?/i)).toHaveCount(0);
@@ -36,12 +46,20 @@ test.describe('Madrid Apoyo Especializado — Smoke E2E y WCAG', () => {
 
     await page.getByRole('button', { name: 'Radio de búsqueda: 80 km' }).click();
 
-    // Seleccionar perfil TEA
+    // Seleccionar perfil TEA y verificar recuento informativo + Grupo C plegado
     const autismButton = page.getByRole('button', { name: /Trastorno del espectro del autismo/i });
     await expect(autismButton).toBeVisible();
     await autismButton.click();
 
     await expect(page.getByText(/Especialización Publicada/i).first()).toBeVisible();
+    const relatedCountText = await page.getByText(/·\s*\d+\s+recursos? relacionados?/i).first().textContent();
+    const relatedNum = parseInt(relatedCountText?.match(/\d+/)?.[0] || '0', 10);
+    expect(relatedNum).toBeGreaterThan(5);
+    expect(relatedNum).toBeLessThan(200);
+
+    const toggleGeneralBtn = page.getByRole('button', { name: /catálogo general de apoyo social \(Nivel C/i });
+    await expect(toggleGeneralBtn).toBeVisible();
+    await expect(toggleGeneralBtn).toHaveAttribute('aria-expanded', 'false');
 
     // Abrir modal "¿Por qué aparece?" en el primer resultado
     const whyBtn = page.getByRole('button', { name: /¿Por qué aparece\?/i }).first();

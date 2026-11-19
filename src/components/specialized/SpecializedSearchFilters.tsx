@@ -60,6 +60,7 @@ interface SearchFiltersProps {
   query: SearchQueryState;
   setQuery: React.Dispatch<React.SetStateAction<SearchQueryState>>;
   totalResults: number;
+  hasMatchedProfileSubset?: boolean;
   centres?: SpecializedCentre[];
   onResetFilters: () => void;
   easyReadMode?: boolean;
@@ -69,6 +70,7 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
   query,
   setQuery,
   totalResults,
+  hasMatchedProfileSubset = false,
   centres,
   onResetFilters,
   easyReadMode = false
@@ -374,7 +376,10 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
           onClick={scrollToResults}
           className="px-3.5 py-1.5 bg-stone-900 text-white text-xs font-semibold rounded-lg hover:bg-stone-800 transition-colors cursor-pointer"
         >
-          Ver {totalResults} {totalResults === 1 ? 'recurso' : 'recursos'}
+          Ver {totalResults}{' '}
+          {hasMatchedProfileSubset
+            ? totalResults === 1 ? 'relacionado' : 'relacionados'
+            : totalResults === 1 ? 'recurso' : 'recursos'}
         </button>
       </div>
 
@@ -967,7 +972,10 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
 
         <div className="flex items-center gap-3 flex-wrap">
           <span className="text-xs font-mono font-bold text-stone-900">
-            {totalResults} {totalResults === 1 ? 'recurso oficial' : 'recursos oficiales'}
+            {totalResults}{' '}
+            {hasMatchedProfileSubset
+              ? totalResults === 1 ? 'recurso relacionado' : 'recursos relacionados'
+              : totalResults === 1 ? 'recurso oficial' : 'recursos oficiales'}
           </span>
           <button
             type="button"
@@ -982,7 +990,10 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
             onClick={scrollToResults}
             className="md:hidden px-3 py-1.5 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-stone-800 transition-colors cursor-pointer"
           >
-            Ver {totalResults} {totalResults === 1 ? 'resultado' : 'resultados'}
+            Ver {totalResults}{' '}
+            {hasMatchedProfileSubset
+              ? totalResults === 1 ? 'relacionado' : 'relacionados'
+              : totalResults === 1 ? 'resultado' : 'resultados'}
           </button>
         </div>
       </div>

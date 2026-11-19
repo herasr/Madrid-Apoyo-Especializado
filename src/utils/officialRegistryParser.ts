@@ -16,6 +16,7 @@ import {
   AccessRouteType,
   AttributeProvenance
 } from '../types/specialized';
+import { extractSpanishPhoneNumbers } from './phoneUtils';
 
 export const OFFICIAL_DATASET_URLS = {
   madrid_municipal: 'https://datos.madrid.es/dataset/212774-0-atencion-social',
@@ -151,9 +152,23 @@ export function normalizePhoneComparable(phone: string): string {
   if (!phone) return '';
   const clean = phone.trim().toUpperCase();
   if (clean === 'RESERVADO' || clean === 'N/D') return '';
+  const parsed = extractSpanishPhoneNumbers(phone);
+  if (parsed.validNumbers.length > 0) {
+    return parsed.validNumbers[0];
+  }
   const firstSegment = clean.split(/[\/;,]/)[0].trim();
   const digits = firstSegment.replace(/\D/g, '');
   return digits.length >= 9 ? digits.slice(0, 9) : digits;
+}
+
+function normalizePhoneFieldForCatalog(rawPhone: string): string {
+  const clean = (rawPhone || '').trim();
+  if (!clean || /^(RESERVADO|N\/D)$/i.test(clean)) return '';
+  const parsed = extractSpanishPhoneNumbers(clean);
+  if (parsed.formattedNumbers.length > 0) {
+    return parsed.formattedNumbers.join(' / ');
+  }
+  return clean;
 }
 
 export function decodeHtmlEntities(text: string): string {
@@ -205,9 +220,185 @@ const LOWERCASE_SPANISH_PREPOSITIONS = new Set([
 
 const LOWERCASE_SPANISH_ARTICLES = new Set(['la', 'las', 'los', 'el']);
 
+const RESTORED_SPANISH_DIACRITICS: Record<string, string> = {
+  accion: 'acción',
+  alarcon: 'alarcón',
+  alcala: 'alcalá',
+  alcorcon: 'alcorcón',
+  angel: 'ángel',
+  angeles: 'ángeles',
+  animacion: 'animación',
+  animo: 'ánimo',
+  apostol: 'apóstol',
+  area: 'área',
+  areas: 'áreas',
+  arguelles: 'argüelles',
+  asociacion: 'asociación',
+  atencion: 'atención',
+  autonomia: 'autonomía',
+  bahia: 'bahía',
+  basica: 'básica',
+  basico: 'básico',
+  becquer: 'bécquer',
+  benefico: 'benéfico',
+  betica: 'bética',
+  bifida: 'bífida',
+  calderon: 'calderón',
+  carmenes: 'cármenes',
+  chamberi: 'chamberí',
+  circulo: 'círculo',
+  clarin: 'clarín',
+  clinica: 'clínica',
+  clinico: 'clínico',
+  comunicacion: 'comunicación',
+  confederacion: 'confederación',
+  congregacion: 'congregación',
+  consejeria: 'consejería',
+  cooperacion: 'cooperación',
+  corazon: 'corazón',
+  crispin: 'crispín',
+  cronica: 'crónica',
+  cronicos: 'crónicos',
+  dali: 'dalí',
+  dedicacion: 'dedicación',
+  dia: 'día',
+  dias: 'días',
+  diaz: 'díaz',
+  educacion: 'educación',
+  estimulacion: 'estimulación',
+  federacion: 'federación',
+  fermin: 'fermín',
+  fernandez: 'fernández',
+  fisica: 'física',
+  fisico: 'físico',
+  fisicos: 'físicos',
+  formacion: 'formación',
+  fundacion: 'fundación',
+  garcia: 'garcía',
+  genero: 'género',
+  geriatrica: 'geriátrica',
+  geriatrico: 'geriátrico',
+  gestion: 'gestión',
+  gomez: 'gómez',
+  guia: 'guía',
+  habilitacion: 'habilitación',
+  hepatico: 'hepático',
+  hernandez: 'hernández',
+  inclusion: 'inclusión',
+  indice: 'índice',
+  informacion: 'información',
+  iniciacion: 'iniciación',
+  insercion: 'inserción',
+  institucion: 'institución',
+  integracion: 'integración',
+  interpretes: 'intérpretes',
+  intervencion: 'intervención',
+  investigacion: 'investigación',
+  jaen: 'jaén',
+  jardineria: 'jardinería',
+  jazmin: 'jazmín',
+  jesus: 'jesús',
+  jimenez: 'jiménez',
+  jose: 'josé',
+  jovenes: 'jóvenes',
+  leganes: 'leganés',
+  leon: 'león',
+  lesion: 'lesión',
+  limite: 'límite',
+  linea: 'línea',
+  lopez: 'lópez',
+  maria: 'maría',
+  martin: 'martín',
+  martinez: 'martínez',
+  mediacion: 'mediación',
+  medica: 'médica',
+  medico: 'médico',
+  minusvalido: 'minusválido',
+  minusvalidos: 'minusválidos',
+  miopia: 'miopía',
+  mostoles: 'móstoles',
+  multiple: 'múltiple',
+  multiples: 'múltiples',
+  neurologica: 'neurológica',
+  neurologico: 'neurológico',
+  neuropsicologica: 'neuropsicológica',
+  nicolas: 'nicolás',
+  orientacion: 'orientación',
+  paralisis: 'parálisis',
+  paralitico: 'paralítico',
+  paraliticos: 'paralíticos',
+  paraplejicos: 'parapléjicos',
+  participacion: 'participación',
+  patologia: 'patología',
+  pechuan: 'pechuán',
+  pedagogia: 'pedagogía',
+  pedagogica: 'pedagógica',
+  pedagogicos: 'pedagógicos',
+  pediatria: 'pediatría',
+  perez: 'pérez',
+  pingarron: 'pingarrón',
+  planificacion: 'planificación',
+  potenciacion: 'potenciación',
+  preparacion: 'preparación',
+  prestacion: 'prestación',
+  prevencion: 'prevención',
+  principe: 'príncipe',
+  promocion: 'promoción',
+  proteccion: 'protección',
+  psicogeriatrico: 'psicogeriátrico',
+  psicologica: 'psicológica',
+  psiquiatria: 'psiquiatría',
+  psiquica: 'psíquica',
+  psiquico: 'psíquico',
+  psiquicos: 'psíquicos',
+  publica: 'pública',
+  publico: 'público',
+  ramon: 'ramón',
+  recuperacion: 'recuperación',
+  reeducacion: 'reeducación',
+  rehabilitacion: 'rehabilitación',
+  riñon: 'riñón',
+  rodriguez: 'rodríguez',
+  roldan: 'roldán',
+  sanchez: 'sánchez',
+  sebastian: 'sebastián',
+  simon: 'simón',
+  sindrome: 'síndrome',
+  sofia: 'sofía',
+  tecnica: 'técnica',
+  tecnicas: 'técnicas',
+  tecnico: 'técnico',
+  tellez: 'téllez',
+  terapeutica: 'terapéutica',
+  terapeutico: 'terapéutico',
+  terapeuticos: 'terapéuticos',
+  torrejon: 'torrejón',
+  trebol: 'trébol',
+  unica: 'única',
+  unicas: 'únicas',
+  unico: 'único',
+  union: 'unión',
+  valoracion: 'valoración',
+  via: 'vía',
+  vicalvaro: 'vicálvaro',
+  vision: 'visión',
+  yebenes: 'yébenes',
+  zurbaran: 'zurbarán'
+};
+
+function restoreSpanishDiacriticsWord(lowerWord: string): string {
+  if (RESTORED_SPANISH_DIACRITICS[lowerWord]) {
+    return RESTORED_SPANISH_DIACRITICS[lowerWord];
+  }
+  if (/^[a-zñü]{4,}(cion|sion)$/.test(lowerWord)) {
+    return `${lowerWord.slice(0, -3)}ión`;
+  }
+  return lowerWord;
+}
+
 /**
  * Convierte denominaciones registrales escritas íntegramente en MAYÚSCULAS a formato legible
- * con mayúscula inicial en español, respetando siglas oficiales (TEA, DCA, ASPACE...) y preposiciones (#13).
+ * con mayúscula inicial en español y tildes ortográficas restituidas, respetando siglas oficiales (#13).
  */
 export function formatOfficialSpanishName(raw: string): string {
   const s = (raw || '').trim();
@@ -216,8 +407,20 @@ export function formatOfficialSpanishName(raw: string): string {
   const letters = s.match(/\p{L}/gu) || [];
   if (letters.length === 0) return s;
   const upperCount = letters.filter(ch => ch === ch.toLocaleUpperCase('es-ES') && ch !== ch.toLocaleLowerCase('es-ES')).length;
-  // Solo normalizar cuando la cadena viene mayoritariamente en mayúsculas (>60%)
-  if (upperCount / letters.length <= 0.6) return s;
+
+  // Si ya viene en formato mixto, solo restituimos tildes inequívocas en palabras sueltas preservando capitalización
+  if (upperCount / letters.length <= 0.6) {
+    return s.replace(/\b(\p{L}+)\b/gu, (token) => {
+      if (PRESERVED_SPANISH_ACRONYMS.has(token.toLocaleUpperCase('es-ES')) && token === token.toLocaleUpperCase('es-ES')) {
+        return token;
+      }
+      const lower = token.toLocaleLowerCase('es-ES');
+      const restored = restoreSpanishDiacriticsWord(lower);
+      if (restored === lower) return token;
+      const startsUpper = token.charAt(0) === token.charAt(0).toLocaleUpperCase('es-ES');
+      return startsUpper ? restored.charAt(0).toLocaleUpperCase('es-ES') + restored.slice(1) : restored;
+    });
+  }
 
   const parts = s.split(/(\s+|[-/,()"“”«»])/);
   let seenWord = false;
@@ -234,7 +437,7 @@ export function formatOfficialSpanishName(raw: string): string {
       return cleanUpper;
     }
 
-    const lower = word.toLocaleLowerCase('es-ES');
+    const lower = restoreSpanishDiacriticsWord(word.toLocaleLowerCase('es-ES'));
     const allowConnectorLowercase =
       seenWord &&
       prevSeparator !== '(' &&
@@ -563,13 +766,7 @@ function sanitizePersonalPractitionerRecord(params: {
   const serviceLabel = subtipo || tipo || 'Servicio de Atención Social autorizado';
   const hasAls = explicitSpecs.includes('als') || entitySpecs.includes('als') || /\bela\b/.test(normalizeStrict(denom));
   const condTag = hasAls ? ' (ELA)' : '';
-  const prettyType = serviceLabel
-    .toLocaleLowerCase('es-ES')
-    .replace(/(^|[\s\-/])(\p{L})/gu, (_match, sep, ch) => `${sep}${ch.toLocaleUpperCase('es-ES')}`)
-    .replace(/\bDe\b/g, 'de')
-    .replace(/\bA\b/g, 'a')
-    .replace(/\bEn\b/g, 'en')
-    .replace(/\bY\b/g, 'y');
+  const prettyType = formatOfficialSpanishName(serviceLabel);
 
   return {
     officialName: `${prettyType}${condTag} · Profesional individual autorizado`,
@@ -687,7 +884,7 @@ export function buildCentresFromOfficialCSVs(params: {
           Number.isFinite(lat) && Number.isFinite(lon) && lat !== 0 && lon !== 0
             ? [Number(lat.toFixed(6)), Number(lon.toFixed(6))]
             : null;
-        const phone = (r[col('TELEFONO')] || '').trim();
+        const phone = normalizePhoneFieldForCatalog(r[col('TELEFONO')] || '');
         const email = (r[col('EMAIL')] || '').trim();
         const accCode = (r[col('ACCESIBILIDAD')] || '').trim();
         const contentUrl = (r[col('CONTENT-URL')] || '').trim();
@@ -782,7 +979,7 @@ export function buildCentresFromOfficialCSVs(params: {
         const utmY = parseFloat(r[col('direccion_coor_y')] || '');
         const coords = utm30NToWgs84(utmX, utmY);
         const rawPhone = (r[col('contacto_telefono')] || '').trim();
-        const phone = rawPhone.toUpperCase() === 'RESERVADO' ? '' : rawPhone;
+        const phone = normalizePhoneFieldForCatalog(rawPhone);
         const email = (r[col('contacto_correo')] || '').trim().split(';')[0]?.trim() || '';
         const entityRaw = (r[col('entidad_denominacion')] || '').trim();
         const entityNif = (r[col('entidad_nif')] || '').trim();
@@ -1227,7 +1424,7 @@ export function buildCentresFromOfficialCSVs(params: {
         const utmY = parseFloat(r[col('direccion_coor_y')] || '');
         const coords = utm30NToWgs84(utmX, utmY);
         const rawPhone = (r[col('contacto_telefono')] || '').trim();
-        const phone = rawPhone.toUpperCase() === 'RESERVADO' ? '' : rawPhone;
+        const phone = normalizePhoneFieldForCatalog(rawPhone);
         const email = (r[col('contacto_correo')] || '').trim().split(';')[0]?.trim() || '';
         const entity = (r[col('entidad_denominacion')] || '').trim();
         const nif = (r[col('entidad_nif')] || '').trim();

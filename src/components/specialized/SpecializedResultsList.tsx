@@ -130,12 +130,34 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
   easyReadMode
 }) => {
   const [showIncompatibles, setShowIncompatibles] = useState(false);
+  const [showGeneralOrientation, setShowGeneralOrientation] = useState(false);
   const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'error'>('idle');
   const [displayLimit, setDisplayLimit] = useState(40);
 
   useEffect(() => {
     setDisplayLimit(40);
   }, [results]);
+
+  useEffect(() => {
+    setShowGeneralOrientation(false);
+  }, [query.profile]);
+
+  const allGroupA = results.filter(r => r.evidence_level === 'A1' || r.evidence_level === 'A2');
+  const allGroupB = results.filter(r => r.evidence_level === 'B1' || r.evidence_level === 'B2');
+  const allGroupC = results.filter(r => r.evidence_level === 'C');
+
+  const totalGroupA = allGroupA.length;
+  const totalGroupB = allGroupB.length;
+  const totalGroupC = allGroupC.length;
+  const matchedCount = totalGroupA + totalGroupB;
+  const hasActiveProfile = query.profile !== null;
+  const collapseGroupC = hasActiveProfile && matchedCount > 0;
+
+  const displayedPool = collapseGroupC && !showGeneralOrientation ? [...allGroupA, ...allGroupB] : results;
+  const visibleSlice = displayedPool.slice(0, displayLimit);
+  const groupA = visibleSlice.filter(r => r.evidence_level === 'A1' || r.evidence_level === 'A2');
+  const groupB = visibleSlice.filter(r => r.evidence_level === 'B1' || r.evidence_level === 'B2');
+  const groupC = visibleSlice.filter(r => r.evidence_level === 'C');
 
   // Copiar enlace de reproducibilidad con fallback seguro en iframes restringidos
   const handleCopyShareLink = async () => {
@@ -166,7 +188,7 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
 
   // Descarga CSV de resultados con neutralización de fórmulas y trazabilidad completa
   const handleExportCSV = () => {
-    const csvStr = buildResultsCsv(results);
+    const csvStr = buildResultsCsv(displayedPool);
     const blob = new Blob([csvStr], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -180,7 +202,7 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
 
   // Descarga JSON estructurado con metadatos de consulta (sin coordenadas GPS personales)
   const handleExportJSON = () => {
-    const payload = buildResultsJsonPayload(results, query);
+    const payload = buildResultsJsonPayload(displayedPool, query);
     const jsonStr = JSON.stringify(payload, null, 2);
     const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -192,15 +214,6 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
     document.body.removeChild(link);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
-
-  const totalGroupA = results.filter(r => r.evidence_level === 'A1' || r.evidence_level === 'A2').length;
-  const totalGroupB = results.filter(r => r.evidence_level === 'B1' || r.evidence_level === 'B2').length;
-  const totalGroupC = results.filter(r => r.evidence_level === 'C').length;
-
-  const visibleSlice = results.slice(0, displayLimit);
-  const groupA = visibleSlice.filter(r => r.evidence_level === 'A1' || r.evidence_level === 'A2');
-  const groupB = visibleSlice.filter(r => r.evidence_level === 'B1' || r.evidence_level === 'B2');
-  const groupC = visibleSlice.filter(r => r.evidence_level === 'C');
 
   // Si no hay resultados (§38: Diseño para incertidumbre y ausencia de resultados)
   if (results.length === 0) {
@@ -245,13 +258,24 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
     <div id="results-list-anchor" className="space-y-6 scroll-mt-28">
       {/* Barra de cabecera de la lista con exportaciones y compartir */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-200 pb-3">
-        <div className="flex items-baseline gap-2.5">
+        <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
           <h2 className={`${easyReadMode ? 'text-lg' : 'text-base'} font-bold text-stone-900`}>
             {easyReadMode ? 'Centros encontrados para tu búsqueda' : 'Resultados de la búsqueda'}
           </h2>
-          <span className="text-xs font-mono font-semibold text-stone-600 tabular-nums">
-            · {results.length} {results.length === 1 ? 'recurso' : 'recursos'}
-          </span>
+          {collapseGroupC ? (
+            <>
+              <span className="text-xs font-mono font-semibold text-stone-800 tabular-nums">
+                · {matchedCount} {matchedCount === 1 ? 'recurso relacionado' : 'recursos relacionados'}
+              </span>
+              <span className="text-[11px] text-stone-500">
+                ({totalGroupA} con especialización publicada · {totalGroupB} relacionados)
+              </span>
+            </>
+          ) : (
+            <span className="text-xs font-mono font-semibold text-stone-600 tabular-nums">
+              · {results.length} {results.length === 1 ? 'recurso' : 'recursos'}
+            </span>
+          )}
         </div>
 
         {/* Acciones de exportación y enlace compartible */}
@@ -378,42 +402,100 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
           </section>
         )}
 
-        {/* Grupo C: Orientación potencial */}
-        {groupC.length > 0 && (
-          <section className="space-y-3">
-            <div className="flex items-center justify-between border-b border-stone-200 pb-2">
-              <div className="flex items-center gap-2">
-                <Compass className="w-4 h-4 text-stone-600 shrink-0" aria-hidden="true" />
-                <h3 className={`${easyReadMode ? 'text-base' : 'text-sm'} font-bold text-stone-900`}>
-                  {easyReadMode ? 'Otros centros de atención social' : 'Orientación General'} ({groupC.length < totalGroupC ? `${groupC.length} mostrados de ${totalGroupC}` : totalGroupC})
-                </h3>
-              </div>
-              <span className="text-[11px] text-stone-500">
-                {easyReadMode ? 'Recursos generales para consultar' : 'Sector asistencial compatible'}
-              </span>
-            </div>
+        {/* Grupo C: Orientación general (plegado bajo demanda cuando hay perfil activo con recursos A/B) */}
+        {totalGroupC > 0 && (
+          collapseGroupC ? (
+            <section className="space-y-4 pt-2 border-t border-stone-200">
+              <button
+                type="button"
+                aria-expanded={showGeneralOrientation}
+                onClick={() => setShowGeneralOrientation(prev => !prev)}
+                className="text-xs font-semibold text-stone-700 hover:text-stone-950 flex items-center justify-between w-full p-3.5 rounded-xl bg-stone-50 border border-stone-200 hover:bg-stone-100/70 transition-colors cursor-pointer text-left gap-3"
+              >
+                <span className="flex items-center gap-2 min-w-0">
+                  <Compass className="w-4 h-4 text-stone-600 shrink-0" aria-hidden="true" />
+                  <span>
+                    {showGeneralOrientation
+                      ? `Ocultar catálogo general de apoyo social (Nivel C · ${totalGroupC} recursos sin especialización publicada)`
+                      : `Ver también catálogo general de apoyo social (Nivel C · ${totalGroupC} recursos sin especialización publicada para este perfil)`}
+                  </span>
+                </span>
+                {showGeneralOrientation
+                  ? <ChevronUp className="w-4 h-4 shrink-0 text-stone-600" aria-hidden="true" />
+                  : <ChevronDown className="w-4 h-4 shrink-0 text-stone-600" aria-hidden="true" />}
+              </button>
 
-            <div className="space-y-4">
-              {groupC.map((item) => (
-                <SpecializedCentreCard
-                  key={item.centre.centre_id}
-                  item={item}
-                  onWhyAppears={onWhyAppears}
-                  onPrepareContact={onPrepareContact}
-                  isCompared={comparedIds.includes(item.centre.centre_id)}
-                  onToggleCompare={onToggleCompare}
-                  easyReadMode={easyReadMode}
-                />
-              ))}
-            </div>
-          </section>
+              {showGeneralOrientation && groupC.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between border-b border-stone-200 pb-2">
+                    <div className="flex items-center gap-2">
+                      <Compass className="w-4 h-4 text-stone-600 shrink-0" aria-hidden="true" />
+                      <h3 className={`${easyReadMode ? 'text-base' : 'text-sm'} font-bold text-stone-900`}>
+                        {easyReadMode ? 'Otros centros de atención social' : 'Orientación General'} ({groupC.length < totalGroupC ? `${groupC.length} mostrados de ${totalGroupC}` : totalGroupC})
+                      </h3>
+                    </div>
+                    <span className="text-[11px] text-stone-500">
+                      {easyReadMode ? 'Recursos generales para consultar' : 'Sin especialización publicada; confirmar por teléfono'}
+                    </span>
+                  </div>
+
+                  <div className="space-y-4">
+                    {groupC.map((item) => (
+                      <SpecializedCentreCard
+                        key={item.centre.centre_id}
+                        item={item}
+                        onWhyAppears={onWhyAppears}
+                        onPrepareContact={onPrepareContact}
+                        isCompared={comparedIds.includes(item.centre.centre_id)}
+                        onToggleCompare={onToggleCompare}
+                        easyReadMode={easyReadMode}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+          ) : groupC.length > 0 ? (
+            <section className="space-y-3">
+              <div className="flex items-center justify-between border-b border-stone-200 pb-2">
+                <div className="flex items-center gap-2">
+                  <Compass className="w-4 h-4 text-stone-600 shrink-0" aria-hidden="true" />
+                  <h3 className={`${easyReadMode ? 'text-base' : 'text-sm'} font-bold text-stone-900`}>
+                    {hasActiveProfile
+                      ? (easyReadMode ? 'Otros centros de atención social' : 'Orientación General')
+                      : (easyReadMode ? 'Todos los centros oficiales' : 'Catálogo Oficial Autorizado')}{' '}
+                    ({groupC.length < totalGroupC ? `${groupC.length} mostrados de ${totalGroupC}` : totalGroupC})
+                  </h3>
+                </div>
+                <span className="text-[11px] text-stone-500">
+                  {hasActiveProfile
+                    ? (easyReadMode ? 'Recursos generales para consultar' : 'Sector asistencial compatible')
+                    : 'Registro oficial de la Comunidad de Madrid y Ayuntamiento'}
+                </span>
+              </div>
+
+              <div className="space-y-4">
+                {groupC.map((item) => (
+                  <SpecializedCentreCard
+                    key={item.centre.centre_id}
+                    item={item}
+                    onWhyAppears={onWhyAppears}
+                    onPrepareContact={onPrepareContact}
+                    isCompared={comparedIds.includes(item.centre.centre_id)}
+                    onToggleCompare={onToggleCompare}
+                    easyReadMode={easyReadMode}
+                  />
+                ))}
+              </div>
+            </section>
+          ) : null
         )}
       </div>
 
-      {results.length > displayLimit && (
+      {displayedPool.length > displayLimit && (
         <div className="flex flex-col items-center gap-2 pt-2">
           <div className="text-xs text-stone-500 font-mono tabular-nums">
-            Mostrando {visibleSlice.length} de {results.length} recursos oficiales
+            Mostrando {visibleSlice.length} de {displayedPool.length} recursos oficiales
           </div>
           <button
             type="button"

@@ -15,6 +15,7 @@ import {
   FileText
 } from 'lucide-react';
 import { LIFE_STAGES } from '../../data/specializedTaxonomy';
+import { extractSpanishPhoneNumbers } from '../../utils/phoneUtils';
 
 interface PrintableContactCardProps {
   item: EvaluatedCentreResult | null;
@@ -129,8 +130,30 @@ export const PrintableContactCardModal: React.FC<PrintableContactCardProps> = ({
             </div>
             <div>
               <span className="font-semibold text-stone-600 block">Teléfono y web:</span>
-              <span className="font-medium">{centre.phone || 'No publicado'}</span>
-              {centre.website && <div className="text-stone-500 truncate">{centre.website}</div>}
+              {(() => {
+                const parsedPhones = extractSpanishPhoneNumbers(centre.phone || '');
+                if (parsedPhones.validNumbers.length > 0) {
+                  return (
+                    <div className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 font-mono font-medium">
+                      {parsedPhones.validNumbers.map((num, idx) => (
+                        <a
+                          key={num}
+                          href={`tel:${num}`}
+                          className="text-stone-900 underline decoration-stone-300 hover:text-stone-700"
+                        >
+                          {parsedPhones.formattedNumbers[idx]}
+                        </a>
+                      ))}
+                    </div>
+                  );
+                }
+                return (
+                  <span className="font-medium">
+                    {centre.phone ? `${centre.phone} (incompleto en registro)` : 'No publicado'}
+                  </span>
+                );
+              })()}
+              {centre.website && <div className="text-stone-600 truncate mt-0.5">{centre.website}</div>}
             </div>
           </div>
 
