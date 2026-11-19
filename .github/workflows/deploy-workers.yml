@@ -77,7 +77,7 @@ jobs:
           cache: 'npm'
 
       - name: Instalar dependencias
-        run: npm ci
+      run: npm install --no-audit --no-fund
 
       - name: Instalar Chromium para verificación sobre la URL pública
         run: npx playwright install --with-deps chromium
