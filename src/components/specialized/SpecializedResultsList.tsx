@@ -100,7 +100,7 @@ export function buildResultsCsv(results: EvaluatedCentreResult[]): string {
 export function buildResultsJsonPayload(results: EvaluatedCentreResult[], query: SearchQueryState) {
   return {
     exported_at: new Date().toISOString(),
-    taxonomy_version: '1.8.0',
+    taxonomy_version: '1.9.0',
     total_results: results.length,
     query: {
       profile: query.profile,
@@ -499,10 +499,10 @@ export const SpecializedResultsList: React.FC<ResultsListProps> = ({
           </div>
           <button
             type="button"
-            onClick={() => setDisplayLimit(prev => prev + 60)}
+            onClick={() => setDisplayLimit(prev => prev + 40)}
             className="px-5 py-2 bg-white border border-stone-300 text-stone-900 rounded-lg text-xs font-semibold hover:bg-stone-50 transition-colors shadow-xs cursor-pointer"
           >
-            Mostrar más recursos (+60)
+            Mostrar más recursos (+40)
           </button>
         </div>
       )}

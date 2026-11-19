@@ -2,6 +2,21 @@
 
 Todos los cambios relevantes de **Madrid Apoyo Especializado** se documentan en este fichero siguiendo [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [Semantic Versioning](https://semver.org/lang/es/).
 
+## [1.9.0] - 2026-11-19
+
+### Añadido
+- **Parser estricto de telefonía española (`src/utils/phoneUtils.ts`)**: Separa automáticamente múltiples líneas concatenadas, bloques de 18/27 dígitos sin separador y sufijos abreviados en los 407 registros multi-teléfono del catálogo, evitando enlaces `tel:` rotos ante erratas incompletas del CSV oficial.
+- **Ficha imprimible «Preparar contacto» (`PrintableContactCardModal`)**: Vista imprimible y accesible con guion de preguntas orientativas según el perfil buscado y enlaces telefónicos validados.
+- **Pruebas basadas en propiedades (`fast-check`, 1.000 ejecuciones)**: Verificación formal de invariantes lexicográficos del ranking y no escalado ante reglas negativas.
+- **CI/CD automatizado en Cloudflare Workers (`.github/workflows/deploy-workers.yml`)**: Compilación verificada, cobertura V8, E2E WCAG con Playwright, despliegue continuo en Workers (incluyendo disparo automático tras `weekly-ingest.yml`) y smoke test post-despliegue sobre la URL pública.
+
+### Cambiado
+- **Recuentos informativos y coherencia de Nivel C**: Al filtrar por perfil con coincidencias A/B, la interfaz informa el subconjunto relacionado (`A + B`), pliega el catálogo general de Nivel C tras un desplegable accesible (`aria-expanded`) tanto en lista como en el mapa territorial, y elimina la contradicción «Coincidencia completa» en resultados de Nivel C.
+- **Limpieza editorial de registros oficiales (`officialRegistryParser.ts`)**:
+  - Restitución de tildes españolas en ~430 denominaciones oficiales publicadas en mayúsculas (`Fundación`, `Atención`, `Rehabilitación`, `Asociación`, `Alcalá`, `Leganés`, etc.), conservación de siglas (`FMP`, `AFEAM`), minúscula en conectores (`contra la`) y espaciado tipográfico tras abreviaturas.
+  - Traducción ciudadana de los identificadores crudos de subtipo municipal (`CentrosAtencionSocialPersonasDiscapacidad`, `CentrosServiciosSociales`, `CentrosAtencionTemprana`, `CentrosOrientacionValoracion`) y normalización homogénea de distritos (`Centro` en lugar de `CENTRO` / exclusión de marcador `DISTRITO`).
+- **Paginación y CTA unificados**: Incremento coherente de `40` en `40` en la lista de resultados y eliminación del botón CTA duplicado en móvil; sustitución de capturas `.svg` en `README.md` por capturas `.png` reales de la compilación en producción.
+
 ## [1.8.0] - 2026-11-18
 
 ### Añadido

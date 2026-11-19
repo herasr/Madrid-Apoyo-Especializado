@@ -812,7 +812,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-1">
             <div className="font-bold text-stone-900 text-sm">
-              Madrid Apoyo Especializado v1.8 · DATAMAD 2026
+              Madrid Apoyo Especializado v1.9 · DATAMAD 2026
             </div>
             <p className="text-stone-500 max-w-2xl leading-relaxed">
               DATAMAD 2026: Buscador independiente basado en los registros oficiales de Atención Social del Ayuntamiento de Madrid y la Comunidad de Madrid. Orientación verificable (sin finalidad diagnóstica). Código abierto bajo licencia Apache-2.0. Sin telemetría ni almacenamiento de datos de salud.

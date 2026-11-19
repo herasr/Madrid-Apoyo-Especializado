@@ -209,13 +209,13 @@ const PRESERVED_SPANISH_ACRONYMS = new Set([
   'AFANIAS', 'APANID', 'INTRESS', 'APASCOVI', 'POLIBEA', 'AFA', 'ENVERA',
   'CIRVITE', 'PAU', 'UAD', 'CMM', 'CEAPAT', 'ALCER', 'ASINDOWN', 'FUNDOWN',
   'ASEM', 'ADISLI', 'ANFAS', 'AETAPI', 'FESORCAM', 'ASCASAM', 'ACUDEM', 'APROCOR',
-  'APAMA', 'APAMP', 'AMAS', 'ALEPH', 'AVANTE', 'DNI', 'NIF', 'II', 'III', 'IV',
+  'APAMA', 'APAMP', 'AMAS', 'ALEPH', 'AVANTE', 'FMP', 'AFEAM', 'DNI', 'NIF', 'II', 'III', 'IV',
   'VI', 'VII', 'VIII', 'IX', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XXI', 'XXIII'
 ]);
 
 const LOWERCASE_SPANISH_PREPOSITIONS = new Set([
   'de', 'del', 'en', 'y', 'e', 'a', 'o', 'u',
-  'al', 'con', 'para', 'por', 'sin', 'su', 'sus'
+  'al', 'con', 'contra', 'para', 'por', 'sin', 'su', 'sus'
 ]);
 
 const LOWERCASE_SPANISH_ARTICLES = new Set(['la', 'las', 'los', 'el']);
@@ -245,6 +245,7 @@ const RESTORED_SPANISH_DIACRITICS: Record<string, string> = {
   bifida: 'bífida',
   calderon: 'calderón',
   carmenes: 'cármenes',
+  chamartin: 'chamartín',
   chamberi: 'chamberí',
   circulo: 'círculo',
   clarin: 'clarín',
@@ -372,6 +373,7 @@ const RESTORED_SPANISH_DIACRITICS: Record<string, string> = {
   terapeutica: 'terapéutica',
   terapeutico: 'terapéutico',
   terapeuticos: 'terapéuticos',
+  tetuan: 'tetuán',
   torrejon: 'torrejón',
   trebol: 'trébol',
   unica: 'única',
@@ -401,25 +403,64 @@ function restoreSpanishDiacriticsWord(lowerWord: string): string {
  * con mayúscula inicial en español y tildes ortográficas restituidas, respetando siglas oficiales (#13).
  */
 export function formatOfficialSpanishName(raw: string): string {
-  const s = (raw || '').trim();
+  const s = (raw || '')
+    .trim()
+    .replace(/(\p{L}{2,})\.(\p{L}{2,})/gu, '$1. $2')
+    .replace(/,(?=\p{L})/gu, ', ');
   if (!s || /^RESERVADO$/i.test(s)) return s;
 
   const letters = s.match(/\p{L}/gu) || [];
   if (letters.length === 0) return s;
   const upperCount = letters.filter(ch => ch === ch.toLocaleUpperCase('es-ES') && ch !== ch.toLocaleLowerCase('es-ES')).length;
 
-  // Si ya viene en formato mixto, solo restituimos tildes inequívocas en palabras sueltas preservando capitalización
+  // Si ya viene en formato mixto, normalizamos siglas clave, conectores españoles y tildes ortográficas
   if (upperCount / letters.length <= 0.6) {
-    return s.replace(/\b(\p{L}+)\b/gu, (token) => {
-      if (PRESERVED_SPANISH_ACRONYMS.has(token.toLocaleUpperCase('es-ES')) && token === token.toLocaleUpperCase('es-ES')) {
-        return token;
-      }
-      const lower = token.toLocaleLowerCase('es-ES');
-      const restored = restoreSpanishDiacriticsWord(lower);
-      if (restored === lower) return token;
-      const startsUpper = token.charAt(0) === token.charAt(0).toLocaleUpperCase('es-ES');
-      return startsUpper ? restored.charAt(0).toLocaleUpperCase('es-ES') + restored.slice(1) : restored;
-    });
+    const MIXED_CASE_ACRONYMS = new Set(['FMP', 'AFEAM', 'TEA', 'DCA', 'ELA', 'TDAH']);
+    let seenWord = false;
+    let prevSeparator = '';
+    let prevLowerWord = '';
+    return s
+      .split(/(\s+|[-/,():"“”«»])/)
+      .map((part) => {
+        if (!part) return '';
+        if (/^(\s+|[-/,():"“”«»])$/.test(part)) {
+          if (!/^\s+$/.test(part)) prevSeparator = part;
+          return part;
+        }
+        return part.replace(/\b(\p{L}+)\b/gu, (token) => {
+          const upper = token.toLocaleUpperCase('es-ES');
+          if (
+            (PRESERVED_SPANISH_ACRONYMS.has(upper) && token === upper) ||
+            MIXED_CASE_ACRONYMS.has(upper)
+          ) {
+            seenWord = true;
+            prevSeparator = '';
+            prevLowerWord = upper.toLocaleLowerCase('es-ES');
+            return upper;
+          }
+          const lower = restoreSpanishDiacriticsWord(token.toLocaleLowerCase('es-ES'));
+          const allowConnectorLowercase =
+            seenWord &&
+            prevSeparator !== ':' &&
+            prevSeparator !== '(' &&
+            prevSeparator !== '«' &&
+            prevSeparator !== '"' &&
+            (LOWERCASE_SPANISH_PREPOSITIONS.has(lower) ||
+              (LOWERCASE_SPANISH_ARTICLES.has(lower) &&
+                (LOWERCASE_SPANISH_PREPOSITIONS.has(prevLowerWord) || prevLowerWord === 'o')));
+          if (allowConnectorLowercase) {
+            prevSeparator = '';
+            prevLowerWord = lower;
+            return lower;
+          }
+          seenWord = true;
+          prevSeparator = '';
+          prevLowerWord = lower;
+          const startsUpper = token.charAt(0) === token.charAt(0).toLocaleUpperCase('es-ES');
+          return startsUpper ? lower.charAt(0).toLocaleUpperCase('es-ES') + lower.slice(1) : lower;
+        });
+      })
+      .join('');
   }
 
   const parts = s.split(/(\s+|[-/,()"“”«»])/);
@@ -595,6 +636,32 @@ export function mapCamMunicipalityName(raw: string): string {
     return `${article} ${normalizedBase}`;
   }
   return s;
+}
+
+const MUNICIPAL_SUBTYPE_LABELS: Record<string, string> = {
+  CentrosAtencionSocialPersonasDiscapacidad: 'Centros de Atención Social · Personas con Discapacidad',
+  CentrosOrientacionValoracion: 'Centros de Orientación y Valoración',
+  CentrosAtencionTemprana: 'Centros de Atención Temprana',
+  CentrosServiciosSociales: 'Centros de Servicios Sociales'
+};
+
+export function formatMunicipalSubtypeLabel(tipoPath: string): string {
+  const raw = (tipoPath || '').split('/').pop()?.trim() || '';
+  if (!raw) return 'Centro registrado';
+  if (MUNICIPAL_SUBTYPE_LABELS[raw]) return MUNICIPAL_SUBTYPE_LABELS[raw];
+  if (!/[a-z][A-Z]/.test(raw)) return formatOfficialSpanishName(raw);
+  const spaced = raw.replace(/([a-zñáéíóú])([A-ZÁÉÍÓÚÑ])/g, '$1 $2');
+  return formatOfficialSpanishName(spaced);
+}
+
+export function formatMunicipalDistrict(raw: string): string | undefined {
+  const clean = decodeHtmlEntities(raw || '').trim();
+  if (!clean || /^(DISTRITO|RESERVADO|N\/D)$/i.test(clean)) return undefined;
+  const formatted = formatOfficialSpanishName(clean);
+  if (formatted.toLocaleLowerCase('es-ES') === 'san blas') {
+    return 'San Blas-Canillejas';
+  }
+  return formatted;
 }
 
 function inferSupportsFromOfficialFields(
@@ -877,7 +944,7 @@ export function buildCentresFromOfficialCSVs(params: {
         const num = decodeHtmlEntities(r[col('NUM')] || '');
         const address = [clase, via, num].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
         const postalCode = (r[col('CODIGO-POSTAL')] || '').trim();
-        const district = decodeHtmlEntities((r[col('DISTRITO')] || '').trim());
+        const district = formatMunicipalDistrict(r[col('DISTRITO')] || '') || '';
         const lat = parseFloat(r[col('LATITUD')] || '');
         const lon = parseFloat(r[col('LONGITUD')] || '');
         const coords: [number, number] | null =
@@ -974,7 +1041,7 @@ export function buildCentresFromOfficialCSVs(params: {
           ? 'Dirección reservada en el registro público oficial'
           : addressRaw;
         const postalCode = (r[col('direccion_codigo_postal')] || '').trim();
-        const district = (r[col('direccion_distrito')] || '').trim();
+        const district = formatMunicipalDistrict(r[col('direccion_distrito')] || '') || '';
         const utmX = parseFloat(r[col('direccion_coor_x')] || '');
         const utmY = parseFloat(r[col('direccion_coor_y')] || '');
         const coords = utm30NToWgs84(utmX, utmY);
@@ -1312,7 +1379,7 @@ export function buildCentresFromOfficialCSVs(params: {
       resource_domain: 'social',
       sector: m.equipamiento ? m.equipamiento.slice(0, 120) : 'Catálogo Atención Social Ayuntamiento de Madrid',
       centre_type: 'Centro de Atención Social (Madrid)',
-      subtype: m.tipoPath.split('/').pop() || 'Centro registrado',
+      subtype: formatMunicipalSubtypeLabel(m.tipoPath),
       public_private_status: netInfo.status,
       management_type: isDirectPublic
         ? 'Público Directo (Ayuntamiento / Comunidad de Madrid)'
@@ -1419,7 +1486,7 @@ export function buildCentresFromOfficialCSVs(params: {
           ? 'Dirección reservada en el registro público oficial'
           : addressRaw;
         const postalCode = (r[col('direccion_codigo_postal')] || '').trim();
-        const district = (r[col('direccion_distrito')] || '').trim();
+        const district = formatMunicipalDistrict(r[col('direccion_distrito')] || '') || '';
         const utmX = parseFloat(r[col('direccion_coor_x')] || '');
         const utmY = parseFloat(r[col('direccion_coor_y')] || '');
         const coords = utm30NToWgs84(utmX, utmY);

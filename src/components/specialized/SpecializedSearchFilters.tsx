@@ -985,16 +985,6 @@ export const SpecializedSearchFilters: React.FC<SearchFiltersProps> = ({
             <RotateCcw className="w-3 h-3" aria-hidden="true" />
             <span>Limpiar filtros</span>
           </button>
-          <button
-            type="button"
-            onClick={scrollToResults}
-            className="md:hidden px-3 py-1.5 bg-stone-900 text-white rounded-lg text-xs font-semibold hover:bg-stone-800 transition-colors cursor-pointer"
-          >
-            Ver {totalResults}{' '}
-            {hasMatchedProfileSubset
-              ? totalResults === 1 ? 'relacionado' : 'relacionados'
-              : totalResults === 1 ? 'resultado' : 'resultados'}
-          </button>
         </div>
       </div>
       </div>

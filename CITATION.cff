@@ -2,11 +2,11 @@ cff-version: 1.2.0
 title: "Madrid Apoyo Especializado: Buscador ciudadano de atención social con explicabilidad algorítmica"
 message: "Si reutiliza este software, taxonomía o flujo de ingesta en investigación, docencia o reutilización pública, por favor cítelo mediante estos metadatos."
 type: software
-version: "1.8.0"
-date-released: "2026-11-18"
+version: "1.9.0"
+date-released: "2026-11-19"
 license: "Apache-2.0"
 repository-code: "https://github.com/herasr/Madrid-Apoyo-Especializado"
-url: "https://herasr.github.io/Madrid-Apoyo-Especializado/"
+url: "https://madrid-apoyo-especializado.herasr.workers.dev/"
 abstract: >-
   Buscador ciudadano basado en datos abiertos oficiales (Ayuntamiento de Madrid y Comunidad de Madrid)
   para localizar centros y servicios de atención social autorizados. Implementa un motor determinista

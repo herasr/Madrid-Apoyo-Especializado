@@ -111,7 +111,7 @@ export function validateSavedSearchRecord(raw: unknown): SavedSearch | null {
       network_preference: networkPref,
       accessibility_needs: accessibilityNeeds
     },
-    taxonomy_version: isNonEmptyString(obj.taxonomy_version) ? obj.taxonomy_version : '1.8.0',
+    taxonomy_version: isNonEmptyString(obj.taxonomy_version) ? obj.taxonomy_version : '1.9.0',
     dataset_snapshot: isNonEmptyString(obj.dataset_snapshot) ? obj.dataset_snapshot : ''
   };
 }

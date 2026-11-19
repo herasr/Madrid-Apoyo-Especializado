@@ -92,7 +92,7 @@ export const PrintableContactCardModal: React.FC<PrintableContactCardProps> = ({
           <div className="border-b border-stone-300 pb-3 flex items-start justify-between">
             <div>
               <div className="text-[11px] font-mono uppercase tracking-wider text-stone-500">
-                Madrid Apoyo Especializado v1.8 · DATAMAD 2026
+                Madrid Apoyo Especializado v1.9 · DATAMAD 2026
               </div>
               <h2 className="text-lg font-bold text-stone-900 mt-1">
                 {centre.official_name}

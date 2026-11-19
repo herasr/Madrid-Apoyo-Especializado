@@ -18,6 +18,8 @@ import {
   buildCentresFromOfficialCSVs,
   classifyExplicitSpecialisations,
   formatOfficialSpanishName,
+  formatMunicipalSubtypeLabel,
+  formatMunicipalDistrict,
   mapCamMunicipalityName,
   utm30NToWgs84
 } from './officialRegistryParser';
@@ -640,6 +642,17 @@ describe('Specialized Search Engine (Funciones Puras)', () => {
       expect(formatOfficialSpanishName('C.I.A.N. GRUPO 5')).toBe('C.I.A.N. Grupo 5');
       expect(formatOfficialSpanishName('ASOCIACION A.D.E.M.MADRID')).toBe('Asociación A.D.E.M.Madrid');
       expect(formatOfficialSpanishName('CIUDAD LINEAL')).toBe('Ciudad Lineal');
+      expect(formatOfficialSpanishName('Fmp Aura: Desarrollo Global Contra La Violencia de Género')).toBe('FMP Aura: Desarrollo Global contra la Violencia de Género');
+      expect(formatOfficialSpanishName('Asoc.Esclerosis Múltiple España, Servicio de Información y Orientación')).toBe('Asoc. Esclerosis Múltiple España, Servicio de Información y Orientación');
+      expect(formatOfficialSpanishName('Colisee Vallecas.Centro de Rehabilitación y Recuperación')).toBe('Colisee Vallecas. Centro de Rehabilitación y Recuperación');
+      expect(formatMunicipalSubtypeLabel('/entidades/CentrosAtencionSocialPersonasDiscapacidad')).toBe('Centros de Atención Social · Personas con Discapacidad');
+      expect(formatMunicipalSubtypeLabel('/entidades/CentrosServiciosSociales')).toBe('Centros de Servicios Sociales');
+      expect(formatMunicipalDistrict('CENTRO')).toBe('Centro');
+      expect(formatMunicipalDistrict('CHAMARTIN')).toBe('Chamartín');
+      expect(formatMunicipalDistrict('Chamartin')).toBe('Chamartín');
+      expect(formatMunicipalDistrict('Tetuan')).toBe('Tetuán');
+      expect(formatMunicipalDistrict('SAN BLAS')).toBe('San Blas-Canillejas');
+      expect(formatMunicipalDistrict('DISTRITO')).toBeUndefined();
 
       // #2 Diffs detectan cambios de accesibilidad (Cód. 3 -> 1) y coordenadas
       const prevRows = [

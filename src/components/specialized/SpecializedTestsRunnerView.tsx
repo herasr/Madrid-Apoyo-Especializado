@@ -43,7 +43,7 @@ export const SpecializedTestsRunnerView: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200 pb-5">
         <div>
           <div className="text-[11px] font-mono uppercase tracking-widest text-stone-500">
-            Suite Canónica v1.8 · {suiteResult.total} Casos de Prueba Oficiales
+            Suite Canónica v1.9 · {suiteResult.total} Casos de Prueba Oficiales
           </div>
           <h2 className="text-xl font-bold text-stone-900 mt-1">
             Matriz de Validación y Pruebas Críticas

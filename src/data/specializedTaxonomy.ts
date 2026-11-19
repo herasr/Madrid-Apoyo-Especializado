@@ -66,8 +66,8 @@ export interface LifeStageTransitionDef {
 }
 
 export const TAXONOMY_METADATA = {
-  version: '1.8.0',
-  released_at: '2026-11-15',
+  version: '1.9.0',
+  released_at: '2026-11-19',
   status: 'current',
   active_profiles_count: 3,
   experimental_profiles_count: 3,

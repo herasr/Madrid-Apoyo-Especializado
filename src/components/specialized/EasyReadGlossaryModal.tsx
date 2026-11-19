@@ -94,7 +94,7 @@ const GLOSSARY_TERMS: GlossaryEntry[] = [
   },
   {
     term: 'REGCESS (futuro interoperable)',
-    simple: 'El registro oficial sanitario donde constan clínicas y hospitales autorizados. Esta versión v1.8 consulta los 3 registros oficiales de Atención Social; la integración sanitaria REGCESS queda prevista para la siguiente fase.',
+    simple: 'El registro oficial sanitario donde constan clínicas y hospitales autorizados. Esta versión v1.9 consulta los 3 registros oficiales de Atención Social; la integración sanitaria REGCESS queda prevista para la siguiente fase.',
     technical: 'Registro General de Centros, Servicios y Establecimientos Sanitarios (ámbito sanitario no incluido aún en los 3 CSV sociales).'
   }
 ];

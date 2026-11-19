@@ -3048,7 +3048,7 @@ export const REAL_CANONICAL_CENTRES: SpecializedCentre[] = [
     "resource_domain": "social",
     "sector": "Servicio de Orientación e información. Oficina de accesibilidad. Formación y empleo. Rehabilitación domiciliaria. Atenci",
     "centre_type": "Centro de Atención Social (Madrid)",
-    "subtype": "CentrosAtencionSocialPersonasDiscapacidad",
+    "subtype": "Centros de Atención Social · Personas con Discapacidad",
     "public_private_status": "no_especificado",
     "management_type": "Titularidad no especificada en datos.madrid.es",
     "address": "CAMINO VALDERRIBAS 115",

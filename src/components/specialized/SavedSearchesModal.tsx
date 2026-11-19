@@ -78,7 +78,7 @@ export const SavedSearchesModal: React.FC<SavedSearchesModalProps> = ({
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       filters: safeFilters,
-      taxonomy_version: '1.8.0',
+      taxonomy_version: '1.9.0',
       dataset_snapshot: datasetSnapshot || new Date().toISOString().slice(0, 10)
     };
 

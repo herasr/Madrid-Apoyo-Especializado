@@ -10,4 +10,4 @@ playwright-report/
 .env*
 !.env.example
 .aistudio/
-
+bun.lock

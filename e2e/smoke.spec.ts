@@ -27,6 +27,8 @@ test.describe('Madrid Apoyo Especializado — Smoke E2E y WCAG', () => {
     await expect(page.getByText(/¿Buscas un término general\?/i)).toHaveCount(0);
     await expect(page.getByRole('button', { name: /TDAH/i })).toHaveCount(0);
     await expect(page.getByText(/Cód\.\s*[1456]/i)).toHaveCount(0);
+    await expect(page.getByText(/CentrosAtencion|CentrosServiciosSociales|CentrosOrientacionValoracion/)).toHaveCount(0);
+    await expect(page.getByText('Distrito CENTRO', { exact: true })).toHaveCount(0);
 
     // Auditoría automatizada de accesibilidad WCAG 2.1 A/AA en vista principal
     const axeHome = await new AxeBuilder({ page })
