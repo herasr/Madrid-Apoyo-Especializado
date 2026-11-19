@@ -1,0 +1,5 @@
+name = "madrid-apoyo-especializado"
+compatibility_date = "2026-11-19"
+pages_build_output_dir = "dist"
+
+# Si usas funciones de Workers, añádelas aquí. Si es solo un sitio estático/Vite, déjalo así.
